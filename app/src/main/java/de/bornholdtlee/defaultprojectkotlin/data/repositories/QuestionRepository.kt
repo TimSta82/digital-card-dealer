@@ -12,13 +12,13 @@ class QuestionRepository : BaseRepository() {
 
     private val questionDao by inject<QuestionDao>()
 
-    suspend fun startDownload(): ResponseEvaluator.Result<QuestionListDto> = apiCall { api.loadQuestions("android") }
-
-    fun watchAllQuestions(): Flow<List<QuestionEntity>> = questionDao.watchAll()
-
-    fun saveQuestions(questionListDto: QuestionListDto) {
-        repositoryScope.launch {
-            questionDao.insert(questionListDto.toQuestionEntityList())
-        }
-    }
+//    suspend fun startDownload(): ResponseEvaluator.Result<QuestionListDto> = apiCall { api.loadQuestions("android") }
+//
+//    fun watchAllQuestions(): Flow<List<QuestionEntity>> = questionDao.watchAll()
+//
+//    fun saveQuestions(questionListDto: QuestionListDto) {
+//        repositoryScope.launch {
+//            questionDao.insert(questionListDto.toQuestionEntityList())
+//        }
+//    }
 }

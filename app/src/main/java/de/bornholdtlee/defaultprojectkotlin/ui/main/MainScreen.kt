@@ -28,7 +28,7 @@ fun MainScreen(viewModel: MainViewModel, scaffoldState: ScaffoldState) {
 
     val context = LocalContext.current
     val counter: Int by viewModel.counter.collectAsStateLifecycleAware(0)
-    val questions by viewModel.questionEntities.collectAsStateLifecycleAware(emptyList())
+//    val questions by viewModel.questionEntities.collectAsStateLifecycleAware(emptyList())
 
     LaunchedEffect(key1 = Unit) {
         launch {
@@ -50,14 +50,14 @@ fun MainScreen(viewModel: MainViewModel, scaffoldState: ScaffoldState) {
             Logger.error("Error while taking picture")
         }
     }
-
-    MainContent(
-        counter = counter,
-        questions = questions,
-        incrementCounter = viewModel::onIncrementCounter,
-        takePhoto = { launcher.launch() },
-        loadQuestions = viewModel::makeApiCall,
-    )
+//
+//    MainContent(
+//        counter = counter,
+//        questions = questions,
+//        incrementCounter = viewModel::onIncrementCounter,
+//        takePhoto = { launcher.launch() },
+//        loadQuestions = viewModel::makeApiCall,
+//    )
 }
 
 @Composable

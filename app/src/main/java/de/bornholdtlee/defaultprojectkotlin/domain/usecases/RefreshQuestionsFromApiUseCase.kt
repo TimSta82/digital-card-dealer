@@ -7,5 +7,5 @@ class RefreshQuestionsFromApiUseCase : BaseUseCase() {
 
     private val questionRepository by inject<QuestionRepository>()
 
-    suspend fun call() = simpleResponseCall(questionRepository.startDownload()) { questionListDto -> questionRepository.saveQuestions(questionListDto) }
+//    suspend fun call() = simpleResponseCall(questionRepository.startDownload()) { questionListDto -> questionRepository.saveQuestions(questionListDto) }
 }

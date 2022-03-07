@@ -1,15 +1,18 @@
 package de.bornholdtlee.defaultprojectkotlin.data.api
 
-import de.bornholdtlee.defaultprojectkotlin.data.model.QuestionListDto
+import de.bornholdtlee.defaultprojectkotlin.data.model.CardsResponseDTO
+import de.bornholdtlee.defaultprojectkotlin.data.model.DeckResponseDTO
 import retrofit2.Response
 import retrofit2.http.GET
+import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface ApiInterface {
 
-    /**
-     * Beispielhafter Aufbau eines Endpoints
-     */
-    @GET("/2.2/questions?order=desc&sort=creation&site=stackoverflow")
-    suspend fun loadQuestions(@Query("tagged") tags: String): Response<QuestionListDto>
+    @GET("/api/deck/new/")
+    suspend fun getNewDeck(): Response<DeckResponseDTO>
+
+    @GET("/api/deck/{deck_id}/draw/?count=2")
+    suspend fun drawAmountOfCards(@Path("deck_id") deckId: String, @Query("count") count: Int): Response<CardsResponseDTO>
+
 }

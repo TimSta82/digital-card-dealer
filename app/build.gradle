@@ -122,7 +122,7 @@ android {
         dev {
             dimension = "app"
             applicationId "dev.de.bornholdtlee.defaultproject"
-            buildConfigField 'String', 'BASE_URL', '"https://api.stackexchange.com"'
+            buildConfigField 'String', 'BASE_URL', '"http://deckofcardsapi.com"'
         }
 
         stage {

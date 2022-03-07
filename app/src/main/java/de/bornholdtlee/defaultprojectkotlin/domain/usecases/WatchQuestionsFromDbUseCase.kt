@@ -9,5 +9,5 @@ class WatchQuestionsFromDbUseCase : BaseUseCase() {
 
     private val questionRepository by inject<QuestionRepository>()
 
-    fun call(): Flow<List<QuestionEntity>> = questionRepository.watchAllQuestions()
+//    fun call(): Flow<List<QuestionEntity>> = questionRepository.watchAllQuestions()
 }

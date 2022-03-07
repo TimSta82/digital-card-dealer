@@ -2,7 +2,6 @@ package de.bornholdtlee.defaultprojectkotlin.ui.main
 
 import androidx.lifecycle.ViewModel
 import de.bornholdtlee.defaultprojectkotlin.R
-import de.bornholdtlee.defaultprojectkotlin.core.utils.Logger
 import de.bornholdtlee.defaultprojectkotlin.data.database.KeyValueStore
 import de.bornholdtlee.defaultprojectkotlin.data.database.model.QuestionEntity
 import de.bornholdtlee.defaultprojectkotlin.domain.usecases.BaseUseCase.UseCaseResult.Failure
@@ -29,7 +28,7 @@ class MainViewModel : ViewModel(), KoinComponent {
     private val _counter = MutableStateFlow(0)
     val counter = _counter.asStateFlow()
 
-    val questionEntities: Flow<List<QuestionEntity>> = watchQuestionsFromDbUseCase.call()
+//    val questionEntities: Flow<List<QuestionEntity>> = watchQuestionsFromDbUseCase.call()
 
     init {
         readPreferences()
@@ -40,19 +39,19 @@ class MainViewModel : ViewModel(), KoinComponent {
     }
 
     private fun readPreferences() {
-        launch {
-            keyValueStore.watchExampleStringSet().collectLatest { exampleStringSet ->
-                Logger.error("preferences: ${exampleStringSet.firstOrNull() ?: ""}")
-            }
-        }
+//        launch {
+//            keyValueStore.watchExampleStringSet().collectLatest { exampleStringSet ->
+//                Logger.error("preferences: ${exampleStringSet.firstOrNull() ?: ""}")
+//            }
+//        }
     }
 
     fun makeApiCall() {
-        launch {
-            when (refreshQuestionsFromApiUseCase.call()) {
-                is Success -> _downloadSuccess.emit(Any())
-                is Failure -> _downloadError.emit(R.string.error_load_questions)
-            }
-        }
+//        launch {
+//            when (refreshQuestionsFromApiUseCase.call()) {
+//                is Success -> _downloadSuccess.emit(Any())
+//                is Failure -> _downloadError.emit(R.string.error_load_questions)
+//            }
+//        }
     }
 }
