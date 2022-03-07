@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">DefaultProject-Kotlin</string>
+
+    <string name="error_load_questions">Fragen konnten nicht geladen werden!</string>
+    <string name="download_success">Erfolgreich geladen</string>
+</resources>

@@ -1,0 +1,300 @@
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-kapt'
+apply plugin: 'org.jlleitschuh.gradle.ktlint'
+apply plugin: 'com.betomorrow.appcenter'
+apply plugin: 'androidx.navigation.safeargs.kotlin'
+apply plugin: 'io.gitlab.arturbosch.detekt'
+apply plugin: "com.adarshr.test-logger"
+
+android {
+    compileSdkVersion 31
+    defaultConfig {
+        applicationId "de.bornholdtlee.defaultprojectkotlin"
+        minSdkVersion 24
+        targetSdkVersion 31
+        versionCode System.getenv("CI_PIPELINE_ID") as Integer ?: 1
+        versionName "1.0"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        kapt {
+            arguments {
+                arg("room.schemaLocation", "$projectDir/roomSchemas".toString())
+            }
+        }
+    }
+
+    buildFeatures {
+        compose = true
+    }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion = project.compose_version
+    }
+
+    signingConfigs {
+        release {
+            storeFile file('keystore/ENTER_KEYSTORE_NAME_AND_DONT_FORGET_THE_VARIABLES_IN_GITLAB')
+            storePassword System.getenv("STORE_PASSWORD")
+            keyAlias System.getenv("KEY_ALIAS")
+            keyPassword System.getenv("KEY_PASSWORD")
+        }
+    }
+
+    testOptions {
+        unitTests {
+            includeAndroidResources = true
+        }
+    }
+
+    buildTypes {
+        release {
+            debuggable false
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+
+            android.applicationVariants.all { variant ->
+                variant.outputs.all { output ->
+                    outputFileName = "${variant.name}-${variant.versionName}-${versionCode}.apk"
+                }
+            }
+
+            signingConfig signingConfigs.debug // TODO Set to: signingConfig signingConfigs.release
+        }
+
+        appCenterRelease {
+            debuggable true
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+
+            android.applicationVariants.all { variant ->
+                variant.outputs.all { output ->
+                    outputFileName = "${variant.name}-${variant.versionName}-${versionCode}.apk"
+                }
+            }
+
+            signingConfig signingConfigs.debug // TODO Set to: signingConfig signingConfigs.release
+        }
+
+        debug {
+            minifyEnabled false
+            shrinkResources false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+
+            android.applicationVariants.all { variant ->
+                variant.outputs.all { output ->
+                    outputFileName = "${variant.name}-${variant.versionName}-${versionCode}.apk"
+                }
+            }
+
+            signingConfig signingConfigs.debug
+        }
+
+        proguardTest {
+            debuggable true
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.debug
+        }
+    }
+    packagingOptions {
+        resources {
+            excludes += ['META-INF/LICENSE.txt', 'META-INF/NOTICE.txt']
+        }
+    }
+
+    compileOptions {
+        coreLibraryDesugaringEnabled true
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+
+    kotlinOptions {
+        jvmTarget = "11"
+        freeCompilerArgs += "-Xopt-in=kotlin.RequiresOptIn"
+    }
+
+    flavorDimensions("app")
+    productFlavors {
+        dev {
+            dimension = "app"
+            applicationId "dev.de.bornholdtlee.defaultproject"
+            buildConfigField 'String', 'BASE_URL', '"https://api.stackexchange.com"'
+        }
+
+        stage {
+            dimension = "app"
+            applicationId "stage.de.bornholdtlee.defaultproject"
+            buildConfigField 'String', 'BASE_URL', '"https://api.stackexchange.com"'
+        }
+
+        prod {
+            dimension = "app"
+            applicationId "de.bornholdtlee.defaultproject"
+            buildConfigField 'String', 'BASE_URL', '"https://api.stackexchange.com"'
+        }
+    }
+}
+
+ktlint {
+    version = "0.42.1"
+    debug = true
+    verbose = true
+    android = true
+    outputToConsole = true
+    disabledRules = ["no-wildcard-imports", "import-ordering"]
+    reporters {
+        reporter "plain"
+        reporter "checkstyle"
+        reporter "sarif"
+    }
+    ignoreFailures = false
+    kotlinScriptAdditionalPaths { include fileTree("scripts/") }
+    filter {
+        exclude("**/generated/**")
+        include("**/kotlin/**")
+    }
+}
+
+detekt {
+    autoCorrect = true
+    ignoreFailures = false
+    parallel = true
+    buildUponDefaultConfig = true
+    config = files("./configdetekt.yml")
+    allRules = false
+    basePath = projectDir
+    reports {
+        xml {
+            enabled = true
+            destination = file("build/reports/detekt/detekt.xml")
+        }
+        html {
+            enabled = true
+            destination = file("build/reports/detekt/detekt.html")
+        }
+    }
+}
+
+licensee {
+    allow('Apache-2.0')
+    allow('MIT')
+    allow('BSD-2-Clause')
+    allow('BSD-3-Clause')
+    allow('LGPL-2.1')
+    allow('LGPL-3.0')
+    allow('Artistic-1.0')
+    allow('Artistic-2.0')
+    allow('Artistic-1.0-Perl')
+
+    allowDependency('org.threeten', 'threetenbp', '1.5.1')
+    allowDependency('com.airbnb.android', 'lottie', '4.1.0')
+
+    allowUrl('http://www.opensource.org/licenses/bsd-license')
+    allowUrl('https://api.github.com/licenses/apache-2.0')
+    allowUrl('http://www.apache.org/licenses/LICENSE-2.0.html')
+    allowUrl('https://developer.android.com/studio/terms.html')
+    allowUrl('https://github.com/journeyapps/zxing-android-embedded/blob/master/COPYING')
+}
+
+appcenter {
+    ownerName = "OWNER_EINTRAGEN"
+    distributionGroups = ["Collaborators"]
+    notifyTesters = false
+    apps {
+        prodRelease {
+            appName = "APP_NAME_EINTRAGEN"
+            apiToken = "API_TOKEN_EINTRAGEN"
+        }
+        stageRelease {
+            appName = "APP_NAME_EINTRAGEN"
+            apiToken = "API_TOKEN_EINTRAGEN"
+        }
+        devAppCenterRelease {
+            appName = "APP_NAME_EINTRAGEN"
+            apiToken = "API_TOKEN_EINTRAGEN"
+        }
+    }
+}
+
+///// Pretty Print Tests on console /////
+testlogger {
+    theme = 'mocha'
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'androidx.startup:startup-runtime:1.1.0'
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.1.5'
+
+    ///// ANDROID /////
+    implementation 'com.google.android.material:material:1.5.0'
+
+    implementation 'androidx.core:core-ktx:1.7.0'
+    implementation 'androidx.appcompat:appcompat:1.4.1'
+    implementation 'androidx.exifinterface:exifinterface:1.3.3'
+    implementation 'androidx.fragment:fragment-ktx:1.4.1'
+    implementation 'androidx.activity:activity-ktx:1.4.0'
+    implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
+    implementation 'androidx.lifecycle:lifecycle-common-java8:2.4.0'
+    implementation 'androidx.navigation:navigation-ui-ktx:2.3.5'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.3'
+    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.4.0'
+    implementation 'androidx.security:security-crypto:1.1.0-alpha03'
+    implementation "androidx.datastore:datastore-preferences:1.0.0"
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.4.0'
+
+    //// JETPACK COMPOSE /////
+    implementation "androidx.compose.ui:ui:$compose_version"
+    implementation "androidx.compose.ui:ui-tooling:$compose_version"
+    implementation "androidx.compose.foundation:foundation:$compose_version"
+    implementation "androidx.compose.material:material:$compose_version"
+    implementation "androidx.compose.material:material-icons-core:$compose_version"
+    implementation "androidx.compose.material:material-icons-extended:$compose_version"
+    implementation "androidx.compose.runtime:runtime-livedata:$compose_version"
+    implementation 'androidx.activity:activity-compose:1.4.0'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.4.0'
+    implementation "androidx.navigation:navigation-compose:2.4.0-rc01"
+
+    //// ACCOMPANIST LIBRARIES ////
+    implementation "com.google.accompanist:accompanist-systemuicontroller:$accompanist"
+
+    ///// DATABASE /////
+    implementation "androidx.room:room-ktx:$room"
+    implementation "androidx.room:room-runtime:$room"
+    kapt "androidx.room:room-compiler:$room"
+
+    //// DEPENDENCY INJECTION ////
+    implementation "io.insert-koin:koin-android:$koin_version"
+
+    ///// API /////
+    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.9.1'
+
+    ///// OTHER /////
+    detektPlugins "io.gitlab.arturbosch.detekt:detekt-formatting:1.18.1"
+
+    //// DEBUG ////
+    implementation 'com.squareup:seismic:1.0.3'
+    appCenterReleaseImplementation "com.github.chuckerteam.chucker:library:$chucker"
+    debugImplementation "com.github.chuckerteam.chucker:library:$chucker"
+    proguardTestImplementation "com.github.chuckerteam.chucker:library-no-op:$chucker"
+    releaseImplementation "com.github.chuckerteam.chucker:library-no-op:$chucker"
+
+    ///// UNIT TESTING /////
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
+    testImplementation 'io.mockk:mockk:1.12.1'
+    testImplementation 'androidx.arch.core:core-testing:2.1.0'
+    testImplementation "io.insert-koin:koin-test-junit4:$koin_version"
+    testImplementation "io.insert-koin:koin-test:$koin_version"
+    testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.5.2'
+    testImplementation 'app.cash.turbine:turbine:0.7.0'
+
+    ///// INTEGRATION TESTING /////
+    androidTestImplementation 'androidx.test.ext:junit-ktx:1.1.3'
+    androidTestImplementation 'androidx.test:runner:1.4.0'
+}

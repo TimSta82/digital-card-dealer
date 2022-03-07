@@ -1,0 +1,108 @@
+before_script:
+  - export ANDROID_HOME=/Volumes/Daten/android_sdk
+
+stages:
+  - clean
+  - build
+  - license_check
+  - code_quality
+  - unit_tests
+  - deploy
+
+clean-build:
+  stage: clean
+  script:
+    - ./gradlew clean
+  tags:
+    - android-new
+
+build-appbundle:
+  stage: build
+  script:
+    - ./gradlew bundleProdRelease
+  artifacts:
+    paths:
+      - app/build/outputs/bundle/prodRelease/
+      - app/build/outputs/mapping/
+  only:
+    - master
+  tags:
+    - android-new
+
+build-dev-debug:
+  stage: build
+  script:
+    - ./gradlew assembleDevDebug
+  only:
+    - /^feature.*$/
+  except:
+    - development
+    - master
+  tags:
+    - android-new
+
+build-dev-appCenterRelease:
+  stage: build
+  script:
+    - ./gradlew assembleDevAppCenterRelease
+  only:
+    - development
+  tags:
+    - android-new
+
+build-prod-release:
+  stage: build
+  script:
+    - ./gradlew assembleProdRelease
+  only:
+    - master
+  tags:
+    - android-new
+  artifacts:
+    paths:
+      - app/build/outputs/apk/
+      - app/build/outputs/mapping/
+
+license-check:
+  stage: license_check
+  script:
+    - ./gradlew licensee --stacktrace
+  tags:
+    - android-new
+
+code_quality:
+  stage: code_quality
+  tags:
+    - android-new
+  script:
+    - ./gradlew ktlintCheck
+    - ./gradlew detekt
+  after_script:
+    - cp -r app/build/reports/ /Users/gitlabrunner/node-gradle-check/public/$CI_COMMIT_SHA/
+
+unit_tests:
+  stage: unit_tests
+  tags:
+    - android-new
+  script:
+    - ./gradlew testProdReleaseUnitTest
+
+deploy-dev-appCenterRelease:
+  stage: deploy
+  script:
+    - ./gradlew assembleDevAppCenterRelease appCenterUploadDevAppCenterRelease
+  only:
+    - development
+  tags:
+    - android-new
+  when: on_success
+
+deploy-prod-release:
+  stage: deploy
+  script:
+    - ./gradlew assembleProdRelease appCenterUploadProdRelease
+  only:
+    - master
+  tags:
+    - android-new
+  when: on_success
