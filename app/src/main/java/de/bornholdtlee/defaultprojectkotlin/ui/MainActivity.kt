@@ -1,5 +1,6 @@
 package de.bornholdtlee.defaultprojectkotlin.ui
 
+import android.content.pm.ActivityInfo
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -20,6 +21,7 @@ import de.bornholdtlee.defaultprojectkotlin.ui.base.BaseActivity
 import de.bornholdtlee.defaultprojectkotlin.ui.main.MainScreen
 import de.bornholdtlee.defaultprojectkotlin.ui.main.MainViewModel
 import de.bornholdtlee.defaultprojectkotlin.ui.main.central_device.CentralDeviceStartScreen
+import de.bornholdtlee.defaultprojectkotlin.ui.main.central_device.LockScreenOrientation
 import de.bornholdtlee.defaultprojectkotlin.ui.main.satellite_device.SatelliteDeviceStartScreen
 import de.bornholdtlee.defaultprojectkotlin.ui.main.start.StartScreen
 import de.bornholdtlee.defaultprojectkotlin.ui.theme.DefaultTheme
@@ -44,17 +46,17 @@ fun DefaultApp(mainViewModel: MainViewModel) {
     DefaultTheme {
         Scaffold(
             scaffoldState = scaffoldState,
-            topBar = {
-                TopAppBar(
-                    title = { Text(stringResource(id = R.string.app_name)) },
-                    contentColor = Color.White,
-                    navigationIcon = {
-                        IconButton(onClick = {}) {
-                            Icon(painter = painterResource(id = R.drawable.ic_baseline_android_24), contentDescription = null, tint = Color.White)
-                        }
-                    }
-                )
-            },
+//            topBar = {
+//                TopAppBar(
+//                    title = { Text(stringResource(id = R.string.app_name)) },
+//                    contentColor = Color.White,
+//                    navigationIcon = {
+//                        IconButton(onClick = {}) {
+//                            Icon(painter = painterResource(id = R.drawable.ic_baseline_android_24), contentDescription = null, tint = Color.White)
+//                        }
+//                    }
+//                )
+//            },
         ) {
             NavHost(navController = navController, startDestination = START_SCREEN) {
                 composable(route = MAIN_SCREEN) {
@@ -67,7 +69,8 @@ fun DefaultApp(mainViewModel: MainViewModel) {
                     StartScreen(navController = navController)
                 }
                 composable(CENTRAL_DEVICE_START_SCREEN) {
-                    CentralDeviceStartScreen()
+                    LockScreenOrientation(orientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE)
+//                    CentralDeviceStartScreen()
                 }
                 composable(SATELLITE_DEVICE_START_SCREEN) {
                     SatelliteDeviceStartScreen()
