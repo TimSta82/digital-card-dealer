@@ -30,6 +30,9 @@ class CentralViewModel : ViewModel(), KoinComponent {
     private val _river = MutableLiveData<List<Card?>>()
     val river: LiveData<List<Card?>> = _river
 
+    private val _addPlayerWithDeckId = MutableLiveData<String?>()
+    val addPlayerWithDeckId: LiveData<String?> = _addPlayerWithDeckId
+
     private val _onDeckLoadingFailure = SingleLiveEvent<Any>()
     val onDeckLoadingFailure: LiveData<Any> = _onDeckLoadingFailure
 
@@ -91,7 +94,17 @@ class CentralViewModel : ViewModel(), KoinComponent {
     }
 
     fun addPlayer() {
+        deckId?.let {
+            _addPlayerWithDeckId.value = it
+        }
+    }
 
+    fun reset() {
+        updateGamePhase(GamePhase.SHUFFLE)
+    }
+
+    fun resetPlayerDeckId() {
+        _addPlayerWithDeckId.value = null
     }
 }
 

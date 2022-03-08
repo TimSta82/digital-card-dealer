@@ -30,7 +30,7 @@ fun PokerCard(
     ) {
         Box(
             modifier = Modifier
-                .padding(horizontal = 16.dp, vertical = 40.dp)
+                .padding(horizontal = 24.dp, vertical = 64.dp)
         ) {
             if (card == null) {
                 Image(Icons.Filled.Api, contentDescription = "")
