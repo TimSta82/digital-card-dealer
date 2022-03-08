@@ -9,7 +9,7 @@ import retrofit2.http.Query
 
 interface ApiInterface {
 
-    @GET("/api/deck/new/")
+    @GET("/api/deck/new/shuffle/?deck_count=1")
     suspend fun getNewDeck(): Response<DeckResponseDTO>
 
     @GET("/api/deck/{deck_id}/draw/?count=2")
