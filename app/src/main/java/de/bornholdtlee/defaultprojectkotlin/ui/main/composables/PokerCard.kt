@@ -1,17 +1,20 @@
 package de.bornholdtlee.defaultprojectkotlin.ui.main.composables
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Api
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import de.bornholdtlee.defaultprojectkotlin.domain.model.Card
@@ -29,23 +32,17 @@ fun PokerCard(
         elevation = elevation ?: 4.dp,
     ) {
         Box(
-            modifier = Modifier
-                .padding(horizontal = 24.dp, vertical = 64.dp)
+            modifier = Modifier.padding(horizontal = 24.dp, vertical = 64.dp),
+            contentAlignment = Alignment.Center
         ) {
             if (card == null) {
                 Image(Icons.Filled.Api, contentDescription = "")
             } else {
-//                Image(
-//                    painter = rememberImagePainter(
-//                        data = card.image,
-//                        builder = {
-//                            transformations(CircleCropTransformation())
-//                        }
-//                    ),
-//                    contentDescription = null,
-//                    contentScale = ContentScale.Crop,
-//                )
-                Text(text = card.code, color = Color.Black)
+                Column {
+                    Image(painter = painterResource(id = card.getSuitIcon()), contentDescription = "")
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(text = card.value, color = colorResource(id = card.getSuitColor()), textAlign = TextAlign.Center)
+                }
             }
         }
     }

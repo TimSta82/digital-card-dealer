@@ -22,6 +22,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -135,11 +136,15 @@ private fun getQrCodeAsBitmap(deckId: String): ImageBitmap {
 
 @Composable
 fun flop(flop: List<Card?>) {
-    LazyRow {
-        itemsIndexed(flop) { index, card ->
-            card?.let {
-                PokerCard(card = card)
-                Spacer(modifier = Modifier.width(8.dp))
+    Column {
+        Text(text = "Flop", textAlign = TextAlign.Center)
+        Spacer(modifier = Modifier.height(8.dp))
+        LazyRow {
+            itemsIndexed(flop) { index, card ->
+                card?.let {
+                    PokerCard(card = card)
+                    Spacer(modifier = Modifier.width(8.dp))
+                }
             }
         }
     }
@@ -147,11 +152,15 @@ fun flop(flop: List<Card?>) {
 
 @Composable
 fun turn(turn: List<Card?>) {
-    LazyRow {
-        itemsIndexed(turn) { index, card ->
-            card?.let {
-                PokerCard(card = card)
-                Spacer(modifier = Modifier.width(8.dp))
+    Column {
+        Text(text = "Turn", textAlign = TextAlign.Center)
+        Spacer(modifier = Modifier.height(8.dp))
+        LazyRow {
+            itemsIndexed(turn) { index, card ->
+                card?.let {
+                    PokerCard(card = card)
+                    Spacer(modifier = Modifier.width(8.dp))
+                }
             }
         }
     }
@@ -159,10 +168,14 @@ fun turn(turn: List<Card?>) {
 
 @Composable
 fun river(river: List<Card?>) {
-    LazyRow {
-        itemsIndexed(river) { index, card ->
-            card?.let {
-                PokerCard(card = card)
+    Column {
+        Text(text = "River", textAlign = TextAlign.Center)
+        Spacer(modifier = Modifier.height(8.dp))
+        LazyRow {
+            itemsIndexed(river) { index, card ->
+                card?.let {
+                    PokerCard(card = card)
+                }
             }
         }
     }
