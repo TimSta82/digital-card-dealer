@@ -10,7 +10,7 @@ apply plugin: "com.adarshr.test-logger"
 android {
     compileSdkVersion 31
     defaultConfig {
-        applicationId "de.bornholdtlee.defaultprojectkotlin"
+        applicationId "de.digitaldealer.cardsplease"
         minSdkVersion 24
         targetSdkVersion 31
         versionCode System.getenv("CI_PIPELINE_ID") as Integer ?: 1
@@ -300,5 +300,5 @@ dependencies {
 
     implementation("io.coil-kt:coil-compose:1.4.0")
     implementation("com.journeyapps:zxing-android-embedded:4.3.0")
-    implementation 'com.github.kenglxn.QRGen:android:2.6.0'
+    implementation("com.github.kenglxn.QRGen:android:2.6.0")
 }

@@ -8,7 +8,7 @@
 
     <fragment
             android:id="@+id/mainFragment"
-            android:name="de.bornholdtlee.defaultprojectkotlin.ui.main.MainFragment"
+            android:name="de.digitaldealer.cardsplease.ui.main.MainFragment"
             android:label="MainFragment"
             tools:layout="@layout/fragment_main"/>
 
