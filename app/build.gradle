@@ -122,21 +122,21 @@ android {
     productFlavors {
         dev {
             dimension = "app"
-            applicationId "dev.de.bornholdtlee.defaultproject"
-            buildConfigField 'String', 'BASE_URL', '"http://deckofcardsapi.com"'
+            applicationId "de.digitaldealer.cardsplease"
+            buildConfigField 'String', 'BASE_URL', '"https://deckofcardsapi.com"'
         }
+//
+//        stage {
+//            dimension = "app"
+//            applicationId "stage.de.bornholdtlee.defaultproject"
+//            buildConfigField 'String', 'BASE_URL', '"https://api.stackexchange.com"'
+//        }
 
-        stage {
-            dimension = "app"
-            applicationId "stage.de.bornholdtlee.defaultproject"
-            buildConfigField 'String', 'BASE_URL', '"https://api.stackexchange.com"'
-        }
-
-        prod {
-            dimension = "app"
-            applicationId "de.bornholdtlee.defaultproject"
-            buildConfigField 'String', 'BASE_URL', '"https://api.stackexchange.com"'
-        }
+//        prod {
+//            dimension = "app"
+//            applicationId "de.digitaldealer.cardsplease"
+//            buildConfigField 'String', 'BASE_URL', '"https://deckofcardsapi.com"'
+//        }
     }
 }
 

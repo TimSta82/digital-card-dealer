@@ -4,6 +4,8 @@ class DeckRepository : BaseRepository() {
 
     suspend fun getNewDeck() = apiCall { api.getNewDeck() }
 
+    suspend fun shuffleDeck(deckId: String) = apiCall { api.shuffleDeck(deckId) }
+
     suspend fun drawAmountOfCards(amount: Int, deckId: String) = apiCall { api.drawAmountOfCards(deckId = deckId, count = amount) }
 
 //    private val questionDao by inject<QuestionDao>()

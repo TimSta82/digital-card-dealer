@@ -9,10 +9,13 @@ import retrofit2.http.Query
 
 interface ApiInterface {
 
-    @GET("/api/deck/new/shuffle/?deck_count=1")
+    @GET("/api/deck/new")
     suspend fun getNewDeck(): Response<DeckResponseDTO>
 
-    @GET("/api/deck/{deck_id}/draw/?count=2")
+    @GET("/api/deck/{deck_id}/shuffle")
+    suspend fun shuffleDeck(@Path("deck_id") deckId: String): Response<DeckResponseDTO>
+
+    @GET("/api/deck/{deck_id}/draw")
     suspend fun drawAmountOfCards(@Path("deck_id") deckId: String, @Query("count") count: Int): Response<CardsResponseDTO>
 
 }
