@@ -6,6 +6,7 @@ apply plugin: 'com.betomorrow.appcenter'
 apply plugin: 'androidx.navigation.safeargs.kotlin'
 apply plugin: 'io.gitlab.arturbosch.detekt'
 apply plugin: "com.adarshr.test-logger"
+apply plugin: 'com.google.gms.google-services'
 
 android {
     compileSdkVersion 31
@@ -301,4 +302,9 @@ dependencies {
     implementation("io.coil-kt:coil-compose:1.4.0")
     implementation("com.journeyapps:zxing-android-embedded:4.3.0")
     implementation("com.github.kenglxn.QRGen:android:2.6.0")
+
+    ///// FIREBASE /////
+    implementation platform('com.google.firebase:firebase-bom:29.1.0')
+    implementation("com.google.firebase:firebase-analytics-ktx")
+    implementation 'com.google.firebase:firebase-firestore-ktx'
 }
