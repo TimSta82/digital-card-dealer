@@ -8,6 +8,13 @@ data class Deck(
     val shuffled: Boolean,
     val remaining: Int
 ) {
+    constructor() : this(
+        success = false,
+        deckId = "",
+        shuffled = false,
+        remaining = -1
+    )
+
     constructor(dto: DeckResponseDTO) : this(
         success = dto.success ?: false,
         deckId = dto.deckId ?: "-1",

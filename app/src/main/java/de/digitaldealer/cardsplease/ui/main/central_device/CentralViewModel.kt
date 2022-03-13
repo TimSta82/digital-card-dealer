@@ -5,11 +5,12 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
-import de.digitaldealer.cardsplease.KEY_DECK
-import de.digitaldealer.cardsplease.KEY_PLAYER_NICK_NAME
+import com.google.firebase.firestore.ktx.toObject
+import de.digitaldealer.cardsplease.COLLECTION_GAMES
 import de.digitaldealer.cardsplease.core.utils.Logger
 import de.digitaldealer.cardsplease.domain.model.Card
 import de.digitaldealer.cardsplease.domain.model.Deck
+import de.digitaldealer.cardsplease.domain.model.Game
 import de.digitaldealer.cardsplease.domain.usecases.BaseUseCase
 import de.digitaldealer.cardsplease.domain.usecases.DrawAmountOfCardsUseCase
 import de.digitaldealer.cardsplease.domain.usecases.GetNewDeckUseCase
@@ -47,22 +48,25 @@ class CentralViewModel : ViewModel(), KoinComponent {
     private val _gamePhase = MutableLiveData(GamePhase.FLOP)
     val gamePhase: LiveData<GamePhase> = _gamePhase
 
-    private val _onPlayerJoinedSuccessful = SingleLiveEvent<String>()
-    val onPlayerJoinedSuccessful: LiveData<String> = _onPlayerJoinedSuccessful
+    private val _onPlayerJoinedSuccessful = SingleLiveEvent<Game>()
+    val onPlayerJoinedSuccessful: LiveData<Game> = _onPlayerJoinedSuccessful
 
     private var deckId: String? = null
     private val db = FirebaseFirestore.getInstance()
+    private val gamesCollectionRef = db.collection(COLLECTION_GAMES)
+
     private val gamesDeckRef = db.collection("games").document("deck")
     private val playersRef = db.collection("players").document("player")
-    private var playerListenerRegistration: ListenerRegistration? = null
+    private var gameListenerRegistration: ListenerRegistration? = null
 
     init {
+        Logger.debug("init() called")
         launch {
             when (val result = getNewDeckUseCase.call()) {
                 is BaseUseCase.UseCaseResult.Success -> {
                     result.resultObject?.let { deck ->
                         deckId = deck.deckId
-                        saveDeckInFireStore(deck)
+                        initGameWithDeckId(deck)
                     }
                 }
                 else -> _onDeckLoadingFailure.callAsync()
@@ -70,14 +74,14 @@ class CentralViewModel : ViewModel(), KoinComponent {
         }
     }
 
-    fun onStart() {
-        playerListenerRegistration = playersRef.addSnapshotListener { snapshot, error ->
+    fun onStart(deck: Deck) {
+        Logger.debug("onStart() called")
+        gameListenerRegistration = gamesCollectionRef.document(deck.deckId).addSnapshotListener { snapshot, error ->
             if (snapshot?.exists() == true) {
-//                val x = snapshot[KEY_PLAYER] as? Player
-                val playerNickName = snapshot.getString(KEY_PLAYER_NICK_NAME)
+                val game = snapshot.toObject<Game>()
                 Logger.debug("observe snapshot -> $snapshot")
-                Logger.debug("observe player successfull -> $playerNickName")
-                playerNickName?.let { _onPlayerJoinedSuccessful.value = it }
+                Logger.debug("observe player successfull -> ${game?.players ?: listOf("keiner da")}")
+                game?.let { _onPlayerJoinedSuccessful.value = it }
             }
             if (error != null) {
                 Logger.debug("Loading player failed")
@@ -86,21 +90,18 @@ class CentralViewModel : ViewModel(), KoinComponent {
     }
 
     fun onStop() {
-        playerListenerRegistration?.remove()
+        gameListenerRegistration?.remove()
     }
 
-    private fun saveDeckInFireStore(deck: Deck) {
-        val note = hashMapOf<String, Any>()
-        note[KEY_DECK] = deck
-        gamesDeckRef.set(note)
+    private fun initGameWithDeckId(deck: Deck) {
+        gamesCollectionRef.document(deck.deckId).set(Game(deck = deck))
             .addOnSuccessListener {
 //                _onUploadDeckSuccessful.call()
-                Logger.debug("Successfully uploaded -> deckId: ${deck.deckId}")
+                Logger.debug("Successfully init game -> deckId: ${deck.deckId}")
             }
             .addOnFailureListener {
-                Logger.debug("Uploading failed -> deckId: ${deck.deckId}")
+                Logger.debug("Game init failed -> deckId: ${deck.deckId}")
             }
-
     }
 
 //    private fun loadFromFireStore() {

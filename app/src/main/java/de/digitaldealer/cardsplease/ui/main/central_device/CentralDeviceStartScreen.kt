@@ -25,7 +25,6 @@ import de.digitaldealer.cardsplease.R
 import de.digitaldealer.cardsplease.domain.model.Card
 import de.digitaldealer.cardsplease.ui.main.composables.AddPlayerDialog
 import de.digitaldealer.cardsplease.ui.main.composables.PokerCard
-import de.digitaldealer.cardsplease.ui.main.satellite_device.Player
 
 @Composable
 fun CentralDeviceStartScreen(modifier: Modifier = Modifier) {
@@ -42,7 +41,9 @@ fun CentralDeviceStartScreen(modifier: Modifier = Modifier) {
     if (addPlayerDeckId != null) AddPlayerDialog(viewModel = viewModel, addPlayerDeckId = addPlayerDeckId)
 
     DisposableEffect(key1 = viewModel) {
-        viewModel.onStart()
+        deck?.let {
+            viewModel.onStart(it)
+        }
         onDispose { viewModel.onStop() }
     }
 
@@ -50,7 +51,7 @@ fun CentralDeviceStartScreen(modifier: Modifier = Modifier) {
     setSnackBarState(player != null)
 
     if (snackbarVisibleState) {
-        PlayerSnackbar(player!!)
+        PlayerSnackbar(player!!.players?.first()?.nickName ?: "Wurst")
         Snackbar(
             action = {
                 Button(onClick = {}) {
