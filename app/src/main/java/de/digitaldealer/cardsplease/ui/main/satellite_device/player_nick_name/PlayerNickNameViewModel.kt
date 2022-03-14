@@ -1,22 +1,27 @@
-package de.digitaldealer.cardsplease.ui.main.satellite_device
+package de.digitaldealer.cardsplease.ui.main.satellite_device.player_nick_name
 
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.*
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.toObject
 import de.digitaldealer.cardsplease.COLLECTION_GAMES
 import de.digitaldealer.cardsplease.core.utils.Logger
-import de.digitaldealer.cardsplease.domain.model.Game
 import de.digitaldealer.cardsplease.domain.model.Deck
+import de.digitaldealer.cardsplease.domain.model.Game
 import de.digitaldealer.cardsplease.domain.model.Player
 import org.koin.core.component.KoinComponent
 
-class SatelliteViewModel : ViewModel(), KoinComponent {
+class PlayerNickNameViewModel(val savedState: SavedStateHandle) : ViewModel(), KoinComponent {
+
+    val deckId = liveData { emit(savedState.get<String>("deckId") ?: "-1") }
+
     private val db = FirebaseFirestore.getInstance()
-    private val playersRef = db.collection("players").document("player")
     private val gamesCollectionRef = db.collection(COLLECTION_GAMES)
 
-    fun submitToGame(deckId: String, nickName: String) {
-        loadGameByDeckIdFromFireStore(deckId, nickName)
+    private val _player = MutableLiveData<Player>()
+    val player: LiveData<Player> = _player
+
+    fun submitToGame(nickName: String) {
+        loadGameByDeckIdFromFireStore(deckId = savedState.get<String>("deckId") ?: "-1", nickName = nickName)
     }
 
     private fun loadGameByDeckIdFromFireStore(deckId: String, nickName: String) {
@@ -25,10 +30,11 @@ class SatelliteViewModel : ViewModel(), KoinComponent {
                 val game = snapshot.toObject<Game>()
                 val alreadyRegisteredPlayers = game?.players ?: emptyList()
                 val enrichedPlayersList = alreadyRegisteredPlayers.toMutableList()
-                enrichedPlayersList.add(Player(deckId = deckId, nickName = nickName))
+                val newPlayer = Player(deckId = deckId, nickName = nickName)
+                enrichedPlayersList.add(newPlayer)
                 game?.let { game ->
                     game.deck?.let { deck ->
-                        updatePlayers(deck, enrichedPlayersList)
+                        updatePlayers(deck, enrichedPlayersList, newPlayer)
                     } ?: Logger.debug("Error: No deck found")
                 } ?: Logger.debug("Error: No game found")
             }
@@ -37,9 +43,12 @@ class SatelliteViewModel : ViewModel(), KoinComponent {
             }
     }
 
-    private fun updatePlayers(deck: Deck, enrichedPlayersList: MutableList<Player>) {
+    private fun updatePlayers(deck: Deck, enrichedPlayersList: MutableList<Player>, player: Player) {
         gamesCollectionRef.document(deck.deckId).set(Game(deck = deck, players = enrichedPlayersList))
-            .addOnSuccessListener { Logger.debug("Whooo hooo") }
+            .addOnSuccessListener {
+                Logger.debug("Whooo hooo")
+                _player.value = player
+            }
             .addOnFailureListener { Logger.debug("Oooooohh nooooooo") }
     }
 }

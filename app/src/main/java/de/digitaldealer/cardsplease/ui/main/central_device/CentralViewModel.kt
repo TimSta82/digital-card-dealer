@@ -75,7 +75,8 @@ class CentralViewModel : ViewModel(), KoinComponent {
     }
 
     fun onStart(deck: Deck) {
-        Logger.debug("onStart() called")
+        Logger.debug("onStart() called - deckId: ${deck?.deckId ?: "-1"}")
+        gameListenerRegistration?.remove()
         gameListenerRegistration = gamesCollectionRef.document(deck.deckId).addSnapshotListener { snapshot, error ->
             if (snapshot?.exists() == true) {
                 val game = snapshot.toObject<Game>()
@@ -97,6 +98,7 @@ class CentralViewModel : ViewModel(), KoinComponent {
         gamesCollectionRef.document(deck.deckId).set(Game(deck = deck))
             .addOnSuccessListener {
 //                _onUploadDeckSuccessful.call()
+                _deck.value = deck
                 Logger.debug("Successfully init game -> deckId: ${deck.deckId}")
             }
             .addOnFailureListener {

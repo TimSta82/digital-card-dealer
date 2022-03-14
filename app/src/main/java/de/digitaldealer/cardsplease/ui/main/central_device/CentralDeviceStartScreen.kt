@@ -40,10 +40,13 @@ fun CentralDeviceStartScreen(modifier: Modifier = Modifier) {
 
     if (addPlayerDeckId != null) AddPlayerDialog(viewModel = viewModel, addPlayerDeckId = addPlayerDeckId)
 
-    DisposableEffect(key1 = viewModel) {
+    LaunchedEffect(key1 = deck?.deckId) {
         deck?.let {
             viewModel.onStart(it)
         }
+    }
+
+    DisposableEffect(key1 = Unit) {
         onDispose { viewModel.onStop() }
     }
 
