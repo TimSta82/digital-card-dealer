@@ -1,4 +1,4 @@
-package de.digitaldealer.cardsplease.ui.main.satellite_device.player_nick_name
+package de.digitaldealer.cardsplease.ui.main.satellite_device.insert_name
 
 import androidx.lifecycle.*
 import com.google.firebase.firestore.FirebaseFirestore
@@ -10,7 +10,7 @@ import de.digitaldealer.cardsplease.domain.model.Game
 import de.digitaldealer.cardsplease.domain.model.Player
 import org.koin.core.component.KoinComponent
 
-class PlayerNickNameViewModel(val savedState: SavedStateHandle) : ViewModel(), KoinComponent {
+class InsertNameViewModel(val savedState: SavedStateHandle) : ViewModel(), KoinComponent {
 
     val deckId = liveData { emit(savedState.get<String>("deckId") ?: "-1") }
 

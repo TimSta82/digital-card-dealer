@@ -1,20 +1,25 @@
 package de.digitaldealer.cardsplease.ui.main.satellite_device.player_hand
 
-import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.liveData
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.ktx.toObject
-import de.digitaldealer.cardsplease.COLLECTION_GAMES
+import androidx.lifecycle.*
 import de.digitaldealer.cardsplease.core.utils.Logger
-import de.digitaldealer.cardsplease.domain.model.Deck
-import de.digitaldealer.cardsplease.domain.model.Game
-import de.digitaldealer.cardsplease.domain.model.Player
 import org.koin.core.component.KoinComponent
 
-class PlayerHandViewModel(val savedState: SavedStateHandle) : ViewModel(), KoinComponent {
+class PlayerHandViewModel(savedState: SavedStateHandle) : ViewModel(), KoinComponent {
 
-    val deckId = liveData { emit(savedState.get<String>("deckId") ?: "-1") }
-    val nickname = liveData { emit(savedState.get<String>("nickName") ?: "-1") }
+//    val deckId = liveData { emit(savedState.get<String>("deckId") ?: "-1") }
+//    val nickname = liveData { emit(savedState.get<String>("nickName") ?: "-1") }
+//
+    private val _d = MutableLiveData<String>()
+    val d: LiveData<String> = _d
 
+    private val _n = MutableLiveData<String>()
+    val n: LiveData<String> = _n
+
+    init {
+        // TODO find out why this gets called endless
+        _d.value = savedState.get<String>("deckId") ?: "-1"
+        _n.value = savedState.get<String>("nickName") ?: "-1"
+//        Logger.debug("deckId: ${deckId.value}")
+//        Logger.debug("name: ${nickname.value}")
+    }
 }

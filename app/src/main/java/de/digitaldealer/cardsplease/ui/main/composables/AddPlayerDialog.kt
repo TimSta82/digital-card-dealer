@@ -24,12 +24,13 @@ fun AddPlayerDialog(
         onDismissRequest = {
             viewModel.resetPlayerDeckId()
         },
-        title = {
-            Text(text = "Scanne mal den Code oder tip in ab -> ${addPlayerDeckId ?: ""}")
-        },
         text = {
             addPlayerDeckId?.let {
-                Box(contentAlignment = Alignment.Center) {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
                     Image(
                         bitmap = getQrCodeAsBitmap(deckId = it),
                         contentDescription = ""
@@ -55,6 +56,6 @@ fun AddPlayerDialog(
 
 @Composable
 private fun getQrCodeAsBitmap(deckId: String): ImageBitmap {
-    val bitmap = QRCode.from(deckId).withSize(300, 300).bitmap().asImageBitmap()
+    val bitmap = QRCode.from(deckId).withSize(400, 400).bitmap().asImageBitmap()
     return bitmap
 }

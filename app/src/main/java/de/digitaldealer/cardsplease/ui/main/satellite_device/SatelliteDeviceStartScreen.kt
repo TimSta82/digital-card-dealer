@@ -16,11 +16,13 @@ import com.google.accompanist.permissions.PermissionStatus
 import com.google.accompanist.permissions.rememberPermissionState
 import com.journeyapps.barcodescanner.CaptureManager
 import com.journeyapps.barcodescanner.CompoundBarcodeView
-import de.digitaldealer.cardsplease.ui.NavigationRoutes.PLAYER_NICK_NAME_SCREEN
+import de.digitaldealer.cardsplease.ui.NavigationRoutes.INSERT_NAME_SCREEN
+import de.digitaldealer.cardsplease.ui.main.satellite_device.qr_scanner.QrScannerScreen
 
 @Composable
 fun SatelliteDeviceStartScreen(modifier: Modifier = Modifier, navController: NavController) {
-    FeatureThatRequiresCameraPermission(navController)
+//    FeatureThatRequiresCameraPermission(navController)
+    QrScannerScreen(navController)
 }
 
 @OptIn(ExperimentalPermissionsApi::class)
@@ -79,7 +81,7 @@ fun AddPlayerQrScanScreen(navController: NavController) {
                 result.text?.let { barCodeOrQr ->
                     //Do something and when you finish this something
 
-                    navController.navigate(route = "$PLAYER_NICK_NAME_SCREEN/$barCodeOrQr")
+                    navController.navigate(route = "$INSERT_NAME_SCREEN/$barCodeOrQr")
                     //put scanFlag = false to scan another item
 //                    scanFlag = false
                 }
