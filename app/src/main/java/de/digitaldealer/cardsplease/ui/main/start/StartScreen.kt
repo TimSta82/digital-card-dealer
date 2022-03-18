@@ -18,10 +18,10 @@ fun StartScreen(modifier: Modifier = Modifier, navController: NavController) {
         contentAlignment = Alignment.Center
     ) {
         Column {
-            Button(onClick = { navController.navigate(route = NavigationRoutes.DEALER_DEVICE_SCREEN) }) {
+            Button(onClick = { navController.navigate(route = NavigationRoutes.DEALER_DEVICE_START_SCREEN) }) {
                 Text(text = "Neues Spiel starten")
             }
-            Button(onClick = { navController.navigate(route = NavigationRoutes.SATELLITE_DEVICE_START_SCREEN) }) {
+            Button(onClick = { navController.navigate(route = NavigationRoutes.PLAYER_DEVICE_START_SCREEN) }) {
                 Text(text = "An einem Spiel teilnehmen")
             }
         }

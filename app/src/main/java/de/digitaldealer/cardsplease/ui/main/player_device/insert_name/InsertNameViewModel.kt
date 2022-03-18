@@ -1,13 +1,10 @@
-package de.digitaldealer.cardsplease.ui.main.satellite_device.insert_name
+package de.digitaldealer.cardsplease.ui.main.player_device.insert_name
 
 import androidx.lifecycle.*
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.ktx.toObject
 import de.digitaldealer.cardsplease.COLLECTION_GAMES
 import de.digitaldealer.cardsplease.COLLECTION_PLAYERS
 import de.digitaldealer.cardsplease.core.utils.Logger
-import de.digitaldealer.cardsplease.domain.model.Deck
-import de.digitaldealer.cardsplease.domain.model.Game
 import de.digitaldealer.cardsplease.domain.model.Player
 import org.koin.core.component.KoinComponent
 import java.util.*

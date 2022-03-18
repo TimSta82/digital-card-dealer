@@ -1,7 +1,6 @@
-package de.digitaldealer.cardsplease.ui.main.satellite_device.player_hand
+package de.digitaldealer.cardsplease.ui.main.player_device.player_hand
 
 import androidx.lifecycle.*
-import de.digitaldealer.cardsplease.core.utils.Logger
 import org.koin.core.component.KoinComponent
 
 class PlayerHandViewModel(savedState: SavedStateHandle) : ViewModel(), KoinComponent {

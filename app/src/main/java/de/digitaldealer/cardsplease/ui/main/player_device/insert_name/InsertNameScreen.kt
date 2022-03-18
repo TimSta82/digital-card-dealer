@@ -1,4 +1,4 @@
-package de.digitaldealer.cardsplease.ui.main.satellite_device.insert_name
+package de.digitaldealer.cardsplease.ui.main.player_device.insert_name
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Button

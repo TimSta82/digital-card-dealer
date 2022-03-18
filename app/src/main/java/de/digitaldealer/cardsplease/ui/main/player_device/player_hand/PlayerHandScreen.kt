@@ -1,4 +1,4 @@
-package de.digitaldealer.cardsplease.ui.main.satellite_device.player_hand
+package de.digitaldealer.cardsplease.ui.main.player_device.player_hand
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

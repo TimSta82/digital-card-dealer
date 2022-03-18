@@ -1,4 +1,4 @@
-package de.digitaldealer.cardsplease.ui.main.satellite_device.qr_scanner
+package de.digitaldealer.cardsplease.ui.main.player_device.qr_scanner
 
 import android.Manifest
 import android.content.pm.PackageManager

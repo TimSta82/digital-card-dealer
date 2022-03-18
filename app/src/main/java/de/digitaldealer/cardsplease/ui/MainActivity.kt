@@ -11,16 +11,16 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import de.digitaldealer.cardsplease.ui.NavigationRoutes.DEALER_DEVICE_SCREEN
+import de.digitaldealer.cardsplease.ui.NavigationRoutes.DEALER_DEVICE_START_SCREEN
 import de.digitaldealer.cardsplease.ui.NavigationRoutes.INSERT_NAME_SCREEN
 import de.digitaldealer.cardsplease.ui.NavigationRoutes.PLAYER_HAND_SCREEN
-import de.digitaldealer.cardsplease.ui.NavigationRoutes.SATELLITE_DEVICE_START_SCREEN
+import de.digitaldealer.cardsplease.ui.NavigationRoutes.PLAYER_DEVICE_START_SCREEN
 import de.digitaldealer.cardsplease.ui.NavigationRoutes.START_SCREEN
 import de.digitaldealer.cardsplease.ui.base.BaseActivity
 import de.digitaldealer.cardsplease.ui.main.dealer_device.LockScreenOrientation
-import de.digitaldealer.cardsplease.ui.main.satellite_device.SatelliteDeviceStartScreen
-import de.digitaldealer.cardsplease.ui.main.satellite_device.insert_name.InsertNameScreen
-import de.digitaldealer.cardsplease.ui.main.satellite_device.player_hand.PlayerHandScreen
+import de.digitaldealer.cardsplease.ui.main.player_device.PlayerStartScreen
+import de.digitaldealer.cardsplease.ui.main.player_device.insert_name.InsertNameScreen
+import de.digitaldealer.cardsplease.ui.main.player_device.player_hand.PlayerHandScreen
 import de.digitaldealer.cardsplease.ui.main.start.StartScreen
 import de.digitaldealer.cardsplease.ui.theme.DefaultTheme
 
@@ -58,11 +58,11 @@ fun DefaultApp() {
                 composable(START_SCREEN) {
                     StartScreen(navController = navController)
                 }
-                composable(DEALER_DEVICE_SCREEN) {
+                composable(DEALER_DEVICE_START_SCREEN) {
                     LockScreenOrientation(orientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE)
                 }
-                composable(SATELLITE_DEVICE_START_SCREEN) {
-                    SatelliteDeviceStartScreen(navController = navController)
+                composable(PLAYER_DEVICE_START_SCREEN) {
+                    PlayerStartScreen(navController = navController)
                 }
                 composable(route = "$INSERT_NAME_SCREEN/{deckId}",
                     arguments = listOf(
