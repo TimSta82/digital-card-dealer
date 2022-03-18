@@ -17,6 +17,6 @@ val DogwoodRose = Color(0xFF00574B)
 /**
  * Dark
  */
-val Gunmetal = Color(0xFF092A34)
-val RichBlack = Color(0xFF061C23)
-val MetallicSeaweed = Color(0xFF028090)
+val Gunmetal = Color(0xFF39AC9E)
+val RichBlack = Color(0xFF118A7E)
+val MetallicSeaweed = Color(0xFF1F6F78)

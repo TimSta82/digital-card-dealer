@@ -1,79 +1,62 @@
-package de.digitaldealer.cardsplease.extensions
+package de.digitaldealer.cardsplease.ui.extensions
 
-import android.app.Activity
 import android.content.Context
-import android.net.ConnectivityManager
-import android.net.NetworkCapabilities
-import android.view.View
-import android.view.inputmethod.InputMethodManager
-import android.widget.TextView
-import androidx.activity.OnBackPressedCallback
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import androidx.activity.viewModels
 import androidx.annotation.ColorRes
-import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewModelScope
-import com.google.android.material.snackbar.Snackbar
-import com.google.android.material.textfield.TextInputEditText
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
+import androidx.lifecycle.*
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.*
+import java.io.IOException
+import java.util.concurrent.Executor
 
-fun Fragment.hideKeyboard() = view?.let { view -> activity?.hideKeyboard(view) }
-fun Activity.hideKeyboard() = hideKeyboard(currentFocus ?: View(this))
-
-fun TextInputEditText.focusAndShowKeyboard() {
-    requestFocus()
-    setSelection(length())
-    val inputMethodManager: InputMethodManager? = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager?
-    inputMethodManager?.showSoftInput(this, InputMethodManager.SHOW_FORCED)
-}
-
-fun Context.hideKeyboard(view: View) {
-    val inputMethodManager = getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
-    inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)
-}
-
-fun Fragment.showSnackBar(message: String, length: Int = Snackbar.LENGTH_SHORT) = Snackbar.make(requireView(), message, length).show()
-
-fun Fragment.showSnackBar(@StringRes messageStringRes: Int, length: Int = Snackbar.LENGTH_SHORT) = Snackbar.make(requireView(), messageStringRes, length).show()
-
-fun Snackbar.setMaxLines(lines: Int): Snackbar {
-    this.view.findViewById<TextView>(com.google.android.material.R.id.snackbar_text).maxLines = lines
-    return this
-}
-
+fun ViewModel.launch(dispatcher: CoroutineDispatcher = Dispatchers.Main, block: suspend CoroutineScope.() -> Unit): Job = viewModelScope.launch(dispatcher) { block(this) }
 fun ViewModel.launch(block: suspend CoroutineScope.() -> Unit): Job = viewModelScope.launch { block(this) }
 
-fun Fragment.getColorByRes(@ColorRes colorRes: Int) = ContextCompat.getColor(requireContext(), colorRes)
-fun Activity.getColorByRes(@ColorRes colorRes: Int) = ContextCompat.getColor(this, colorRes)
+fun Context.getHexFromColorRes(@ColorRes colorRes: Int) = String.format("#%06x", ContextCompat.getColor(this, colorRes) and 0xffffff)
 
-fun Fragment.doOnBackPressed(onBackPressed: () -> Unit) {
-    activity?.onBackPressedDispatcher?.addCallback(
-        viewLifecycleOwner,
-        object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() = onBackPressed()
+inline fun <T> Flow<T>.collectIn(
+    owner: LifecycleOwner,
+    crossinline action: suspend (T) -> Unit
+) = owner.lifecycleScope.launch { owner.repeatOnLifecycle(Lifecycle.State.STARTED) { collect { action(it) } } }
+
+inline fun <T> Flow<T>.collectLatestIn(
+    owner: LifecycleOwner,
+    crossinline action: suspend (T) -> Unit
+) = owner.lifecycleScope.launch { owner.repeatOnLifecycle(Lifecycle.State.STARTED) { collectLatest { action(it) } } }
+
+fun Context.assetToBitmap(fileName: String): Bitmap? {
+    return try {
+        with(assets.open(fileName)) {
+            BitmapFactory.decodeStream(this)
         }
-    )
-}
-
-fun Context.isNetworkConnected(): Boolean {
-    (getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager).apply {
-        return getNetworkCapabilities(activeNetwork)?.run {
-            when {
-                hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> true
-                hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> true
-                hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> true
-                else -> false
-            }
-        } ?: false
+    } catch (e: IOException) {
+        e.printStackTrace()
+        null
     }
 }
+
+/**
+ *  @param started Parameter stopTimeoutMillis is set to 5 seconds to let the flow survive a configuration change
+ */
+fun <T> ViewModel.stateFlow(
+    flow: Flow<T>,
+    initialValue: T,
+    scope: CoroutineScope = viewModelScope,
+    started: SharingStarted = SharingStarted.WhileSubscribed(stopTimeoutMillis = 5_000L)
+): StateFlow<T> = flow.stateIn(
+    scope = scope,
+    started = started,
+    initialValue = initialValue
+)
+
+val Context.executor: Executor
+    get() = ContextCompat.getMainExecutor(this)
 
 inline fun <reified T : ViewModel> Fragment.viewModelsFactory(crossinline viewModelInitialization: () -> T): Lazy<T> {
     return viewModels {

@@ -1,0 +1,22 @@
+Dealer Device
+1. get Deck
+2. upload Deck to Firebase
+3. provide deckId via QR code
+
+    Player Device
+    1. get deckId via scan
+    2. set player name
+    3. upload player to Firebase related to deckID
+
+Dealer Device
+4. listen to collection "players" changes
+5. if (players.size >= 2) enable deal button
+6. deal: implies shuffle deck and draw cards (amount = (players.size*2) + burn + FLOP + burn + TURN + burn + RIVER = (players.size*2) + 8)
+7. add handcards to players and upload to Firebase
+
+    Player Device
+    4. listen to collection "player" document "playerName" changes -> transform to handcards and display
+
+Dealer Device
+8. handle remaining cards (turn, river)
+9. shuffle deck

@@ -36,7 +36,8 @@ fun DealerStartScreen(modifier: Modifier = Modifier) {
     val gamePhase by viewModel.gamePhase.observeAsState()
     val addPlayerDeckId by viewModel.addPlayerWithDeckId.observeAsState()
     val deck by viewModel.deck.observeAsState()
-    val player by viewModel.onPlayerJoinedSuccessful.observeAsState()
+    val players by viewModel.joinedPlayers.observeAsState()
+    val playerCountError by viewModel.onPlayerCountError.observeAsState()
 
     if (addPlayerDeckId != null) AddPlayerDialog(viewModel = viewModel, addPlayerDeckId = addPlayerDeckId)
 
@@ -50,20 +51,20 @@ fun DealerStartScreen(modifier: Modifier = Modifier) {
         onDispose { viewModel.onStop() }
     }
 
-    val (snackbarVisibleState, setSnackBarState) = remember { mutableStateOf(false) }
-    setSnackBarState(player != null)
+//    val (snackbarVisibleState, setSnackBarState) = remember { mutableStateOf(false) }
+//    setSnackBarState(players != null)
+//    if (snackbarVisibleState) {
+//        PlayerSnackbar(players?.first()?.nickName ?: "Wurst")
+//        Snackbar(
+//            action = {
+//                Button(onClick = {}) {
+//                    Text("MyAction")
+//                }
+//            },
+//            modifier = Modifier.padding(8.dp)
+//        ) { Text(text = "This is a snackbar!") }
+//    }
 
-    if (snackbarVisibleState) {
-        PlayerSnackbar(player!!.players?.first()?.nickName ?: "Wurst")
-        Snackbar(
-            action = {
-                Button(onClick = {}) {
-                    Text("MyAction")
-                }
-            },
-            modifier = Modifier.padding(8.dp)
-        ) { Text(text = "This is a snackbar!") }
-    }
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -177,7 +178,7 @@ fun river(river: List<Card?>) {
 @Preview
 @Composable
 fun Preview_DealerStartScreen(modifier: Modifier = Modifier) {
-    LockScreenOrientation(orientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE)
+    LockScreenOrientation(orientation = ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR)
 }
 
 @Composable

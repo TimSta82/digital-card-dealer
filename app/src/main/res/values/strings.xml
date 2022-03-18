@@ -3,4 +3,6 @@
 
     <string name="error_load_questions">Fragen konnten nicht geladen werden!</string>
     <string name="download_success">Erfolgreich geladen</string>
+    <string name="player_count_error_too_many_message">Zu viele Spieler</string>
+    <string name="player_count_error_not_enough_message">Nicht genug Spieler</string>
 </resources>

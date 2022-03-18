@@ -1,13 +1,18 @@
 package de.digitaldealer.cardsplease.domain.model
 
+import com.google.firebase.firestore.PropertyName
 import de.digitaldealer.cardsplease.R
 import de.digitaldealer.cardsplease.data.model.CardResponseDTO
 
 data class Card(
+    @PropertyName("image")
     val image: String,
+    @PropertyName("value")
     val value: String,
+    @PropertyName("suit")
     val suit: String,
-    val code: String
+    @PropertyName("code")
+    val code: String,
 ) {
     constructor(dto: CardResponseDTO) : this(
         image = dto.image ?: "-1",
@@ -15,6 +20,17 @@ data class Card(
         suit = dto.suit ?: "-1",
         code = dto.code ?: "-1"
     )
+
+    constructor() : this(
+        image = "",
+        value = "",
+        suit = "",
+        code = ""
+    )
+
+    companion object {
+        fun getDefaultCard() = Card(image = "", value = "JOKER", suit = "", code = "JOKER")
+    }
 
     fun getSuitIcon() = when (suit) {
         "HEARTS" -> R.drawable.ic_hearts
