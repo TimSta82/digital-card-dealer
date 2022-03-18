@@ -11,13 +11,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.unit.dp
-import de.digitaldealer.cardsplease.ui.main.central_device.CentralViewModel
+import de.digitaldealer.cardsplease.ui.main.dealer_device.DealerViewModel
 import net.glxn.qrgen.android.QRCode
 
 @Composable
 fun AddPlayerDialog(
     modifier: Modifier = Modifier,
-    viewModel: CentralViewModel,
+    viewModel: DealerViewModel,
     addPlayerDeckId: String?
 ) {
     AlertDialog(

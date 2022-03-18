@@ -1,4 +1,4 @@
-package de.digitaldealer.cardsplease.ui.main.central_device
+package de.digitaldealer.cardsplease.ui.main.dealer_device
 
 import android.app.Activity
 import android.content.Context
@@ -27,8 +27,8 @@ import de.digitaldealer.cardsplease.ui.main.composables.AddPlayerDialog
 import de.digitaldealer.cardsplease.ui.main.composables.PokerCard
 
 @Composable
-fun CentralDeviceStartScreen(modifier: Modifier = Modifier) {
-    val viewModel: CentralViewModel = viewModel()
+fun DealerStartScreen(modifier: Modifier = Modifier) {
+    val viewModel: DealerViewModel = viewModel()
 
     val flop by viewModel.flop.observeAsState(emptyList())
     val turn by viewModel.turn.observeAsState(emptyList())
@@ -107,11 +107,6 @@ fun CentralDeviceStartScreen(modifier: Modifier = Modifier) {
                 Spacer(modifier = Modifier.width(32.dp))
                 FloatingActionButton(onClick = {
                     viewModel.addPlayer()
-//                val size = Point()
-//                requireActivity().windowManager.defaultDisplay.getSize(size)
-//                val bitmap = QRCode.from(appUserId).withSize(size.x, size.x).withColor(requireContext().getColor(R.color.primary), requireContext().getColor(R.color.foreground)).bitmap()
-//                binding.exportQrCodeIv.setImageBitmap(bitmap)
-//                getDimensionsForQrQode()
                 }) {
                     Icon(Icons.Filled.Add, "")
                 }
@@ -181,7 +176,7 @@ fun river(river: List<Card?>) {
 
 @Preview
 @Composable
-fun PreviewCentralDeviceScreen(modifier: Modifier = Modifier) {
+fun Preview_DealerStartScreen(modifier: Modifier = Modifier) {
     LockScreenOrientation(orientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE)
 }
 
@@ -197,7 +192,7 @@ fun LockScreenOrientation(orientation: Int) {
             activity.requestedOrientation = originalOrientation
         }
     }
-    CentralDeviceStartScreen()
+    DealerStartScreen()
 }
 
 fun Context.findActivity(): Activity? = when (this) {

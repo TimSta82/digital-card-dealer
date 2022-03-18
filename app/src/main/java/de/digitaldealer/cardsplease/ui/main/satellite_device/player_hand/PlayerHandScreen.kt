@@ -18,8 +18,10 @@ fun PlayerHandScreen(modifier: Modifier = Modifier, navController: NavController
 
     val viewModel: PlayerHandViewModel = viewModel()
 
-    val deckId by viewModel.deckId.observeAsState()
-    val nickName by viewModel.nickname.observeAsState()
+    val deckId by viewModel.d.observeAsState()
+//    val deckId by viewModel.deckId.observeAsState()
+    val nickName by viewModel.n.observeAsState()
+//    val nickName by viewModel.nickname.observeAsState()
     Column(
         modifier = Modifier.padding(top = 24.dp),
         verticalArrangement = Arrangement.Top,

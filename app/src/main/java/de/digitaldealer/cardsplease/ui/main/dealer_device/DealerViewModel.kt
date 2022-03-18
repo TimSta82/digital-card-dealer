@@ -1,12 +1,12 @@
-package de.digitaldealer.cardsplease.ui.main.central_device
+package de.digitaldealer.cardsplease.ui.main.dealer_device
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
-import com.google.firebase.firestore.ktx.toObject
 import de.digitaldealer.cardsplease.COLLECTION_GAMES
+import de.digitaldealer.cardsplease.COLLECTION_PLAYERS
 import de.digitaldealer.cardsplease.core.utils.Logger
 import de.digitaldealer.cardsplease.domain.model.Card
 import de.digitaldealer.cardsplease.domain.model.Deck
@@ -19,7 +19,7 @@ import de.digitaldealer.cardsplease.ui.util.SingleLiveEvent
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-class CentralViewModel : ViewModel(), KoinComponent {
+class DealerViewModel : ViewModel(), KoinComponent {
 
     private val getNewDeckUseCase by inject<GetNewDeckUseCase>()
     private val drawAmountOfCardsUseCase by inject<DrawAmountOfCardsUseCase>()
@@ -55,8 +55,6 @@ class CentralViewModel : ViewModel(), KoinComponent {
     private val db = FirebaseFirestore.getInstance()
     private val gamesCollectionRef = db.collection(COLLECTION_GAMES)
 
-    private val gamesDeckRef = db.collection("games").document("deck")
-    private val playersRef = db.collection("players").document("player")
     private var gameListenerRegistration: ListenerRegistration? = null
 
     init {
@@ -75,14 +73,15 @@ class CentralViewModel : ViewModel(), KoinComponent {
     }
 
     fun onStart(deck: Deck) {
-        Logger.debug("onStart() called - deckId: ${deck?.deckId ?: "-1"}")
+        Logger.debug("onStart() called - deckId: ${deck.deckId}")
         gameListenerRegistration?.remove()
-        gameListenerRegistration = gamesCollectionRef.document(deck.deckId).addSnapshotListener { snapshot, error ->
+        gameListenerRegistration = gamesCollectionRef.document(deck.deckId).collection(COLLECTION_PLAYERS).document().addSnapshotListener { snapshot, error ->
+//            if (snapshot?.exists() == true) {
             if (snapshot?.exists() == true) {
-                val game = snapshot.toObject<Game>()
+//                val game = snapshot.toObject<Game>()
                 Logger.debug("observe snapshot -> $snapshot")
-                Logger.debug("observe player successfull -> ${game?.players ?: listOf("keiner da")}")
-                game?.let { _onPlayerJoinedSuccessful.value = it }
+//                Logger.debug("observe player successfull -> ${game?.players ?: listOf("keiner da")}")
+//                game?.let { _onPlayerJoinedSuccessful.value = it }
             }
             if (error != null) {
                 Logger.debug("Loading player failed")
@@ -95,9 +94,9 @@ class CentralViewModel : ViewModel(), KoinComponent {
     }
 
     private fun initGameWithDeckId(deck: Deck) {
-        gamesCollectionRef.document(deck.deckId).set(Game(deck = deck))
+//        gamesCollectionRef.document(deck.deckId).set(Game(deck = deck))
+        gamesCollectionRef.document(deck.deckId).set(deck)
             .addOnSuccessListener {
-//                _onUploadDeckSuccessful.call()
                 _deck.value = deck
                 Logger.debug("Successfully init game -> deckId: ${deck.deckId}")
             }
@@ -105,20 +104,6 @@ class CentralViewModel : ViewModel(), KoinComponent {
                 Logger.debug("Game init failed -> deckId: ${deck.deckId}")
             }
     }
-
-//    private fun loadFromFireStore() {
-//        playersRef.get()
-//            .addOnSuccessListener { snapshot ->
-//                if (snapshot.exists()) {
-//                    _onPlayerJoinedSuccessful.value = snapshot[KEY_PLAYER] as? Player
-//                } else {
-//                    Logger.debug("Loading player failed, coz snapshot does not exists")
-//                }
-//            }
-//            .addOnFailureListener {
-//                Logger.debug("Loading player failed")
-//            }
-//    }
 
     fun deal(gamePhase: GamePhase) {
         launch {
