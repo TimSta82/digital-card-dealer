@@ -1,11 +1,16 @@
 package de.digitaldealer.cardsplease.domain.model
 
+import com.google.firebase.firestore.PropertyName
 import de.digitaldealer.cardsplease.data.model.DeckResponseDTO
 
 data class Deck(
+    @PropertyName("success")
     val success: Boolean,
+    @PropertyName("deck_id")
     val deckId: String,
+    @PropertyName("shuffled")
     val shuffled: Boolean,
+    @PropertyName("remaining")
     val remaining: Int
 ) {
     constructor() : this(

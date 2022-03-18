@@ -13,10 +13,12 @@ import de.digitaldealer.cardsplease.R
 import de.digitaldealer.cardsplease.core.utils.Logger
 import de.digitaldealer.cardsplease.domain.model.Card
 import de.digitaldealer.cardsplease.domain.model.Deck
+import de.digitaldealer.cardsplease.domain.model.Hand
 import de.digitaldealer.cardsplease.domain.model.Player
 import de.digitaldealer.cardsplease.domain.usecases.BaseUseCase
 import de.digitaldealer.cardsplease.domain.usecases.DrawAmountOfCardsUseCase
 import de.digitaldealer.cardsplease.domain.usecases.GetNewDeckUseCase
+import de.digitaldealer.cardsplease.domain.usecases.ShuffleDeckUseCase
 import de.digitaldealer.cardsplease.ui.extensions.launch
 import de.digitaldealer.cardsplease.ui.util.SingleLiveEvent
 import org.koin.core.component.KoinComponent
@@ -25,6 +27,7 @@ import org.koin.core.component.inject
 class DealerViewModel : ViewModel(), KoinComponent {
 
     private val getNewDeckUseCase by inject<GetNewDeckUseCase>()
+    private val shuffleDeckUseCase by inject<ShuffleDeckUseCase>()
     private val drawAmountOfCardsUseCase by inject<DrawAmountOfCardsUseCase>()
 
     private val _deck = MutableLiveData<Deck>()
@@ -56,6 +59,9 @@ class DealerViewModel : ViewModel(), KoinComponent {
 
     private val _onPlayerCountError = SingleLiveEvent<PlayerCountError>()
     val onPlayerCountError: LiveData<PlayerCountError> = _onPlayerCountError
+
+    private val _onShuffleError = SingleLiveEvent<Any>()
+    val onShuffleError: LiveData<Any> = _onShuffleError
 
     private var deckId: String? = null
     private val db = FirebaseFirestore.getInstance()
@@ -93,7 +99,6 @@ class DealerViewModel : ViewModel(), KoinComponent {
         playersListener = gamesCollectionRef.document(deckId).collection(COLLECTION_PLAYERS).addSnapshotListener { snapshot, error ->
             val players = ArrayList<Player>()
             if (snapshot?.isEmpty?.not() == true) {
-                Logger.debug("observe snapshot -> ${snapshot.documents}")
                 for (doc in snapshot) {
                     val player = doc.toObject<Player>()
                     players.add(player)
@@ -107,6 +112,7 @@ class DealerViewModel : ViewModel(), KoinComponent {
             }
             if (error != null) {
                 Logger.debug("Loading player failed")
+                return@addSnapshotListener
             }
         }
     }
@@ -128,38 +134,36 @@ class DealerViewModel : ViewModel(), KoinComponent {
             deckId?.let { deckId ->
                 if (deckId.isNotBlank())
                     when (gamePhase) {
-                        GamePhase.DEAL -> drawCards(deckId = deckId, gamePhase)
+                        GamePhase.DEAL -> shuffleCards(deckId, gamePhase)
                         else -> handleGamePhase(gamePhase)
                     }
             }
         }
     }
 
+    private suspend fun shuffleCards(deckId: String, gamePhase: GamePhase) {
+        when (val result = shuffleDeckUseCase.call(deckId = deckId)) {
+            is BaseUseCase.UseCaseResult.Success -> if (result.resultObject.shuffled) drawCards(deckId = deckId, gamePhase) else _onShuffleError.callAsync()
+            else -> _onShuffleError.callAsync()
+        }
+    }
+
     private fun handleGamePhase(gamePhase: GamePhase) {
         when (gamePhase) {
-            GamePhase.FLOP -> {
-                val burnedRemainingCards = _remainingCards.drop(1)
-                val flop = burnedRemainingCards.take(3)
-                val remainingCardsPostFlop = burnedRemainingCards.drop(3)
-                _remainingCards = remainingCardsPostFlop
-                _flop.postValue(flop)
-            }
-            GamePhase.TURN -> {
-                val burnedRemainingCards = _remainingCards.drop(1)
-                val turn = burnedRemainingCards.take(1)
-                val remainingCardsPostTurn = burnedRemainingCards.drop(1)
-                _remainingCards = remainingCardsPostTurn
-                _turn.postValue(turn)
-            }
-            GamePhase.RIVER -> {
-                val burnedRemainingCards = _remainingCards.drop(1)
-                val river = burnedRemainingCards.take(1)
-                val remainingCardsPostRiver = burnedRemainingCards.drop(1)
-                _remainingCards = remainingCardsPostRiver
-                _river.postValue(river)
-            }
+            GamePhase.FLOP -> _flop.postValue(getCardsAndHandleRemainingCardStack(gamePhase))
+            GamePhase.TURN -> _turn.postValue(getCardsAndHandleRemainingCardStack(gamePhase))
+            GamePhase.RIVER -> _river.postValue(getCardsAndHandleRemainingCardStack(gamePhase))
         }
         updateGamePhase(gamePhase)
+    }
+
+    private fun getCardsAndHandleRemainingCardStack(gamePhase: GamePhase): List<Card> {
+        val dealAmount = if (gamePhase == GamePhase.FLOP) 3 else 1
+        val burnedRemainingCards = _remainingCards.drop(1)
+        val cardsToDeal = burnedRemainingCards.take(dealAmount)
+        val postActionRemainingCards = burnedRemainingCards.drop(dealAmount)
+        _remainingCards = postActionRemainingCards
+        return cardsToDeal
     }
 
     private suspend fun drawCards(deckId: String, gamePhase: GamePhase) {
@@ -182,10 +186,10 @@ class DealerViewModel : ViewModel(), KoinComponent {
             val currentHand = Hand(one = cards[index], two = cards[index + 1])
             gamesCollectionRef.document(player.deckId).collection(COLLECTION_PLAYERS).document(player.nickName).collection(COLLECTION_HAND_CARDS).document("currentHand").set(currentHand)
                 .addOnSuccessListener {
-                    Logger.debug("Jeder spieler sollte jetzt ne hand haben")
+                    Logger.debug("Spieler ${player.nickName} sollte jetzt ne hand haben")
                 }
                 .addOnFailureListener {
-                    Logger.debug("Karten konnten nicht verteilt werden")
+                    Logger.debug("Karten konnten nicht an Spieler ${player.nickName} verteilt werden")
                 }
         }
         val remainingCards = cards.drop(players.size * 2)
@@ -231,21 +235,4 @@ enum class GamePhase(val buttonText: String) {
 
 enum class PlayerCountError(val errorMessageId: Int) {
     NOT_ENOUGH(R.string.player_count_error_not_enough_message), TOO_MANY(R.string.player_count_error_too_many_message)
-}
-
-data class Hand(
-    val one: Card,
-    val two: Card
-) {
-    constructor() : this(
-        one = Card.getDefaultCard(),
-        two = Card.getDefaultCard()
-    )
-
-    companion object {
-        fun getDefaultHand() = Hand(
-            one = Card.getDefaultCard(),
-            two = Card.getDefaultCard()
-        )
-    }
 }

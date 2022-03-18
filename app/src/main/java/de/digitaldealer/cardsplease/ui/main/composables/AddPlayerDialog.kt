@@ -25,14 +25,15 @@ fun AddPlayerDialog(
             viewModel.resetPlayerDeckId()
         },
         text = {
-            addPlayerDeckId?.let {
+            addPlayerDeckId?.let { deckId ->
                 Column(
                     modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
+                    Text(text = "SpielId: $deckId")
                     Image(
-                        bitmap = getQrCodeAsBitmap(deckId = it),
+                        bitmap = getQrCodeAsBitmap(deckId = deckId),
                         contentDescription = ""
                     )
                 }

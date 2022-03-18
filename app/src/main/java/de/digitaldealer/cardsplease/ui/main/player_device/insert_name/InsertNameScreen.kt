@@ -1,7 +1,13 @@
+@file:OptIn(ExperimentalComposeUiApi::class, ExperimentalFoundationApi::class)
+
 package de.digitaldealer.cardsplease.ui.main.player_device.insert_name
 
+import android.net.Uri
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Button
 import androidx.compose.material.Card
 import androidx.compose.material.Text
@@ -12,14 +18,19 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.google.gson.Gson
 import de.digitaldealer.cardsplease.R
 import de.digitaldealer.cardsplease.ui.NavigationRoutes.PLAYER_HAND_SCREEN
 
@@ -51,16 +62,29 @@ fun InsertNameScreen(modifier: Modifier = Modifier, navController: NavController
     }
 
     player?.let {
-        navController?.navigate(route = "$PLAYER_HAND_SCREEN/${player?.deckId}/${player?.nickName}")
+//        navController?.navigate(route = "$PLAYER_HAND_SCREEN/${player?.deckId}/${player?.nickName}")
+        val playerJson = Uri.encode(Gson().toJson(player))
+        navController?.navigate(route = "$PLAYER_HAND_SCREEN/${playerJson}")
     }
 }
 
 @Composable
 fun InsertNameTextFieldContainer(viewModel: InsertNameViewModel) {
     val nickName = remember { mutableStateOf(TextFieldValue()) }
-    Text(text = "bitte nickname eingeben")
+    val keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done)
+    val keyboardController = LocalSoftwareKeyboardController.current
+
+    Text(text = "Gib mal deinen Namen ein")
     Spacer(modifier = Modifier.height(32.dp))
-    TextField(value = nickName.value, onValueChange = { nickName.value = it })
+    TextField(
+        value = nickName.value,
+        onValueChange = { nickName.value = it },
+        keyboardOptions = keyboardOptions,
+        keyboardActions = KeyboardActions(onDone = {
+            keyboardController?.hide()
+            viewModel.submitToGame(nickName.value.text)
+        }),
+    )
     Button(onClick = { viewModel.submitToGame(nickName.value.text) }) {
         Text(text = "anmelden")
     }

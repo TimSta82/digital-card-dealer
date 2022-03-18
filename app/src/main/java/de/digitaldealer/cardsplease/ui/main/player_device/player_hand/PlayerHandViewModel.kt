@@ -1,5 +1,7 @@
 package de.digitaldealer.cardsplease.ui.main.player_device.player_hand
 
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import com.google.firebase.firestore.FirebaseFirestore
@@ -9,56 +11,28 @@ import de.digitaldealer.cardsplease.COLLECTION_GAMES
 import de.digitaldealer.cardsplease.COLLECTION_HAND_CARDS
 import de.digitaldealer.cardsplease.COLLECTION_PLAYERS
 import de.digitaldealer.cardsplease.core.utils.Logger
-import de.digitaldealer.cardsplease.ui.main.dealer_device.Hand
+import de.digitaldealer.cardsplease.domain.model.Hand
+import de.digitaldealer.cardsplease.domain.model.Player
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import org.koin.core.component.KoinComponent
 
 class PlayerHandViewModel(val savedState: SavedStateHandle) : ViewModel(), KoinComponent {
 
-//    val deckId = liveData { emit(savedState.get<String>("deckId") ?: "-1") }
-//    val nickname = liveData { emit(savedState.get<String>("nickName") ?: "-1") }
-//
-//    private val _d = MutableLiveData<String>()
-//    val d: LiveData<String> = _d
-//
-//    private val _n = MutableLiveData<String>()
-//    val n: LiveData<String> = _n
+    private val _player = MutableStateFlow(savedState.get<Player>("player") ?: Player())
+    val player = _player.asStateFlow()
 
-    /**
-    VM
-    private val _articles = MutableStateFlow(emptyList<Content.Article>())
-    val articles = _articles.asStateFlow()
-    val articles: StateFlow<List<Content.Article>> = runtimeDataController.articles
-
-    screen
-    val followUpArticle: Content.Article? by remember {
-    val allArticles: List<Content.Article> = contentViewModel.articles.value }
-
-     */
-
-    private val _deckId = MutableStateFlow(savedState.get<String>("deckId") ?: "-1")
-    val deckId = _deckId.asStateFlow()
-
-    private val _nickname = MutableStateFlow(savedState.get<String>("nickName") ?: "-1")
-    val nickname = _nickname.asStateFlow()
-
-    private val _currentHand = MutableStateFlow(Hand.getDefaultHand())
-    val currentHand = _currentHand.asStateFlow()
+    private val _currentHand = MutableLiveData(Hand())
+    val currentHand: LiveData<Hand> = _currentHand
 
     private val db = FirebaseFirestore.getInstance()
     private val gamesCollectionRef = db.collection(COLLECTION_GAMES)
 
     private var playerHandListener: ListenerRegistration? = null
 
-    fun onStart() {
-        // TODO find out why this gets called endless
-//        _d.value = savedState.get<String>("deckId") ?: "-1"
-//        _n.value = savedState.get<String>("nickName") ?: "-1"
-        Logger.debug("deckId: ${deckId.value}")
-        Logger.debug("name: ${nickname.value}")
+    init {
         playerHandListener?.remove()
-        playerHandListener = gamesCollectionRef.document(deckId.value!!).collection(COLLECTION_PLAYERS).document(nickname.value!!).collection(COLLECTION_HAND_CARDS)
+        playerHandListener = gamesCollectionRef.document(_player.value.deckId).collection(COLLECTION_PLAYERS).document(_player.value.nickName).collection(COLLECTION_HAND_CARDS)
             .addSnapshotListener { snapshot, error ->
                 if (snapshot?.isEmpty?.not() == true) {
                     val hands = ArrayList<Hand>()
@@ -70,7 +44,7 @@ class PlayerHandViewModel(val savedState: SavedStateHandle) : ViewModel(), KoinC
                     _currentHand.value = hands.first()
                 }
                 if (error != null) {
-                    Logger.debug("Loading player failed")
+//                    Logger.debug("Loading player failed")
                 }
             }
     }

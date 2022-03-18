@@ -11,7 +11,10 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -51,20 +54,6 @@ fun DealerStartScreen(modifier: Modifier = Modifier) {
         onDispose { viewModel.onStop() }
     }
 
-//    val (snackbarVisibleState, setSnackBarState) = remember { mutableStateOf(false) }
-//    setSnackBarState(players != null)
-//    if (snackbarVisibleState) {
-//        PlayerSnackbar(players?.first()?.nickName ?: "Wurst")
-//        Snackbar(
-//            action = {
-//                Button(onClick = {}) {
-//                    Text("MyAction")
-//                }
-//            },
-//            modifier = Modifier.padding(8.dp)
-//        ) { Text(text = "This is a snackbar!") }
-//    }
-
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -72,7 +61,7 @@ fun DealerStartScreen(modifier: Modifier = Modifier) {
         contentAlignment = Alignment.Center
     ) {
         Column {
-            if (deck != null) Text(text = deck?.deckId ?: "nix geklappt")
+            if (deck != null) Text(text = "SpielId: ${deck?.deckId}")
             Spacer(modifier = Modifier.height(8.dp))
             Row(
                 modifier = Modifier.padding(vertical = 40.dp),
@@ -112,6 +101,8 @@ fun DealerStartScreen(modifier: Modifier = Modifier) {
                     Icon(Icons.Filled.Add, "")
                 }
             }
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(text = "Spieler: ${players?.count()}")
         }
     }
 }

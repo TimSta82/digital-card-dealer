@@ -1,7 +1,6 @@
 package de.digitaldealer.cardsplease.data.repositories
 
 import com.google.firebase.firestore.FirebaseFirestore
-import de.digitaldealer.cardsplease.domain.model.Game
 
 class FireStoreRepository {
 
@@ -42,8 +41,4 @@ class FireStoreRepository {
 //    }
 }
 
-sealed class FireStoreResult {
-    data class Success(val game: Game) : FireStoreResult()
-    data class Failure(val error: String) : FireStoreResult()
-}
 

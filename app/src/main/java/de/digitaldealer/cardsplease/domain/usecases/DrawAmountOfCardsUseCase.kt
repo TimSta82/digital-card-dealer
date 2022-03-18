@@ -10,7 +10,7 @@ class DrawAmountOfCardsUseCase : BaseUseCase() {
 
     suspend fun call(amount: Int, deckId: String) = simpleResponseCall(deckRepository.drawAmountOfCards(amount = amount, deckId = deckId)) { dto ->
         dto.cards?.map { cardDto ->
-            cardDto?.let { Card(it) } ?: Card.getDefaultCard()
+            cardDto?.let { Card(it) } ?: Card()
         } ?: emptyList()
     }
 }

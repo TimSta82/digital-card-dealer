@@ -18,6 +18,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import de.digitaldealer.cardsplease.domain.model.Card
+import de.digitaldealer.cardsplease.ui.util.CardUtils
 
 @Composable
 fun PokerCard(
@@ -39,9 +40,9 @@ fun PokerCard(
                 Image(Icons.Filled.Api, contentDescription = "")
             } else {
                 Column {
-                    Image(painter = painterResource(id = card.getSuitIcon()), contentDescription = "")
+                    Image(painter = painterResource(id = CardUtils.getSuitIcon(card.suit)), contentDescription = "")
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text(text = card.value, color = colorResource(id = card.getSuitColor()), textAlign = TextAlign.Center)
+                    Text(text = card.value, color = colorResource(id = CardUtils.getSuitColor(card.suit)), textAlign = TextAlign.Center)
                 }
             }
         }

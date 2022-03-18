@@ -11,6 +11,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.google.gson.Gson
+import de.digitaldealer.cardsplease.domain.model.Player
 import de.digitaldealer.cardsplease.ui.NavigationRoutes.DEALER_DEVICE_START_SCREEN
 import de.digitaldealer.cardsplease.ui.NavigationRoutes.INSERT_NAME_SCREEN
 import de.digitaldealer.cardsplease.ui.NavigationRoutes.PLAYER_HAND_SCREEN
@@ -74,19 +76,38 @@ fun DefaultApp() {
                     InsertNameScreen(navController = navController)
                 }
                 composable(
-                    route = "$PLAYER_HAND_SCREEN/{deckId}/{nickName}",
+                    route = "$PLAYER_HAND_SCREEN/{player}",
                     arguments = listOf(
-                        navArgument("deckId") {
-                            type = NavType.StringType
-                        },
-                        navArgument("nickName") {
-                            type = NavType.StringType
-                        },
+                        navArgument("player") {
+                            type = PlayerNavParamType()
+                        }
                     )
+//                    arguments = listOf(
+//                        navArgument("deckId") {
+//                            type = NavType.StringType
+//                        },
+//                        navArgument("nickName") {
+//                            type = NavType.StringType
+//                        },
+//                    )
                 ) {
                     PlayerHandScreen(navController = navController)
                 }
             }
         }
+    }
+}
+
+class PlayerNavParamType : NavType<Player>(isNullableAllowed = false) {
+    override fun get(bundle: Bundle, key: String): Player? {
+        return bundle.getParcelable(key)
+    }
+
+    override fun parseValue(value: String): Player {
+        return Gson().fromJson(value, Player::class.java)
+    }
+
+    override fun put(bundle: Bundle, key: String, value: Player) {
+        bundle.putParcelable(key, value)
     }
 }
