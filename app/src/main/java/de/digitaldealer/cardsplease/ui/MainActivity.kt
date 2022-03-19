@@ -91,7 +91,7 @@ fun DefaultApp() {
 //                        },
 //                    )
                 ) {
-                    PlayerHandScreen(navController = navController)
+                    PlayerHandScreen()
                 }
             }
         }
