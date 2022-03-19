@@ -106,6 +106,7 @@ class DealerViewModel : ViewModel(), KoinComponent {
                 when {
                     players.size in 2..10 -> _joinedPlayers.value = players
                     players.size == 1 -> {
+                        _joinedPlayers.value = players
                         _onPlayerCountError.value = PlayerCountError.NOT_ENOUGH
                         Logger.debug("Not enough players yet")
                     }

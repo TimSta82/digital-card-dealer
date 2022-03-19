@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
@@ -24,16 +23,19 @@ import de.digitaldealer.cardsplease.ui.NavigationRoutes
 import de.digitaldealer.cardsplease.ui.extensions.collectAsStateLifecycleAware
 import de.digitaldealer.cardsplease.ui.main.composables.CardFace
 import de.digitaldealer.cardsplease.ui.main.composables.FlipCard
+import de.digitaldealer.cardsplease.ui.main.composables.PlayerLeaveTableDialog
 import de.digitaldealer.cardsplease.ui.main.composables.RotationAxis
-import kotlinx.coroutines.launch
 
 @Composable
 fun PlayerHandScreen(modifier: Modifier = Modifier, navController: NavController) {
 
     val viewModel: PlayerHandViewModel = viewModel()
 
-//    val bottomSheetScaffoldState = rememberBottomSheetScaffoldState()
-    val scope = rememberCoroutineScope()
+    val showPlayerLeaveDialog = remember { mutableStateOf(false) }
+
+    val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(
+        bottomSheetState = BottomSheetState(BottomSheetValue.Collapsed)
+    )
 
     val player by viewModel.player.collectAsStateLifecycleAware()
     val hand by viewModel.currentHand.collectAsStateLifecycleAware()
@@ -42,54 +44,27 @@ fun PlayerHandScreen(modifier: Modifier = Modifier, navController: NavController
     LaunchedEffect(key1 = hand.one.code != "") {
         viewModel.onStart()
     }
-
     DisposableEffect(key1 = Unit) {
         onDispose { viewModel.onStop() }
     }
+    if (showPlayerLeaveDialog.value) PlayerLeaveTableDialog(onDismiss = { showPlayerLeaveDialog.value = false }, onDisconnectPlayer = viewModel::disconnectPlayer)
 
-    if (onLeaveTable == true) navController.navigate(route = NavigationRoutes.START_SCREEN)
+    if (onLeaveTable == true) {
+        showPlayerLeaveDialog.value = false
+        navController.navigate(route = NavigationRoutes.START_SCREEN)
+    }
 
-//    BottomSheetScaffold(
-//        sheetContent = {
-//            HandBottomSheet(hand = hand)
-//        },
-//        scaffoldState = bottomSheetScaffoldState,
-//    ) {
-//        /* Add code later */
-//    }
-
-    val bottomState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
-    val scaffoldState = rememberScaffoldState()
-    ModalBottomSheetLayout(
-        sheetState = bottomState,
+    BottomSheetScaffold(
+        scaffoldState = bottomSheetScaffoldState,
         sheetContent = {
             HandBottomSheet(hand = hand)
-        }
+        },
+        sheetPeekHeight = 40.dp
     ) {
-        Scaffold(
-            scaffoldState = scaffoldState,
-//            topBar = {
-//                TopAppBar(
-//                    title = {
-//                        Text(text = "TopAppBar")
-//                    }
-//                )
-//            },
-            bottomBar = {
-                BottomAppBar(modifier = Modifier) {
-                    IconButton(
-                        onClick = {
-                            scope.launch { bottomState.show() }
-                        }
-                    ) {
-                        Icon(Icons.Filled.Menu, contentDescription = "Localized description")
-                    }
-                }
-            },
-            content = { innerPadding ->
-                HandContent(player = player, hand = hand, onDisconnectPlayer = viewModel::disconnectPlayer)
-            }
-        )
+        HandContent(
+            player = player,
+            hand = hand,
+            onDisconnectPlayer = { showPlayerLeaveDialog.value = true })
     }
 }
 

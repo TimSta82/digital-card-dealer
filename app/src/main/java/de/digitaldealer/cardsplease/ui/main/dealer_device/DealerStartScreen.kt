@@ -85,7 +85,9 @@ fun DealerStartScreen(modifier: Modifier = Modifier) {
                 Spacer(modifier = Modifier.width(32.dp))
                 Column {
                     gamePhase?.let { phase ->
-                        FloatingActionButton(onClick = { viewModel.deal(gamePhase = phase) }) {
+                        FloatingActionButton(
+                            onClick = { viewModel.deal(gamePhase = phase) },
+                        ) {
                             Text(text = phase.buttonText)
                         }
                     }

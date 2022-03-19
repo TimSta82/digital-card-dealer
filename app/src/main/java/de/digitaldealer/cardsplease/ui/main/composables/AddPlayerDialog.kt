@@ -48,7 +48,7 @@ fun AddPlayerDialog(
                     modifier = Modifier.fillMaxWidth(),
                     onClick = { viewModel.resetPlayerDeckId() }
                 ) {
-                    Text("Dismiss")
+                    Text("Aha!")
                 }
             }
         }
