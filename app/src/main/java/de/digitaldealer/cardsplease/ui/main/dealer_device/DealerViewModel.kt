@@ -19,6 +19,7 @@ import de.digitaldealer.cardsplease.domain.usecases.BaseUseCase
 import de.digitaldealer.cardsplease.domain.usecases.DrawAmountOfCardsUseCase
 import de.digitaldealer.cardsplease.domain.usecases.GetNewDeckUseCase
 import de.digitaldealer.cardsplease.domain.usecases.ShuffleDeckUseCase
+import de.digitaldealer.cardsplease.extensions.second
 import de.digitaldealer.cardsplease.ui.extensions.launch
 import de.digitaldealer.cardsplease.ui.util.SingleLiveEvent
 import org.koin.core.component.KoinComponent
@@ -180,20 +181,22 @@ class DealerViewModel : ViewModel(), KoinComponent {
     }
 
     private fun dealHandCardsToPlayers(players: List<Player>, cards: List<Card>) {
+        val remainingCards = cards
         Logger.debug("cards.size: ${cards.size}")
         Logger.debug("players.size: ${players.size}")
-        players.forEachIndexed { index, player ->
-            val currentHand = Hand(one = cards[index], two = cards[index + 1])
+        players.forEach { player ->
+            val currentHand = Hand(one = remainingCards.first(), two = remainingCards.second())
             gamesCollectionRef.document(player.deckId).collection(COLLECTION_PLAYERS).document(player.nickName).collection(COLLECTION_HAND_CARDS).document("currentHand").set(currentHand)
                 .addOnSuccessListener {
                     Logger.debug("Spieler ${player.nickName} sollte jetzt ne hand haben")
+                    val remainingCards = remainingCards.drop(2)
+                    _remainingCards = remainingCards
                 }
                 .addOnFailureListener {
                     Logger.debug("Karten konnten nicht an Spieler ${player.nickName} verteilt werden")
+                    return@addOnFailureListener
                 }
         }
-        val remainingCards = cards.drop(players.size * 2)
-        _remainingCards = remainingCards
     }
 
     private fun updateGamePhase(gamePhase: GamePhase) = when (gamePhase) {

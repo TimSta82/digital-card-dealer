@@ -1,7 +1,5 @@
 package de.digitaldealer.cardsplease.ui.main.player_device.player_hand
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import com.google.firebase.firestore.FirebaseFirestore
@@ -22,15 +20,21 @@ class PlayerHandViewModel(val savedState: SavedStateHandle) : ViewModel(), KoinC
     private val _player = MutableStateFlow(savedState.get<Player>("player") ?: Player())
     val player = _player.asStateFlow()
 
-    private val _currentHand = MutableLiveData(Hand())
-    val currentHand: LiveData<Hand> = _currentHand
+    private val _currentHand = MutableStateFlow(Hand())
+    val currentHand = _currentHand.asStateFlow()
 
     private val db = FirebaseFirestore.getInstance()
     private val gamesCollectionRef = db.collection(COLLECTION_GAMES)
 
     private var playerHandListener: ListenerRegistration? = null
 
-    init {
+    private fun isHandValid(hand: Hand): Boolean = hand.one.value != "" && hand.two.value != ""
+
+    fun onStop() {
+        playerHandListener?.remove()
+    }
+
+    fun onStart() {
         playerHandListener?.remove()
         playerHandListener = gamesCollectionRef.document(_player.value.deckId).collection(COLLECTION_PLAYERS).document(_player.value.nickName).collection(COLLECTION_HAND_CARDS)
             .addSnapshotListener { snapshot, error ->
@@ -38,18 +42,15 @@ class PlayerHandViewModel(val savedState: SavedStateHandle) : ViewModel(), KoinC
                     val hands = ArrayList<Hand>()
                     for (doc in snapshot) {
                         val hand = doc.toObject<Hand>()
-                        hands.add(hand)
+                        if (isHandValid(hand)) hands.add(hand)
                     }
                     Logger.debug("currentHand: $hands")
                     _currentHand.value = hands.first()
                 }
                 if (error != null) {
-//                    Logger.debug("Loading player failed")
+                    Logger.debug("Loading player failed")
+                    return@addSnapshotListener
                 }
             }
-    }
-
-    fun onStop() {
-        playerHandListener?.remove()
     }
 }

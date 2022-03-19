@@ -12,11 +12,8 @@ import androidx.compose.material.Button
 import androidx.compose.material.Card
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -42,6 +39,13 @@ fun InsertNameScreen(modifier: Modifier = Modifier, navController: NavController
     val deckId by viewModel.deckId.observeAsState()
     val player by viewModel.player.observeAsState()
 
+    LaunchedEffect(key1 = player != null) {
+        player?.let {
+            val playerJson = Uri.encode(Gson().toJson(player))
+            navController?.navigate(route = "$PLAYER_HAND_SCREEN/${playerJson}")
+        }
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -59,12 +63,6 @@ fun InsertNameScreen(modifier: Modifier = Modifier, navController: NavController
                 InsertNameTextFieldContainer(viewModel = viewModel)
             }
         }
-    }
-
-    player?.let {
-//        navController?.navigate(route = "$PLAYER_HAND_SCREEN/${player?.deckId}/${player?.nickName}")
-        val playerJson = Uri.encode(Gson().toJson(player))
-        navController?.navigate(route = "$PLAYER_HAND_SCREEN/${playerJson}")
     }
 }
 

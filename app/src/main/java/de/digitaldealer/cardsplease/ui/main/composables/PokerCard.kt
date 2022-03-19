@@ -48,3 +48,28 @@ fun PokerCard(
         }
     }
 }
+
+@Composable
+fun HandCard(
+    modifier: Modifier = Modifier,
+    card: Card,
+    elevation: Dp? = 4.dp,
+) {
+    Card(
+        shape = RoundedCornerShape(8.dp),
+        modifier = Modifier.clip(RoundedCornerShape(8.dp)),
+        backgroundColor = if (card == null) Color.DarkGray else Color.White,
+        elevation = elevation ?: 4.dp,
+    ) {
+        Box(
+            modifier = Modifier.padding(horizontal = 24.dp, vertical = 64.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Column {
+                Image(painter = painterResource(id = CardUtils.getSuitIcon(card.suit)), contentDescription = "")
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(text = card.value, color = colorResource(id = CardUtils.getSuitColor(card.suit)), textAlign = TextAlign.Center)
+            }
+        }
+    }
+}
