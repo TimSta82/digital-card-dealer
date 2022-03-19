@@ -9,15 +9,18 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import de.digitaldealer.cardsplease.R
 import de.digitaldealer.cardsplease.domain.model.Hand
 import de.digitaldealer.cardsplease.domain.model.Player
+import de.digitaldealer.cardsplease.ui.NavigationRoutes
 import de.digitaldealer.cardsplease.ui.extensions.collectAsStateLifecycleAware
 import de.digitaldealer.cardsplease.ui.main.composables.CardFace
 import de.digitaldealer.cardsplease.ui.main.composables.FlipCard
@@ -25,7 +28,7 @@ import de.digitaldealer.cardsplease.ui.main.composables.RotationAxis
 import kotlinx.coroutines.launch
 
 @Composable
-fun PlayerHandScreen(modifier: Modifier = Modifier) {
+fun PlayerHandScreen(modifier: Modifier = Modifier, navController: NavController) {
 
     val viewModel: PlayerHandViewModel = viewModel()
 
@@ -34,6 +37,7 @@ fun PlayerHandScreen(modifier: Modifier = Modifier) {
 
     val player by viewModel.player.collectAsStateLifecycleAware()
     val hand by viewModel.currentHand.collectAsStateLifecycleAware()
+    val onLeaveTable by viewModel.onLeaveTable.observeAsState()
 
     LaunchedEffect(key1 = hand.one.code != "") {
         viewModel.onStart()
@@ -42,6 +46,8 @@ fun PlayerHandScreen(modifier: Modifier = Modifier) {
     DisposableEffect(key1 = Unit) {
         onDispose { viewModel.onStop() }
     }
+
+    if (onLeaveTable == true) navController.navigate(route = NavigationRoutes.START_SCREEN)
 
 //    BottomSheetScaffold(
 //        sheetContent = {
@@ -158,11 +164,11 @@ fun HandBottomSheet(modifier: Modifier = Modifier, hand: Hand) {
     }
 }
 
-@Preview
-@Composable
-fun Preview_PlayerHandScreen(modifier: Modifier = Modifier) {
-    PlayerHandScreen()
-}
+//@Preview
+//@Composable
+//fun Preview_PlayerHandScreen(modifier: Modifier = Modifier) {
+////    PlayerHandScreen()
+//}
 
 @Preview
 @Composable

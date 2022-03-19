@@ -1,5 +1,6 @@
 package de.digitaldealer.cardsplease.ui.main.player_device.player_hand
 
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import com.google.firebase.firestore.FirebaseFirestore
@@ -11,6 +12,7 @@ import de.digitaldealer.cardsplease.COLLECTION_PLAYERS
 import de.digitaldealer.cardsplease.core.utils.Logger
 import de.digitaldealer.cardsplease.domain.model.Hand
 import de.digitaldealer.cardsplease.domain.model.Player
+import de.digitaldealer.cardsplease.ui.util.SingleLiveEvent
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import org.koin.core.component.KoinComponent
@@ -22,6 +24,9 @@ class PlayerHandViewModel(val savedState: SavedStateHandle) : ViewModel(), KoinC
 
     private val _currentHand = MutableStateFlow(Hand())
     val currentHand = _currentHand.asStateFlow()
+
+    private val _onLeaveTable = SingleLiveEvent<Boolean>()
+    val onLeaveTable: LiveData<Boolean> = _onLeaveTable
 
     private val db = FirebaseFirestore.getInstance()
     private val gamesCollectionRef = db.collection(COLLECTION_GAMES)
@@ -58,6 +63,7 @@ class PlayerHandViewModel(val savedState: SavedStateHandle) : ViewModel(), KoinC
         gamesCollectionRef.document(_player.value.deckId).collection(COLLECTION_PLAYERS).document(_player.value.nickName).delete()
             .addOnSuccessListener {
                 Logger.debug("Tschüss ${_player.value.nickName}")
+                _onLeaveTable.value = true
             }
             .addOnFailureListener {
                 Logger.debug("Du musst weiter spielen, weil abmelden hat nicht geklappt")

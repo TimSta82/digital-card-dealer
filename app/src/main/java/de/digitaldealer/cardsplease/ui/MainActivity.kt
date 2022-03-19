@@ -83,7 +83,7 @@ fun DefaultApp() {
                         }
                     )
                 ) {
-                    PlayerHandScreen()
+                    PlayerHandScreen(navController = navController)
                 }
             }
         }

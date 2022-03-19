@@ -42,9 +42,9 @@ fun CardFace(
     ) {
         Box(
             modifier = Modifier
-                .fillMaxHeight(0.4f)
-                .fillMaxWidth(0.4f),
-//                .defaultMinSize(minHeight = card_height, minWidth = card_width),
+//                .fillMaxHeight(0.4f)
+//                .fillMaxWidth(0.4f),
+                .defaultMinSize(minHeight = card_height, minWidth = card_width),
             contentAlignment = Alignment.Center
         ) {
             Column {
@@ -69,9 +69,9 @@ fun CardBack(
     ) {
         Box(
             modifier = Modifier
-                .fillMaxHeight(0.4f)
-                .fillMaxWidth(0.4f),
-//                .defaultMinSize(minHeight = card_height, minWidth = card_width),
+//                .fillMaxHeight(0.4f)
+//                .fillMaxWidth(0.4f),
+                .defaultMinSize(minHeight = card_height, minWidth = card_width),
             contentAlignment = Alignment.Center
         ) {
             Image(Icons.Filled.Api, contentDescription = "")

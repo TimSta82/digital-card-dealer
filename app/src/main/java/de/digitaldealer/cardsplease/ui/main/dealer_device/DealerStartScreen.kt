@@ -8,7 +8,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material.*
+import androidx.compose.material.FloatingActionButton
+import androidx.compose.material.Icon
+import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.Composable
@@ -20,7 +22,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -76,11 +77,11 @@ fun DealerStartScreen(modifier: Modifier = Modifier) {
                     CardBack(elevation = 8.dp)
                 }
                 Spacer(modifier = Modifier.width(16.dp))
-                flop(flop)
+                Flop(flop)
                 Spacer(modifier = Modifier.width(8.dp))
-                turn(turn)
+                Turn(turn)
                 Spacer(modifier = Modifier.width(8.dp))
-                river(river)
+                River(river)
                 Spacer(modifier = Modifier.width(32.dp))
                 Column {
                     gamePhase?.let { phase ->
@@ -113,47 +114,36 @@ fun DealerStartScreen(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun flop(flop: List<Card?>) {
-    Column {
-        Text(text = "Flop", textAlign = TextAlign.Center)
-        Spacer(modifier = Modifier.height(8.dp))
-        LazyRow {
-            itemsIndexed(flop) { index, card ->
-                card?.let {
-                    CardFace(card = card)
-                    Spacer(modifier = Modifier.width(8.dp))
-                }
+fun Flop(flop: List<Card?>) {
+    LazyRow {
+        itemsIndexed(flop) { index, card ->
+            card?.let {
+                CardFace(card = card)
+                Spacer(modifier = Modifier.width(8.dp))
             }
         }
     }
 }
 
 @Composable
-fun turn(turn: List<Card?>) {
-    Column {
-        Text(text = "Turn", textAlign = TextAlign.Center)
-        Spacer(modifier = Modifier.height(8.dp))
-        LazyRow {
-            itemsIndexed(turn) { index, card ->
-                card?.let {
-                    CardFace(card = card)
-                    Spacer(modifier = Modifier.width(8.dp))
-                }
+fun Turn(turn: List<Card?>) {
+    LazyRow {
+        itemsIndexed(turn) { index, card ->
+            card?.let {
+                CardFace(card = card)
+                Spacer(modifier = Modifier.width(8.dp))
             }
         }
     }
 }
 
+
 @Composable
-fun river(river: List<Card?>) {
-    Column {
-        Text(text = "River", textAlign = TextAlign.Center)
-        Spacer(modifier = Modifier.height(8.dp))
-        LazyRow {
-            itemsIndexed(river) { index, card ->
-                card?.let {
-                    CardFace(card = card)
-                }
+fun River(river: List<Card?>) {
+    LazyRow {
+        itemsIndexed(river) { index, card ->
+            card?.let {
+                CardFace(card = card)
             }
         }
     }

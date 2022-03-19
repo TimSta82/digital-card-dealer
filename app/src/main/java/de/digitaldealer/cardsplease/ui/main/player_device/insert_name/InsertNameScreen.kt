@@ -80,10 +80,10 @@ fun InsertNameTextFieldContainer(viewModel: InsertNameViewModel) {
         keyboardOptions = keyboardOptions,
         keyboardActions = KeyboardActions(onDone = {
             keyboardController?.hide()
-            viewModel.submitToGame(nickName.value.text)
+            if (nickName.value.text.isNotBlank()) viewModel.submitToGame(nickName.value.text)
         }),
     )
-    Button(onClick = { viewModel.submitToGame(nickName.value.text) }) {
+    Button(onClick = { if (nickName.value.text.isNotBlank()) viewModel.submitToGame(nickName.value.text) }) {
         Text(text = "anmelden")
     }
 }
