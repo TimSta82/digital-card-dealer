@@ -96,10 +96,14 @@ fun DealerStartScreen(modifier: Modifier = Modifier) {
                     }
                 }
                 Spacer(modifier = Modifier.width(32.dp))
-                FloatingActionButton(onClick = {
-                    viewModel.addPlayer()
-                }) {
-                    Icon(Icons.Filled.Add, "")
+                players.let {
+                    if (it == null || it.size <= 10) {
+                        FloatingActionButton(onClick = {
+                            viewModel.addPlayer()
+                        }) {
+                            Icon(Icons.Filled.Add, "")
+                        }
+                    }
                 }
             }
             Spacer(modifier = Modifier.height(8.dp))

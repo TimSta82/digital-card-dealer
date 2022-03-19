@@ -6,6 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -79,9 +80,8 @@ fun PlayerHandScreen(modifier: Modifier = Modifier) {
                     }
                 }
             },
-
             content = { innerPadding ->
-                HandContent(player = player, hand = hand)
+                HandContent(player = player, hand = hand, onDisconnectPlayer = viewModel::disconnectPlayer)
             }
         )
     }
@@ -91,18 +91,27 @@ fun PlayerHandScreen(modifier: Modifier = Modifier) {
 fun HandContent(
     modifier: Modifier = Modifier,
     player: Player,
-    hand: Hand
+    hand: Hand,
+    onDisconnectPlayer: () -> Unit
 ) {
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(color = colorResource(id = R.color.colorPrimaryDark)),
-        contentAlignment = Alignment.TopCenter
     ) {
+
         Column(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            Row(
+                horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.Top
+            ) {
+                FloatingActionButton(onClick = onDisconnectPlayer) {
+                    Icon(Icons.Filled.Delete, "")
+                }
+            }
             Text(text = "SpielId: ${player.deckId}")
             Text(text = "${player.nickName} ihm seine Hand")
             Spacer(modifier = Modifier.height(16.dp))
@@ -158,7 +167,7 @@ fun Preview_PlayerHandScreen(modifier: Modifier = Modifier) {
 @Preview
 @Composable
 fun Preview_HandContent(modifier: Modifier = Modifier) {
-    HandContent(player = Player(), hand = Hand())
+    HandContent(player = Player(), hand = Hand(), onDisconnectPlayer = {})
 }
 
 @Preview

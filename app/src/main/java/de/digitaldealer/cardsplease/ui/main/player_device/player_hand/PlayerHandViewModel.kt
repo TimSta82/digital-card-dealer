@@ -53,4 +53,14 @@ class PlayerHandViewModel(val savedState: SavedStateHandle) : ViewModel(), KoinC
                 }
             }
     }
+
+    fun disconnectPlayer() {
+        gamesCollectionRef.document(_player.value.deckId).collection(COLLECTION_PLAYERS).document(_player.value.nickName).delete()
+            .addOnSuccessListener {
+                Logger.debug("Tschüss ${_player.value.nickName}")
+            }
+            .addOnFailureListener {
+                Logger.debug("Du musst weiter spielen, weil abmelden hat nicht geklappt")
+            }
+    }
 }
