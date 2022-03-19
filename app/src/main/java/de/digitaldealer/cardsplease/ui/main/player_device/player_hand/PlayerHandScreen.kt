@@ -1,12 +1,14 @@
+@file:OptIn(ExperimentalMaterialApi::class)
+
 package de.digitaldealer.cardsplease.ui.main.player_device.player_hand
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.BottomSheetScaffold
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
+import androidx.compose.material.rememberBottomSheetScaffoldState
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.colorResource
@@ -24,6 +26,9 @@ fun PlayerHandScreen(modifier: Modifier = Modifier, navController: NavController
 
     val viewModel: PlayerHandViewModel = viewModel()
 
+    val bottomSheetScaffoldState = rememberBottomSheetScaffoldState()
+    val scope = rememberCoroutineScope()
+
     val player by viewModel.player.collectAsStateLifecycleAware()
     val hand by viewModel.currentHand.collectAsStateLifecycleAware()
 
@@ -33,6 +38,15 @@ fun PlayerHandScreen(modifier: Modifier = Modifier, navController: NavController
 
     DisposableEffect(key1 = Unit) {
         onDispose { viewModel.onStop() }
+    }
+
+    BottomSheetScaffold(
+        sheetContent = {
+            HandBottomSheet(hand = hand)
+        },
+        scaffoldState = bottomSheetScaffoldState,
+    ) {
+        /* Add code later */
     }
 
     HandContent(player = player, hand = hand)
@@ -70,5 +84,13 @@ fun HandContent(
                 HandCard(card = hand.two)
             }
         }
+    }
+}
+
+@Composable
+fun HandBottomSheet(modifier: Modifier = Modifier, hand: Hand) {
+    Row {
+        HandCard(card = hand.one)
+        HandCard(card = hand.two)
     }
 }

@@ -211,10 +211,19 @@ class DealerViewModel : ViewModel(), KoinComponent {
     }
 
     private fun clearCards() {
-        _flop.postValue(emptyList())
-        _turn.postValue(emptyList())
-        _river.postValue(emptyList())
-        _remainingCards = emptyList()
+        deckId?.let {
+            gamesCollectionRef.document(it).collection(COLLECTION_PLAYERS).document().collection(COLLECTION_HAND_CARDS).document().delete()
+                .addOnSuccessListener {
+                    Logger.debug("delete all player hand cards")
+                    _flop.postValue(emptyList())
+                    _turn.postValue(emptyList())
+                    _river.postValue(emptyList())
+                    _remainingCards = emptyList()
+                }
+                .addOnFailureListener {
+                    Logger.debug("failed deleting all player hand cards")
+                }
+        }
     }
 
     fun addPlayer() {

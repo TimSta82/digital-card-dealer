@@ -59,10 +59,12 @@ fun HandCard(
         shape = RoundedCornerShape(8.dp),
         modifier = Modifier.clip(RoundedCornerShape(8.dp)),
         backgroundColor = if (card == null) Color.DarkGray else Color.White,
-        elevation = elevation ?: 4.dp,
+        elevation = elevation ?: 8.dp,
     ) {
         Box(
-            modifier = Modifier.padding(horizontal = 24.dp, vertical = 64.dp),
+            modifier = Modifier
+                .padding(horizontal = 24.dp, vertical = 64.dp)
+                .defaultMinSize(minHeight = 80.dp, minWidth = 40.dp),
             contentAlignment = Alignment.Center
         ) {
             Column {
