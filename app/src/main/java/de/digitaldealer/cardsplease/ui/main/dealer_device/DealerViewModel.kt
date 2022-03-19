@@ -72,7 +72,6 @@ class DealerViewModel : ViewModel(), KoinComponent {
     private var _remainingCards: List<Card> = emptyList()
 
     init {
-        Logger.debug("init() called")
         launch {
             when (val result = getNewDeckUseCase.call()) {
                 is BaseUseCase.UseCaseResult.Success -> {
@@ -87,7 +86,6 @@ class DealerViewModel : ViewModel(), KoinComponent {
     }
 
     fun onStart(deck: Deck) {
-        Logger.debug("onStart() called - deckId: ${deck.deckId}")
         watchForPlayersJoining(deck.deckId)
     }
 
@@ -106,9 +104,15 @@ class DealerViewModel : ViewModel(), KoinComponent {
                 }
                 Logger.debug("players: $players")
                 when {
-                    players.size in 2..9 -> _joinedPlayers.value = players
-                    players.size == 1 -> _onPlayerCountError.value = PlayerCountError.NOT_ENOUGH
-                    else -> _onPlayerCountError.value = PlayerCountError.TOO_MANY
+                    players.size in 2..10 -> _joinedPlayers.value = players
+                    players.size == 1 -> {
+                        _onPlayerCountError.value = PlayerCountError.NOT_ENOUGH
+                        Logger.debug("Not enough players yet")
+                    }
+                    else -> {
+                        _onPlayerCountError.value = PlayerCountError.TOO_MANY
+                        Logger.debug("Too many players")
+                    }
                 }
             }
             if (error != null) {

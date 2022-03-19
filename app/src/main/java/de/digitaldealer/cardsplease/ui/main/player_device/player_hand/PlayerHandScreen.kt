@@ -18,7 +18,9 @@ import de.digitaldealer.cardsplease.R
 import de.digitaldealer.cardsplease.domain.model.Hand
 import de.digitaldealer.cardsplease.domain.model.Player
 import de.digitaldealer.cardsplease.ui.extensions.collectAsStateLifecycleAware
-import de.digitaldealer.cardsplease.ui.main.composables.HandCard
+import de.digitaldealer.cardsplease.ui.main.composables.CardFace
+import de.digitaldealer.cardsplease.ui.main.composables.FlipCard
+import de.digitaldealer.cardsplease.ui.main.composables.RotationAxis
 import kotlinx.coroutines.launch
 
 @Composable
@@ -104,17 +106,33 @@ fun HandContent(
             Text(text = "SpielId: ${player.deckId}")
             Text(text = "${player.nickName} ihm seine Hand")
             Spacer(modifier = Modifier.height(16.dp))
-            Text(text = hand.one.code)
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(text = hand.two.code)
-            Spacer(modifier = Modifier.height(16.dp))
             Row(
                 modifier = Modifier.padding(top = 24.dp),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                HandCard(card = hand.one)
+                var cardOneState by remember {
+                    mutableStateOf(CardFace.Front)
+                }
+                FlipCard(
+                    card = hand.one,
+                    cardFace = cardOneState,
+                    onClick = {
+                        cardOneState = it.next
+                    },
+                    axis = RotationAxis.AxisY,
+                )
                 Spacer(modifier = Modifier.width(16.dp))
-                HandCard(card = hand.two)
+                var cardTwoState by remember {
+                    mutableStateOf(CardFace.Front)
+                }
+                FlipCard(
+                    card = hand.two,
+                    cardFace = cardTwoState,
+                    onClick = {
+                        cardTwoState = it.next
+                    },
+                    axis = RotationAxis.AxisY
+                )
             }
         }
     }
@@ -124,9 +142,9 @@ fun HandContent(
 fun HandBottomSheet(modifier: Modifier = Modifier, hand: Hand) {
     Box(contentAlignment = Alignment.TopCenter, modifier = Modifier.padding(16.dp)) {
         Row(horizontalArrangement = Arrangement.Center) {
-            HandCard(card = hand.one)
+            CardFace(card = hand.one)
             Spacer(modifier = Modifier.width(8.dp))
-            HandCard(card = hand.two)
+            CardFace(card = hand.two)
         }
     }
 }

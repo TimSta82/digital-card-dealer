@@ -16,3 +16,5 @@ val eight_GU: Dp = 64.dp
 val nine_GU: Dp = 72.dp
 val ten_GU: Dp = 80.dp
 val sixteen_GU: Dp = 128.dp
+val card_height: Dp = 120.dp
+val card_width: Dp = 70.dp

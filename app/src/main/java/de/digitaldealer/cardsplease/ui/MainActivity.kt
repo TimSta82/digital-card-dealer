@@ -15,8 +15,8 @@ import com.google.gson.Gson
 import de.digitaldealer.cardsplease.domain.model.Player
 import de.digitaldealer.cardsplease.ui.NavigationRoutes.DEALER_DEVICE_START_SCREEN
 import de.digitaldealer.cardsplease.ui.NavigationRoutes.INSERT_NAME_SCREEN
-import de.digitaldealer.cardsplease.ui.NavigationRoutes.PLAYER_HAND_SCREEN
 import de.digitaldealer.cardsplease.ui.NavigationRoutes.PLAYER_DEVICE_START_SCREEN
+import de.digitaldealer.cardsplease.ui.NavigationRoutes.PLAYER_HAND_SCREEN
 import de.digitaldealer.cardsplease.ui.NavigationRoutes.START_SCREEN
 import de.digitaldealer.cardsplease.ui.base.BaseActivity
 import de.digitaldealer.cardsplease.ui.main.dealer_device.LockScreenOrientation
@@ -61,7 +61,7 @@ fun DefaultApp() {
                     StartScreen(navController = navController)
                 }
                 composable(DEALER_DEVICE_START_SCREEN) {
-                    LockScreenOrientation(orientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE)
+                    LockScreenOrientation(orientation = ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR)
                 }
                 composable(PLAYER_DEVICE_START_SCREEN) {
                     PlayerStartScreen(navController = navController)
@@ -82,14 +82,6 @@ fun DefaultApp() {
                             type = PlayerNavParamType()
                         }
                     )
-//                    arguments = listOf(
-//                        navArgument("deckId") {
-//                            type = NavType.StringType
-//                        },
-//                        navArgument("nickName") {
-//                            type = NavType.StringType
-//                        },
-//                    )
                 ) {
                     PlayerHandScreen()
                 }

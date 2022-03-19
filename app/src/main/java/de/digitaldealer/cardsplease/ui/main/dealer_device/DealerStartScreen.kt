@@ -27,7 +27,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import de.digitaldealer.cardsplease.R
 import de.digitaldealer.cardsplease.domain.model.Card
 import de.digitaldealer.cardsplease.ui.main.composables.AddPlayerDialog
-import de.digitaldealer.cardsplease.ui.main.composables.PokerCard
+import de.digitaldealer.cardsplease.ui.main.composables.CardBack
+import de.digitaldealer.cardsplease.ui.main.composables.CardFace
 
 @Composable
 fun DealerStartScreen(modifier: Modifier = Modifier) {
@@ -69,10 +70,10 @@ fun DealerStartScreen(modifier: Modifier = Modifier) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Box {
-                    PokerCard(card = null, elevation = 2.dp)
-                    PokerCard(card = null, elevation = 4.dp)
-                    PokerCard(card = null, elevation = 6.dp)
-                    PokerCard(card = null, elevation = 8.dp)
+                    CardBack(elevation = 2.dp)
+                    CardBack(elevation = 4.dp)
+                    CardBack(elevation = 6.dp)
+                    CardBack(elevation = 8.dp)
                 }
                 Spacer(modifier = Modifier.width(16.dp))
                 flop(flop)
@@ -108,18 +109,6 @@ fun DealerStartScreen(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun PlayerSnackbar(player: String) {
-    Snackbar(
-        action = {
-            Button(onClick = {}) {
-                Text("MyAction")
-            }
-        },
-        modifier = Modifier.padding(8.dp)
-    ) { Text(text = "$player has joined") }
-}
-
-@Composable
 fun flop(flop: List<Card?>) {
     Column {
         Text(text = "Flop", textAlign = TextAlign.Center)
@@ -127,7 +116,7 @@ fun flop(flop: List<Card?>) {
         LazyRow {
             itemsIndexed(flop) { index, card ->
                 card?.let {
-                    PokerCard(card = card)
+                    CardFace(card = card)
                     Spacer(modifier = Modifier.width(8.dp))
                 }
             }
@@ -143,7 +132,7 @@ fun turn(turn: List<Card?>) {
         LazyRow {
             itemsIndexed(turn) { index, card ->
                 card?.let {
-                    PokerCard(card = card)
+                    CardFace(card = card)
                     Spacer(modifier = Modifier.width(8.dp))
                 }
             }
@@ -159,7 +148,7 @@ fun river(river: List<Card?>) {
         LazyRow {
             itemsIndexed(river) { index, card ->
                 card?.let {
-                    PokerCard(card = card)
+                    CardFace(card = card)
                 }
             }
         }
