@@ -43,7 +43,7 @@ fun DealerStartScreen(modifier: Modifier = Modifier) {
     val gamePhase by viewModel.gamePhase.observeAsState()
     val addPlayerDeckId by viewModel.addPlayerWithDeckId.observeAsState()
     val deck by viewModel.deck.observeAsState()
-    val players by viewModel.joinedPlayers.observeAsState()
+    val joinedPlayers by viewModel.joinedPlayers.observeAsState()
     val playerCountError by viewModel.onPlayerCountError.observeAsState()
 
     if (addPlayerDeckId != null) AddPlayerDialog(viewModel = viewModel, deckId = addPlayerDeckId?.deckId ?: "", tableName = addPlayerDeckId?.tableName ?: "")
@@ -107,17 +107,17 @@ fun DealerStartScreen(modifier: Modifier = Modifier) {
                             ) {
                                 Text(text = phase.buttonText)
                             }
-                        }
-                        if (flop.any { card -> card != null }) {
-                            Spacer(modifier = Modifier.height(16.dp))
-                            FloatingActionButton(onClick = { viewModel.reset() }) {
-                                Text(text = "Reset")
+                            if (phase != GamePhase.DEAL) {
+                                Spacer(modifier = Modifier.height(16.dp))
+                                FloatingActionButton(onClick = { viewModel.reset() }) {
+                                    Text(text = "Reset")
+                                }
                             }
                         }
                     }
                     Spacer(modifier = Modifier.width(32.dp))
-                    players.let {
-                        if (it == null || it.size <= 10) {
+                    joinedPlayers.let { players ->
+                        if (players == null || players.size < 10) {
                             FloatingActionButton(onClick = {
                                 viewModel.addPlayer()
                             }) {
@@ -127,7 +127,7 @@ fun DealerStartScreen(modifier: Modifier = Modifier) {
                     }
                 }
                 Spacer(modifier = Modifier.height(8.dp))
-                Text(text = "Spieler: ${players?.count()}")
+                Text(text = "Spieler: ${joinedPlayers?.count()}")
             }
         }
     }

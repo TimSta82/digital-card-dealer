@@ -12,4 +12,6 @@ data class Hand(
         one = Card(),
         two = Card()
     )
+
+    fun isValid(): Boolean = one.value.isNotBlank() && two.value.isNotBlank()
 }

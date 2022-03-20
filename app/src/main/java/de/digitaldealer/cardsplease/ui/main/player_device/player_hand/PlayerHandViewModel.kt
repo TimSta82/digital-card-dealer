@@ -23,6 +23,9 @@ class PlayerHandViewModel(val savedState: SavedStateHandle) : ViewModel(), KoinC
     private val _player = MutableStateFlow(savedState.get<Player>("player") ?: Player())
     val player = _player.asStateFlow()
 
+//    private val _currentHand = MutableStateFlow(Hand())
+//    val currentHand = _currentHand.asStateFlow()
+
     private val _currentHand = MutableStateFlow(Hand())
     val currentHand = _currentHand.asStateFlow()
 
@@ -42,7 +45,7 @@ class PlayerHandViewModel(val savedState: SavedStateHandle) : ViewModel(), KoinC
 
     fun onStart() {
         playerHandListener?.remove()
-        playerHandListener = gamesCollectionRef.document(_player.value.deckId).collection(COLLECTION_PLAYERS).document(_player.value.nickName).collection(COLLECTION_HAND_CARDS)
+        playerHandListener = gamesCollectionRef.document(_player.value.deckId).collection(COLLECTION_PLAYERS).document(_player.value.uuid).collection(COLLECTION_HAND_CARDS)
             .addSnapshotListener { snapshot, error ->
                 if (snapshot?.isEmpty?.not() == true) {
                     val hands = ArrayList<Hand>()
@@ -52,9 +55,13 @@ class PlayerHandViewModel(val savedState: SavedStateHandle) : ViewModel(), KoinC
                     }
                     Logger.debug("currentHand: $hands")
                     _currentHand.value = hands.first()
+//                    _currentHand.value = hands.first()
+                } else {
+                    _currentHand.value = Hand()
                 }
                 if (error != null) {
                     Logger.debug("Loading player failed")
+                    _currentHand.value = Hand()
                     return@addSnapshotListener
                 }
             }

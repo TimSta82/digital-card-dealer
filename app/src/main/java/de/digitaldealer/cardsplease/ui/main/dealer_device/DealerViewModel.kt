@@ -6,10 +6,7 @@ import androidx.lifecycle.ViewModel
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.ktx.toObject
-import de.digitaldealer.cardsplease.COLLECTION_GAMES
-import de.digitaldealer.cardsplease.COLLECTION_HAND_CARDS
-import de.digitaldealer.cardsplease.COLLECTION_PLAYERS
-import de.digitaldealer.cardsplease.R
+import de.digitaldealer.cardsplease.*
 import de.digitaldealer.cardsplease.core.utils.Logger
 import de.digitaldealer.cardsplease.domain.model.Card
 import de.digitaldealer.cardsplease.domain.model.Deck
@@ -199,7 +196,7 @@ class DealerViewModel : ViewModel(), KoinComponent {
             val currentHand = Hand(one = remainingCards.first(), two = remainingCards.second())
             remainingCards = remainingCards.drop(2)
             checkIfDealingCardsToPlayersHasAccomplished(remainingCards)
-            gamesCollectionRef.document(player.deckId).collection(COLLECTION_PLAYERS).document(player.nickName).collection(COLLECTION_HAND_CARDS).document("currentHand").set(currentHand)
+            gamesCollectionRef.document(player.deckId).collection(COLLECTION_PLAYERS).document(player.uuid).collection(COLLECTION_HAND_CARDS).document("currentHand").set(currentHand)
                 .addOnSuccessListener {
                     Logger.debug("Spieler ${player.nickName} sollte jetzt ne hand haben")
                 }
@@ -229,17 +226,22 @@ class DealerViewModel : ViewModel(), KoinComponent {
 
     private fun clearCards() {
         _deck.value?.let { deck1 ->
-            gamesCollectionRef.document(deck1.deckId).collection(COLLECTION_PLAYERS).document().collection(COLLECTION_HAND_CARDS).document().delete()
-                .addOnSuccessListener {
-                    Logger.debug("delete all player hand cards")
-                    _flop.postValue(emptyList())
-                    _turn.postValue(emptyList())
-                    _river.postValue(emptyList())
-                    remainingCards = emptyList()
+            _joinedPlayers.value?.let { players ->
+                players.forEach { player ->
+                    gamesCollectionRef.document(deck1.deckId).collection(COLLECTION_PLAYERS).document(player.uuid).collection(COLLECTION_HAND_CARDS).document(DOCUMENT_CURRENT_HAND).delete()
+                        .addOnSuccessListener {
+                            Logger.debug("currentHand of player ${player.nickName} is deleted")
+                        }
+                        .addOnFailureListener {
+                            Logger.debug("failed deleting all player hand cards")
+                        }
                 }
-                .addOnFailureListener {
-                    Logger.debug("failed deleting all player hand cards")
-                }
+            }
+            Logger.debug("delete all player hand cards")
+            _flop.postValue(emptyList())
+            _turn.postValue(emptyList())
+            _river.postValue(emptyList())
+            remainingCards = emptyList()
         }
     }
 

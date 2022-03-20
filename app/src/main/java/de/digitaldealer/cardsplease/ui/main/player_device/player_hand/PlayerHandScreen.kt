@@ -45,14 +45,15 @@ fun PlayerHandScreen(modifier: Modifier = Modifier, navController: NavController
     LaunchedEffect(key1 = hand.one.code != "") {
         viewModel.onStart()
     }
+
     DisposableEffect(key1 = Unit) {
         onDispose { viewModel.onStop() }
     }
 
     LaunchedEffect(key1 = Unit) {
         viewModel.onLeaveTable.collectLatest {
-        showPlayerLeaveDialog.value = false
-        navController.navigate(route = NavigationRoutes.START_SCREEN)
+            showPlayerLeaveDialog.value = false
+            navController.navigate(route = NavigationRoutes.START_SCREEN)
         }
     }
 
@@ -63,7 +64,8 @@ fun PlayerHandScreen(modifier: Modifier = Modifier, navController: NavController
         sheetContent = {
             HandBottomSheet(hand = hand)
         },
-        sheetPeekHeight = 40.dp
+        sheetPeekHeight = if (hand.isValid()) 40.dp else 0.dp,
+        sheetShape = MaterialTheme.shapes.small
     ) {
         HandContent(
             player = player,
@@ -105,33 +107,37 @@ fun HandContent(
                 }
             }
             Spacer(modifier = Modifier.height(16.dp))
-            Row(
-                modifier = Modifier.padding(top = 24.dp),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                var cardOneState by remember {
-                    mutableStateOf(CardFace.Front)
+            if (hand.isValid()) {
+                Row(
+                    modifier = Modifier.padding(top = 24.dp),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    var cardOneState by remember {
+                        mutableStateOf(CardFace.Front)
+                    }
+                    FlipCard(
+                        card = hand.one,
+                        cardFace = cardOneState,
+                        onClick = {
+                            cardOneState = it.next
+                        },
+                        axis = RotationAxis.AxisY,
+                    )
+                    Spacer(modifier = Modifier.width(16.dp))
+                    var cardTwoState by remember {
+                        mutableStateOf(CardFace.Front)
+                    }
+                    FlipCard(
+                        card = hand.two,
+                        cardFace = cardTwoState,
+                        onClick = {
+                            cardTwoState = it.next
+                        },
+                        axis = RotationAxis.AxisY
+                    )
                 }
-                FlipCard(
-                    card = hand.one,
-                    cardFace = cardOneState,
-                    onClick = {
-                        cardOneState = it.next
-                    },
-                    axis = RotationAxis.AxisY,
-                )
-                Spacer(modifier = Modifier.width(16.dp))
-                var cardTwoState by remember {
-                    mutableStateOf(CardFace.Front)
-                }
-                FlipCard(
-                    card = hand.two,
-                    cardFace = cardTwoState,
-                    onClick = {
-                        cardTwoState = it.next
-                    },
-                    axis = RotationAxis.AxisY
-                )
+            } else {
+                Text(text = "Du hast noch keine Karten erhalten")
             }
         }
     }
