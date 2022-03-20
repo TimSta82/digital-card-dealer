@@ -10,38 +10,39 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.unit.dp
 import de.digitaldealer.cardsplease.ui.main.dealer_device.DealerViewModel
+import de.digitaldealer.cardsplease.ui.theme.one_GU
 import net.glxn.qrgen.android.QRCode
 
 @Composable
 fun AddPlayerDialog(
     modifier: Modifier = Modifier,
     viewModel: DealerViewModel,
-    addPlayerDeckId: String?
+    deckId: String,
+    tableName: String
 ) {
     AlertDialog(
         onDismissRequest = {
             viewModel.resetPlayerDeckId()
         },
         text = {
-            addPlayerDeckId?.let { deckId ->
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(text = "SpielId: $deckId")
-                    Image(
-                        bitmap = getQrCodeAsBitmap(deckId = deckId),
-                        contentDescription = ""
-                    )
-                }
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(text = "Tisch: $tableName")
+                Spacer(modifier = Modifier.height(one_GU))
+                Text(text = "deckId: $deckId")
+                Image(
+                    bitmap = getQrCodeAsBitmap(deckId = deckId, tableName = tableName),
+                    contentDescription = ""
+                )
             }
         },
         buttons = {
             Row(
-                modifier = Modifier.padding(all = 8.dp),
+                modifier = Modifier.padding(all = one_GU),
                 horizontalArrangement = Arrangement.Center
             ) {
                 Button(
@@ -56,7 +57,8 @@ fun AddPlayerDialog(
 }
 
 @Composable
-private fun getQrCodeAsBitmap(deckId: String): ImageBitmap {
-    val bitmap = QRCode.from(deckId).withSize(400, 400).bitmap().asImageBitmap()
+private fun getQrCodeAsBitmap(deckId: String, tableName: String): ImageBitmap {
+    val combinedData = "$deckId:::$tableName"
+    val bitmap = QRCode.from(combinedData).withSize(400, 400).bitmap().asImageBitmap()
     return bitmap
 }

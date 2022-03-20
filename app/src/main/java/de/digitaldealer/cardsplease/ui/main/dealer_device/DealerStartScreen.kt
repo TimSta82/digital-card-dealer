@@ -1,5 +1,6 @@
 package de.digitaldealer.cardsplease.ui.main.dealer_device
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
@@ -8,15 +9,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material.FloatingActionButton
-import androidx.compose.material.Icon
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -30,10 +26,16 @@ import de.digitaldealer.cardsplease.domain.model.Card
 import de.digitaldealer.cardsplease.ui.main.composables.AddPlayerDialog
 import de.digitaldealer.cardsplease.ui.main.composables.CardBack
 import de.digitaldealer.cardsplease.ui.main.composables.CardFace
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
+@SuppressLint("CoroutineCreationDuringComposition")
 @Composable
 fun DealerStartScreen(modifier: Modifier = Modifier) {
     val viewModel: DealerViewModel = viewModel()
+
+    val scaffoldState = rememberScaffoldState() // this contains the `SnackbarHostState`
+    val coroutineScope = rememberCoroutineScope()
 
     val flop by viewModel.flop.observeAsState(emptyList())
     val turn by viewModel.turn.observeAsState(emptyList())
@@ -44,7 +46,17 @@ fun DealerStartScreen(modifier: Modifier = Modifier) {
     val players by viewModel.joinedPlayers.observeAsState()
     val playerCountError by viewModel.onPlayerCountError.observeAsState()
 
-    if (addPlayerDeckId != null) AddPlayerDialog(viewModel = viewModel, addPlayerDeckId = addPlayerDeckId)
+    if (addPlayerDeckId != null) AddPlayerDialog(viewModel = viewModel, deckId = addPlayerDeckId?.deckId ?: "", tableName = addPlayerDeckId?.tableName ?: "")
+
+    LaunchedEffect(key1 = Unit) {
+        launch {
+            viewModel.onDealingCardsToPlayersAccomplished.collectLatest {
+                scaffoldState.snackbarHostState.showSnackbar(
+                    message = "Karten wurden ausgeteilt",
+                )
+            }
+        }
+    }
 
     LaunchedEffect(key1 = deck?.deckId) {
         deck?.let {
@@ -56,61 +68,67 @@ fun DealerStartScreen(modifier: Modifier = Modifier) {
         onDispose { viewModel.onStop() }
     }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(color = colorResource(id = R.color.background)),
-        contentAlignment = Alignment.Center
+    Scaffold(
+        modifier = Modifier,
+        scaffoldState = scaffoldState // attaching `scaffoldState` to the `Scaffold`
     ) {
-        Column {
-            if (deck != null) Text(text = "SpielId: ${deck?.deckId}")
-            Spacer(modifier = Modifier.height(8.dp))
-            Row(
-                modifier = Modifier.padding(vertical = 40.dp),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Box {
-                    CardBack(elevation = 2.dp)
-                    CardBack(elevation = 4.dp)
-                    CardBack(elevation = 6.dp)
-                    CardBack(elevation = 8.dp)
-                }
-                Spacer(modifier = Modifier.width(16.dp))
-                Flop(flop)
-                Spacer(modifier = Modifier.width(8.dp))
-                Turn(turn)
-                Spacer(modifier = Modifier.width(8.dp))
-                River(river)
-                Spacer(modifier = Modifier.width(32.dp))
-                Column {
-                    gamePhase?.let { phase ->
-                        FloatingActionButton(
-                            onClick = { viewModel.deal(gamePhase = phase) },
-                        ) {
-                            Text(text = phase.buttonText)
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(color = colorResource(id = R.color.background)),
+            contentAlignment = Alignment.Center
+        ) {
+            Column {
+                if (deck != null) Text(text = "Tisch: ${deck?.tableName}")
+                if (deck != null) Text(text = "SpielId: ${deck?.deckId}")
+                Spacer(modifier = Modifier.height(8.dp))
+                Row(
+                    modifier = Modifier.padding(vertical = 40.dp),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box {
+                        CardBack(elevation = 2.dp)
+                        CardBack(elevation = 4.dp)
+                        CardBack(elevation = 6.dp)
+                        CardBack(elevation = 8.dp)
+                    }
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Flop(flop)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Turn(turn)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    River(river)
+                    Spacer(modifier = Modifier.width(32.dp))
+                    Column {
+                        gamePhase?.let { phase ->
+                            FloatingActionButton(
+                                onClick = { viewModel.deal(gamePhase = phase) },
+                            ) {
+                                Text(text = phase.buttonText)
+                            }
+                        }
+                        if (flop.any { card -> card != null }) {
+                            Spacer(modifier = Modifier.height(16.dp))
+                            FloatingActionButton(onClick = { viewModel.reset() }) {
+                                Text(text = "Reset")
+                            }
                         }
                     }
-                    if (flop.any { card -> card != null }) {
-                        Spacer(modifier = Modifier.height(16.dp))
-                        FloatingActionButton(onClick = { viewModel.reset() }) {
-                            Text(text = "Reset")
+                    Spacer(modifier = Modifier.width(32.dp))
+                    players.let {
+                        if (it == null || it.size <= 10) {
+                            FloatingActionButton(onClick = {
+                                viewModel.addPlayer()
+                            }) {
+                                Icon(Icons.Filled.Add, "")
+                            }
                         }
                     }
                 }
-                Spacer(modifier = Modifier.width(32.dp))
-                players.let {
-                    if (it == null || it.size <= 10) {
-                        FloatingActionButton(onClick = {
-                            viewModel.addPlayer()
-                        }) {
-                            Icon(Icons.Filled.Add, "")
-                        }
-                    }
-                }
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(text = "Spieler: ${players?.count()}")
             }
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(text = "Spieler: ${players?.count()}")
         }
     }
 }

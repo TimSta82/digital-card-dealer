@@ -60,7 +60,7 @@ class PlayerHandViewModel(val savedState: SavedStateHandle) : ViewModel(), KoinC
     }
 
     fun disconnectPlayer() {
-        gamesCollectionRef.document(_player.value.deckId).collection(COLLECTION_PLAYERS).document(_player.value.nickName).delete()
+        gamesCollectionRef.document(_player.value.deckId).collection(COLLECTION_PLAYERS).document(_player.value.uuid).delete()
             .addOnSuccessListener {
                 Logger.debug("Tschüss ${_player.value.nickName}")
                 _onLeaveTable.value = true

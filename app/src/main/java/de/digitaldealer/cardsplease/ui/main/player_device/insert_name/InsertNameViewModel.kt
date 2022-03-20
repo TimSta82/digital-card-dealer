@@ -6,11 +6,13 @@ import de.digitaldealer.cardsplease.COLLECTION_GAMES
 import de.digitaldealer.cardsplease.COLLECTION_PLAYERS
 import de.digitaldealer.cardsplease.core.utils.Logger
 import de.digitaldealer.cardsplease.domain.model.Player
+import de.digitaldealer.cardsplease.extensions.second
 import org.koin.core.component.KoinComponent
+import java.util.*
 
 class InsertNameViewModel(val savedState: SavedStateHandle) : ViewModel(), KoinComponent {
 
-    val deckId = liveData { emit(savedState.get<String>("deckId") ?: "-1") }
+    val deckIdWithTableName = liveData { emit(getDeckIdAndTableName(savedState.get<String>("deckId") ?: "-1")) }
 
     private val db = FirebaseFirestore.getInstance()
     private val gamesCollectionRef = db.collection(COLLECTION_GAMES)
@@ -19,12 +21,14 @@ class InsertNameViewModel(val savedState: SavedStateHandle) : ViewModel(), KoinC
     val player: LiveData<Player> = _player
 
     fun submitToGame(nickName: String) {
-        loadGameByDeckIdFromFireStore(deckId = savedState.get<String>("deckId") ?: "-1", nickName = nickName)
+        deckIdWithTableName.value?.let { deckTable ->
+            val player = Player(deckId = deckTable.first, tableName = deckTable.second, nickName = nickName, uuid = UUID.randomUUID().toString())
+            loadGameByDeckIdFromFireStore(player = player)
+        }
     }
 
-    private fun loadGameByDeckIdFromFireStore(deckId: String, nickName: String) {
-        val player = Player(deckId = deckId, nickName = nickName)
-        gamesCollectionRef.document(deckId).collection(COLLECTION_PLAYERS).document(nickName).set(player)
+    private fun loadGameByDeckIdFromFireStore(player: Player) {
+        gamesCollectionRef.document(player.deckId).collection(COLLECTION_PLAYERS).document(player.uuid).set(player)
             .addOnSuccessListener {
                 Logger.debug("Bingo, Spieler wurde dem Game hinzugefügt")
                 _player.value = player
@@ -32,5 +36,12 @@ class InsertNameViewModel(val savedState: SavedStateHandle) : ViewModel(), KoinC
             .addOnFailureListener {
                 Logger.debug("Zonk, spieler hinzufügen hat nicht geklappt")
             }
+    }
+
+    private fun getDeckIdAndTableName(navArgument: String): Pair<String, String> {
+        val codes = navArgument.split(":::")
+        val deckId = codes.first()
+        val tableName = codes.second()
+        return Pair(deckId, tableName)
     }
 }

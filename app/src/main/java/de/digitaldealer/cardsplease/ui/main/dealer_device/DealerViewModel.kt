@@ -22,6 +22,8 @@ import de.digitaldealer.cardsplease.domain.usecases.ShuffleDeckUseCase
 import de.digitaldealer.cardsplease.extensions.second
 import de.digitaldealer.cardsplease.ui.extensions.launch
 import de.digitaldealer.cardsplease.ui.util.SingleLiveEvent
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -43,8 +45,8 @@ class DealerViewModel : ViewModel(), KoinComponent {
     private val _river = MutableLiveData<List<Card?>>()
     val river: LiveData<List<Card?>> = _river
 
-    private val _addPlayerWithDeckId = MutableLiveData<String?>()
-    val addPlayerWithDeckId: LiveData<String?> = _addPlayerWithDeckId
+    private val _addPlayerWithDeckId = MutableLiveData<Deck?>()
+    val addPlayerWithDeckId: LiveData<Deck?> = _addPlayerWithDeckId
 
     private val _onDeckLoadingFailure = SingleLiveEvent<Any>()
     val onDeckLoadingFailure: LiveData<Any> = _onDeckLoadingFailure
@@ -64,19 +66,23 @@ class DealerViewModel : ViewModel(), KoinComponent {
     private val _onShuffleError = SingleLiveEvent<Any>()
     val onShuffleError: LiveData<Any> = _onShuffleError
 
-    private var deckId: String? = null
+    private val _onDealingCardsToPlayersAccomplished = MutableSharedFlow<Unit>()
+    val onDealingCardsToPlayersAccomplished = _onDealingCardsToPlayersAccomplished.asSharedFlow()
+
+    private val _onSwitchToStealthMode = MutableSharedFlow<Unit>()
+    val onSwitchToStealthMode = _onSwitchToStealthMode.asSharedFlow()
+
     private val db = FirebaseFirestore.getInstance()
     private val gamesCollectionRef = db.collection(COLLECTION_GAMES)
 
     private var playersListener: ListenerRegistration? = null
-    private var _remainingCards: List<Card> = emptyList()
+    private var remainingCards: List<Card> = emptyList()
 
     init {
         launch {
             when (val result = getNewDeckUseCase.call()) {
                 is BaseUseCase.UseCaseResult.Success -> {
                     result.resultObject?.let { deck ->
-                        deckId = deck.deckId
                         initGameWithDeckId(deck)
                     }
                 }
@@ -103,9 +109,9 @@ class DealerViewModel : ViewModel(), KoinComponent {
                     players.add(player)
                 }
                 Logger.debug("players: $players")
-                when {
-                    players.size in 2..10 -> _joinedPlayers.value = players
-                    players.size == 1 -> {
+                when (players.size) {
+                    in 2..10 -> _joinedPlayers.value = players
+                    1 -> {
                         _joinedPlayers.value = players
                         _onPlayerCountError.value = PlayerCountError.NOT_ENOUGH
                         Logger.debug("Not enough players yet")
@@ -137,10 +143,10 @@ class DealerViewModel : ViewModel(), KoinComponent {
 
     fun deal(gamePhase: GamePhase) {
         launch {
-            deckId?.let { deckId ->
-                if (deckId.isNotBlank())
+            _deck.value?.let { deck ->
+                if (deck.deckId.isNotBlank())
                     when (gamePhase) {
-                        GamePhase.DEAL -> shuffleCards(deckId, gamePhase)
+                        GamePhase.DEAL -> shuffleCards(deckId = deck.deckId, gamePhase)
                         else -> handleGamePhase(gamePhase)
                     }
             }
@@ -165,10 +171,10 @@ class DealerViewModel : ViewModel(), KoinComponent {
 
     private fun getCardsAndHandleRemainingCardStack(gamePhase: GamePhase): List<Card> {
         val dealAmount = if (gamePhase == GamePhase.FLOP) 3 else 1
-        val burnedRemainingCards = _remainingCards.drop(1)
+        val burnedRemainingCards = remainingCards.drop(1)
         val cardsToDeal = burnedRemainingCards.take(dealAmount)
         val postActionRemainingCards = burnedRemainingCards.drop(dealAmount)
-        _remainingCards = postActionRemainingCards
+        remainingCards = postActionRemainingCards
         return cardsToDeal
     }
 
@@ -186,21 +192,27 @@ class DealerViewModel : ViewModel(), KoinComponent {
     }
 
     private fun dealHandCardsToPlayers(players: List<Player>, cards: List<Card>) {
-        val remainingCards = cards
+        remainingCards = cards
         Logger.debug("cards.size: ${cards.size}")
         Logger.debug("players.size: ${players.size}")
         players.forEach { player ->
             val currentHand = Hand(one = remainingCards.first(), two = remainingCards.second())
+            remainingCards = remainingCards.drop(2)
+            checkIfDealingCardsToPlayersHasAccomplished(remainingCards)
             gamesCollectionRef.document(player.deckId).collection(COLLECTION_PLAYERS).document(player.nickName).collection(COLLECTION_HAND_CARDS).document("currentHand").set(currentHand)
                 .addOnSuccessListener {
                     Logger.debug("Spieler ${player.nickName} sollte jetzt ne hand haben")
-                    val remainingCards = remainingCards.drop(2)
-                    _remainingCards = remainingCards
                 }
                 .addOnFailureListener {
                     Logger.debug("Karten konnten nicht an Spieler ${player.nickName} verteilt werden")
                     return@addOnFailureListener
                 }
+        }
+    }
+
+    private fun checkIfDealingCardsToPlayersHasAccomplished(remainingCards: List<Card>) {
+        launch {
+            if (remainingCards.count() == 8) _onDealingCardsToPlayersAccomplished.emit(Unit)
         }
     }
 
@@ -216,14 +228,14 @@ class DealerViewModel : ViewModel(), KoinComponent {
     }
 
     private fun clearCards() {
-        deckId?.let {
-            gamesCollectionRef.document(it).collection(COLLECTION_PLAYERS).document().collection(COLLECTION_HAND_CARDS).document().delete()
+        _deck.value?.let { deck1 ->
+            gamesCollectionRef.document(deck1.deckId).collection(COLLECTION_PLAYERS).document().collection(COLLECTION_HAND_CARDS).document().delete()
                 .addOnSuccessListener {
                     Logger.debug("delete all player hand cards")
                     _flop.postValue(emptyList())
                     _turn.postValue(emptyList())
                     _river.postValue(emptyList())
-                    _remainingCards = emptyList()
+                    remainingCards = emptyList()
                 }
                 .addOnFailureListener {
                     Logger.debug("failed deleting all player hand cards")
@@ -232,7 +244,7 @@ class DealerViewModel : ViewModel(), KoinComponent {
     }
 
     fun addPlayer() {
-        deckId?.let {
+        _deck.value?.let {
             _addPlayerWithDeckId.value = it
         }
     }

@@ -36,7 +36,7 @@ fun InsertNameScreen(modifier: Modifier = Modifier, navController: NavController
 
     val viewModel: InsertNameViewModel = viewModel()
 
-    val deckId by viewModel.deckId.observeAsState()
+    val deckIdWithTableName by viewModel.deckIdWithTableName.observeAsState()
     val player by viewModel.player.observeAsState()
 
     LaunchedEffect(key1 = player != null) {
@@ -58,7 +58,10 @@ fun InsertNameScreen(modifier: Modifier = Modifier, navController: NavController
                 verticalArrangement = Arrangement.Top,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                deckId?.let { Text(text = "SpielId: $it", textAlign = TextAlign.Center) }
+                deckIdWithTableName?.let {
+                    Text(text = "Tisch: ${it.second}", textAlign = TextAlign.Center)
+                    Text(text = "SpielId: ${it.first}", textAlign = TextAlign.Center)
+                }
                 Spacer(modifier = Modifier.height(32.dp))
                 InsertNameTextFieldContainer(viewModel = viewModel)
             }

@@ -6,12 +6,14 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.ExitToApp
+import androidx.compose.material.icons.filled.LeaveBagsAtHome
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -25,6 +27,7 @@ import de.digitaldealer.cardsplease.ui.main.composables.CardFace
 import de.digitaldealer.cardsplease.ui.main.composables.FlipCard
 import de.digitaldealer.cardsplease.ui.main.composables.PlayerLeaveTableDialog
 import de.digitaldealer.cardsplease.ui.main.composables.RotationAxis
+import de.digitaldealer.cardsplease.ui.theme.one_GU
 
 @Composable
 fun PlayerHandScreen(modifier: Modifier = Modifier, navController: NavController) {
@@ -80,21 +83,26 @@ fun HandContent(
             .fillMaxSize()
             .background(color = colorResource(id = R.color.colorPrimaryDark)),
     ) {
-
         Column(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Row(
-                horizontalArrangement = Arrangement.End,
-                verticalAlignment = Alignment.Top
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(one_GU),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
+                Column {
+                    Text(text = "Tisch: ${player.tableName}", textAlign = TextAlign.Start)
+                    Text(text = "SpielId: ${player.deckId}", textAlign = TextAlign.Start)
+                    Text(text = "${player.nickName} ihm seine Hand", textAlign = TextAlign.Start)
+                }
                 FloatingActionButton(onClick = onDisconnectPlayer) {
-                    Icon(Icons.Filled.Delete, "")
+                    Icon(Icons.Filled.ExitToApp, "")
                 }
             }
-            Text(text = "SpielId: ${player.deckId}")
-            Text(text = "${player.nickName} ihm seine Hand")
             Spacer(modifier = Modifier.height(16.dp))
             Row(
                 modifier = Modifier.padding(top = 24.dp),
@@ -130,10 +138,16 @@ fun HandContent(
 
 @Composable
 fun HandBottomSheet(modifier: Modifier = Modifier, hand: Hand) {
-    Box(contentAlignment = Alignment.TopCenter, modifier = Modifier.padding(16.dp)) {
-        Row(horizontalArrangement = Arrangement.Center) {
+    Box(
+        contentAlignment = Alignment.TopCenter,
+        modifier = Modifier.padding(one_GU)
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.Center,
+            modifier = Modifier.fillMaxWidth()
+        ) {
             CardFace(card = hand.one)
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(one_GU))
             CardFace(card = hand.two)
         }
     }
