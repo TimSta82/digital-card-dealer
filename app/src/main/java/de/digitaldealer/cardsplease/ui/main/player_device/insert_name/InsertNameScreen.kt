@@ -3,15 +3,13 @@
 package de.digitaldealer.cardsplease.ui.main.player_device.insert_name
 
 import android.net.Uri
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.Button
-import androidx.compose.material.Card
-import androidx.compose.material.Text
-import androidx.compose.material.TextField
+import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
@@ -30,6 +28,9 @@ import androidx.navigation.NavController
 import com.google.gson.Gson
 import de.digitaldealer.cardsplease.R
 import de.digitaldealer.cardsplease.ui.NavigationRoutes.PLAYER_HAND_SCREEN
+import de.digitaldealer.cardsplease.ui.extensions.collectAsStateLifecycleAware
+import de.digitaldealer.cardsplease.ui.theme.half_GU
+import de.digitaldealer.cardsplease.ui.theme.two_GU
 
 @Composable
 fun InsertNameScreen(modifier: Modifier = Modifier, navController: NavController?) {
@@ -38,6 +39,7 @@ fun InsertNameScreen(modifier: Modifier = Modifier, navController: NavController
 
     val deckIdWithTableName by viewModel.deckIdWithTableName.observeAsState()
     val player by viewModel.player.observeAsState()
+    val isLoading by viewModel.isLoading.collectAsStateLifecycleAware()
 
     LaunchedEffect(key1 = player != null) {
         player?.let {
@@ -52,18 +54,24 @@ fun InsertNameScreen(modifier: Modifier = Modifier, navController: NavController
             .background(color = colorResource(id = R.color.colorPrimaryDark)),
         contentAlignment = Alignment.Center
     ) {
-        Card(elevation = 8.dp) {
-            Column(
-                modifier = Modifier.padding(top = 24.dp),
-                verticalArrangement = Arrangement.Top,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                deckIdWithTableName?.let {
-                    Text(text = "Tisch: ${it.second}", textAlign = TextAlign.Center)
-                    Text(text = "SpielId: ${it.first}", textAlign = TextAlign.Center)
+        if (isLoading) {
+//            AnimatedVisibility(visible = isLoading) {
+                CircularProgressIndicator(modifier = Modifier.padding(horizontal = two_GU, vertical = two_GU + half_GU))
+//            }
+        } else {
+            Card(elevation = 8.dp) {
+                Column(
+                    modifier = Modifier.padding(top = 24.dp),
+                    verticalArrangement = Arrangement.Top,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    deckIdWithTableName?.let {
+                        Text(text = "Tisch: ${it.second}", textAlign = TextAlign.Center)
+                        Text(text = "SpielId: ${it.first}", textAlign = TextAlign.Center)
+                    }
+                    Spacer(modifier = Modifier.height(32.dp))
+                    InsertNameTextFieldContainer(viewModel = viewModel)
                 }
-                Spacer(modifier = Modifier.height(32.dp))
-                InsertNameTextFieldContainer(viewModel = viewModel)
             }
         }
     }

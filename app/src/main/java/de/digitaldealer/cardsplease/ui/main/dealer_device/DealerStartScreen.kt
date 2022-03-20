@@ -75,7 +75,7 @@ fun DealerStartScreen(modifier: Modifier = Modifier) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(color = colorResource(id = R.color.background)),
+                .background(color = colorResource(id = R.color.dealer_background)),
             contentAlignment = Alignment.Center
         ) {
             Column {

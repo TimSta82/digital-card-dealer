@@ -7,9 +7,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExitToApp
-import androidx.compose.material.icons.filled.LeaveBagsAtHome
 import androidx.compose.runtime.*
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.colorResource
@@ -28,6 +26,7 @@ import de.digitaldealer.cardsplease.ui.main.composables.FlipCard
 import de.digitaldealer.cardsplease.ui.main.composables.PlayerLeaveTableDialog
 import de.digitaldealer.cardsplease.ui.main.composables.RotationAxis
 import de.digitaldealer.cardsplease.ui.theme.one_GU
+import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun PlayerHandScreen(modifier: Modifier = Modifier, navController: NavController) {
@@ -42,7 +41,6 @@ fun PlayerHandScreen(modifier: Modifier = Modifier, navController: NavController
 
     val player by viewModel.player.collectAsStateLifecycleAware()
     val hand by viewModel.currentHand.collectAsStateLifecycleAware()
-    val onLeaveTable by viewModel.onLeaveTable.observeAsState()
 
     LaunchedEffect(key1 = hand.one.code != "") {
         viewModel.onStart()
@@ -50,12 +48,15 @@ fun PlayerHandScreen(modifier: Modifier = Modifier, navController: NavController
     DisposableEffect(key1 = Unit) {
         onDispose { viewModel.onStop() }
     }
-    if (showPlayerLeaveDialog.value) PlayerLeaveTableDialog(onDismiss = { showPlayerLeaveDialog.value = false }, onDisconnectPlayer = viewModel::disconnectPlayer)
 
-    if (onLeaveTable == true) {
+    LaunchedEffect(key1 = Unit) {
+        viewModel.onLeaveTable.collectLatest {
         showPlayerLeaveDialog.value = false
         navController.navigate(route = NavigationRoutes.START_SCREEN)
+        }
     }
+
+    if (showPlayerLeaveDialog.value) PlayerLeaveTableDialog(onDismiss = { showPlayerLeaveDialog.value = false }, onDisconnectPlayer = viewModel::disconnectPlayer)
 
     BottomSheetScaffold(
         scaffoldState = bottomSheetScaffoldState,

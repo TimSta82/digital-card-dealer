@@ -4,7 +4,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 // GU = Grid Unit
-val zero_GU: Dp = 4.dp
+val half_GU: Dp = 4.dp
 val one_GU: Dp = 8.dp
 val two_GU: Dp = 16.dp
 val three_GU: Dp = 24.dp
