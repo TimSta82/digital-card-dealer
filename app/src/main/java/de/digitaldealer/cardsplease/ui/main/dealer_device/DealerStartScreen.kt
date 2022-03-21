@@ -5,6 +5,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
 import android.content.pm.ActivityInfo
+import android.media.MediaPlayer
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
@@ -36,6 +37,7 @@ fun DealerStartScreen(modifier: Modifier = Modifier) {
 
     val scaffoldState = rememberScaffoldState() // this contains the `SnackbarHostState`
     val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
 
     val flop by viewModel.flop.observeAsState(emptyList())
     val turn by viewModel.turn.observeAsState(emptyList())
@@ -54,6 +56,14 @@ fun DealerStartScreen(modifier: Modifier = Modifier) {
                 scaffoldState.snackbarHostState.showSnackbar(
                     message = "Karten wurden ausgeteilt",
                 )
+            }
+        }
+    }
+
+    LaunchedEffect(key1 = Unit) {
+        launch {
+            viewModel.onPlaySound.collectLatest {
+                MediaPlayer.create(context, R.raw.deal_cards_sound).start()
             }
         }
     }

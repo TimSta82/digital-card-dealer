@@ -66,8 +66,8 @@ class DealerViewModel : ViewModel(), KoinComponent {
     private val _onDealingCardsToPlayersAccomplished = MutableSharedFlow<Unit>()
     val onDealingCardsToPlayersAccomplished = _onDealingCardsToPlayersAccomplished.asSharedFlow()
 
-    private val _onSwitchToStealthMode = MutableSharedFlow<Unit>()
-    val onSwitchToStealthMode = _onSwitchToStealthMode.asSharedFlow()
+    private val _onPlaySound = MutableSharedFlow<Unit>()
+    val onPlaySound = _onPlaySound.asSharedFlow()
 
     private val db = FirebaseFirestore.getInstance()
     private val gamesCollectionRef = db.collection(COLLECTION_GAMES)
@@ -192,13 +192,14 @@ class DealerViewModel : ViewModel(), KoinComponent {
         remainingCards = cards
         Logger.debug("cards.size: ${cards.size}")
         Logger.debug("players.size: ${players.size}")
-        players.forEach { player ->
+        players.forEachIndexed { index, player ->
             val currentHand = Hand(one = remainingCards.first(), two = remainingCards.second())
             remainingCards = remainingCards.drop(2)
             checkIfDealingCardsToPlayersHasAccomplished(remainingCards)
             gamesCollectionRef.document(player.deckId).collection(COLLECTION_PLAYERS).document(player.uuid).collection(COLLECTION_HAND_CARDS).document("currentHand").set(currentHand)
                 .addOnSuccessListener {
                     Logger.debug("Spieler ${player.nickName} sollte jetzt ne hand haben")
+                    if (index == players.size - 1) launch { _onPlaySound.emit(Unit) }
                 }
                 .addOnFailureListener {
                     Logger.debug("Karten konnten nicht an Spieler ${player.nickName} verteilt werden")
