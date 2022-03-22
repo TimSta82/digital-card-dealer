@@ -31,30 +31,19 @@ class MainActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            DefaultApp()
+            CardsPleaseApp()
         }
     }
 }
 
 @Composable
-fun DefaultApp() {
+fun CardsPleaseApp() {
     val scaffoldState = rememberScaffoldState()
     val navController = rememberNavController()
 
     DefaultTheme {
         Scaffold(
             scaffoldState = scaffoldState,
-//            topBar = {
-//                TopAppBar(
-//                    title = { Text(stringResource(id = R.string.app_name)) },
-//                    contentColor = Color.White,
-//                    navigationIcon = {
-//                        IconButton(onClick = {}) {
-//                            Icon(painter = painterResource(id = R.drawable.ic_baseline_android_24), contentDescription = null, tint = Color.White)
-//                        }
-//                    }
-//                )
-//            },
         ) {
             NavHost(navController = navController, startDestination = START_SCREEN) {
                 composable(START_SCREEN) {

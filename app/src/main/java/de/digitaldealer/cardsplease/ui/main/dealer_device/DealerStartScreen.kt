@@ -13,20 +13,26 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ExitToApp
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.lifecycle.viewmodel.compose.viewModel
 import de.digitaldealer.cardsplease.R
 import de.digitaldealer.cardsplease.domain.model.Card
 import de.digitaldealer.cardsplease.ui.main.composables.AddPlayerDialog
 import de.digitaldealer.cardsplease.ui.main.composables.CardBack
 import de.digitaldealer.cardsplease.ui.main.composables.CardFace
+import de.digitaldealer.cardsplease.ui.main.composables.CustomText
+import de.digitaldealer.cardsplease.ui.theme.fourteen_GU
+import de.digitaldealer.cardsplease.ui.theme.one_GU
+import de.digitaldealer.cardsplease.ui.theme.two_GU
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -39,13 +45,10 @@ fun DealerStartScreen(modifier: Modifier = Modifier) {
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
 
-    val flop by viewModel.flop.observeAsState(emptyList())
-    val turn by viewModel.turn.observeAsState(emptyList())
-    val river by viewModel.river.observeAsState(emptyList())
-    val gamePhase by viewModel.gamePhase.observeAsState()
+//    val gamePhase by viewModel.gamePhase.observeAsState()
     val addPlayerDeckId by viewModel.addPlayerWithDeckId.observeAsState()
     val deck by viewModel.deck.observeAsState()
-    val joinedPlayers by viewModel.joinedPlayers.observeAsState()
+//    val joinedPlayers by viewModel.joinedPlayers.observeAsState()
     val playerCountError by viewModel.onPlayerCountError.observeAsState()
 
     if (addPlayerDeckId != null) AddPlayerDialog(viewModel = viewModel, deckId = addPlayerDeckId?.deckId ?: "", tableName = addPlayerDeckId?.tableName ?: "")
@@ -82,66 +85,102 @@ fun DealerStartScreen(modifier: Modifier = Modifier) {
         modifier = Modifier,
         scaffoldState = scaffoldState // attaching `scaffoldState` to the `Scaffold`
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(color = colorResource(id = R.color.dealer_background)),
-            contentAlignment = Alignment.Center
+        DealerContent(viewModel)
+    }
+}
+
+@Composable
+fun DealerContent(viewModel: DealerViewModel) {
+    val deck by viewModel.deck.observeAsState()
+    val gamePhase by viewModel.gamePhase.observeAsState()
+    val joinedPlayers by viewModel.joinedPlayers.observeAsState()
+    val flop by viewModel.flop.observeAsState(emptyList())
+    val turn by viewModel.turn.observeAsState(emptyList())
+    val river by viewModel.river.observeAsState(emptyList())
+
+    ConstraintLayout(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(color = colorResource(id = R.color.dealer_background))
+            .padding(two_GU)
+    ) {
+        val (infoButton, tableInfo, quitButton, board, dealerButton, playerInfo, addPlayerButton, resetButton) = createRefs()
+        FloatingActionButton(onClick = { /*TODO*/ }, modifier = Modifier.constrainAs(infoButton) {
+            top.linkTo(parent.top)
+            start.linkTo(parent.start)
+        }) {
+            Icon(Icons.Filled.Info, contentDescription = "")
+        }
+        CustomText(text = "Tisch: ${deck?.tableName}", modifier = Modifier.constrainAs(tableInfo) {
+            top.linkTo(parent.top)
+            start.linkTo(infoButton.end)
+            end.linkTo(quitButton.start)
+        })
+        FloatingActionButton(onClick = { /*TODO*/ }, modifier = Modifier.constrainAs(quitButton) {
+            top.linkTo(parent.top)
+            end.linkTo(parent.end)
+        }) {
+            Icon(Icons.Filled.ExitToApp, contentDescription = "")
+        }
+        Row(
+            /** Board */
+            modifier = Modifier.constrainAs(board) {
+                top.linkTo(tableInfo.bottom, margin = two_GU)
+                start.linkTo(parent.start)
+//                end.linkTo(quitButton.start)
+                bottom.linkTo(playerInfo.top, margin = two_GU)
+            }, horizontalArrangement = Arrangement.Start
         ) {
-            Column {
-                if (deck != null) Text(text = "Tisch: ${deck?.tableName}")
-                if (deck != null) Text(text = "SpielId: ${deck?.deckId}")
-                Spacer(modifier = Modifier.height(8.dp))
-                Row(
-                    modifier = Modifier.padding(vertical = 40.dp),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Box {
-                        CardBack(elevation = 2.dp)
-                        CardBack(elevation = 4.dp)
-                        CardBack(elevation = 6.dp)
-                        CardBack(elevation = 8.dp)
-                    }
-                    Spacer(modifier = Modifier.width(16.dp))
-                    Flop(flop)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Turn(turn)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    River(river)
-                    Spacer(modifier = Modifier.width(32.dp))
-                    Column {
-                        gamePhase?.let { phase ->
-                            FloatingActionButton(
-                                onClick = { viewModel.deal(gamePhase = phase) },
-                            ) {
-                                Text(text = phase.buttonText)
-                            }
-                            if (phase != GamePhase.DEAL) {
-                                Spacer(modifier = Modifier.height(16.dp))
-                                FloatingActionButton(onClick = { viewModel.reset() }) {
-                                    Text(text = "Reset")
-                                }
-                            }
-                        }
-                    }
-                    Spacer(modifier = Modifier.width(32.dp))
-                    joinedPlayers.let { players ->
-                        if (players == null || players.size < 10) {
-                            FloatingActionButton(onClick = {
-                                viewModel.addPlayer()
-                            }) {
-                                Icon(Icons.Filled.Add, "")
-                            }
-                        }
-                    }
+            CardBack() // fold
+            Spacer(modifier = Modifier.width(one_GU))
+            CardBack() // deck
+            Spacer(modifier = Modifier.width(one_GU))
+            Flop(flop = flop)
+            Spacer(modifier = Modifier.width(one_GU))
+            Turn(turn = turn)
+            Spacer(modifier = Modifier.width(one_GU))
+            River(river = river)
+        }
+        FloatingActionButton(
+            onClick = { gamePhase?.let { phase -> viewModel.deal(gamePhase = phase) } },
+            modifier = Modifier
+                .size(fourteen_GU)
+                .constrainAs(dealerButton) {
+                    top.linkTo(quitButton.bottom)
+                    end.linkTo(parent.end)
+                    bottom.linkTo(addPlayerButton.top)
+                }) {
+            Text(text = gamePhase?.buttonText ?: "")
+        }
+        if (gamePhase != GamePhase.DEAL) {
+            FloatingActionButton(
+                onClick = { viewModel.reset() },
+                modifier = Modifier.padding(top = two_GU)
+                    .constrainAs(resetButton) {
+                    top.linkTo(dealerButton.bottom)
+                    end.linkTo(parent.end)
                 }
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(text = "Spieler: ${joinedPlayers?.count()}")
+            ) {
+                Text(text = "Reset")
+            }
+        }
+        joinedPlayers.let { players ->
+            CustomText(text = "Spieler: ${players?.count()}", modifier = Modifier.constrainAs(playerInfo) {
+                start.linkTo(parent.start)
+                bottom.linkTo(parent.bottom)
+            })
+            if (players == null || players.size < 10) {
+                FloatingActionButton(onClick = { viewModel.addPlayer() }, modifier = Modifier.constrainAs(addPlayerButton) {
+                    end.linkTo(parent.end)
+                    bottom.linkTo(parent.bottom)
+                }) {
+                    Icon(Icons.Filled.Add, contentDescription = "")
+                }
             }
         }
     }
 }
+
 
 @Composable
 fun Flop(flop: List<Card?>) {
@@ -204,4 +243,11 @@ fun Context.findActivity(): Activity? = when (this) {
     is Activity -> this
     is ContextWrapper -> baseContext.findActivity()
     else -> null
+}
+
+@Preview
+@Composable
+fun Preview_DealerContent(modifier: Modifier = Modifier) {
+    val viewModel: DealerViewModel = viewModel()
+    DealerContent(viewModel)
 }
