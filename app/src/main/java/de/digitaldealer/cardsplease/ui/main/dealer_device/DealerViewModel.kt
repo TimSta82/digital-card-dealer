@@ -69,6 +69,12 @@ class DealerViewModel : ViewModel(), KoinComponent {
     private val _onPlaySound = MutableSharedFlow<Unit>()
     val onPlaySound = _onPlaySound.asSharedFlow()
 
+    private val _onNavigateBack = MutableSharedFlow<Unit>()
+    val onNavigateBack = _onNavigateBack.asSharedFlow()
+
+    private val _onShowErrorMessage = MutableSharedFlow<String>()
+    val onShowErrorMessage = _onShowErrorMessage.asSharedFlow()
+
     private val db = FirebaseFirestore.getInstance()
     private val gamesCollectionRef = db.collection(COLLECTION_GAMES)
 
@@ -243,6 +249,20 @@ class DealerViewModel : ViewModel(), KoinComponent {
             _turn.postValue(emptyList())
             _river.postValue(emptyList())
             remainingCards = emptyList()
+        }
+    }
+
+    fun quitTable() {
+        _deck.value?.let { deck ->
+            gamesCollectionRef.document(deck.deckId).delete()
+                .addOnSuccessListener {
+                    Logger.debug("deckId: ${deck.deckId} Spiel löschen hat geklappt")
+                    launch { _onNavigateBack.emit(Unit) }
+                }
+                .addOnFailureListener {
+                    Logger.debug("deckId: ${deck.deckId} Spiel löschen hat NICHT geklappt")
+                    launch { _onShowErrorMessage.emit("Spiel beenden hat nicht geklappt") }
+                }
         }
     }
 

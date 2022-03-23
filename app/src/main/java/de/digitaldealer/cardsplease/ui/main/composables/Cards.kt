@@ -48,7 +48,7 @@ fun CardFace(
         elevation = elevation ?: 8.dp,
     ) {
         Box(
-            modifier = Modifier.aspectRatio(0.4f)
+            modifier = Modifier.aspectRatio(0.8f)
 //                .fillMaxHeight(0.4f)
 //                .fillMaxWidth(0.4f),
                 .defaultMinSize(minHeight = card_height, minWidth = card_width),

@@ -12,15 +12,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun PlayerLeaveTableDialog(
+fun SimpleDialog(
     modifier: Modifier = Modifier,
+    title: String,
+    buttonText: String,
     onDismiss: () -> Unit,
-    onDisconnectPlayer: () -> Unit,
+    onConfirmClicked: () -> Unit,
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
         text = {
-            Text(text = "Willst du wirklich den Tisch verlassen?")
+            Text(text = title)
         },
         buttons = {
             Row(
@@ -29,9 +31,9 @@ fun PlayerLeaveTableDialog(
             ) {
                 Button(
                     modifier = Modifier.fillMaxWidth(),
-                    onClick = onDisconnectPlayer
+                    onClick = onConfirmClicked
                 ) {
-                    Text("Tisch verlassen")
+                    Text(buttonText)
                 }
             }
         }

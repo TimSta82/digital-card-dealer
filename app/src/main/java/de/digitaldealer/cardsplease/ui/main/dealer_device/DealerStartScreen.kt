@@ -27,9 +27,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import de.digitaldealer.cardsplease.R
 import de.digitaldealer.cardsplease.domain.model.Card
 import de.digitaldealer.cardsplease.ui.main.composables.AddPlayerDialog
-import de.digitaldealer.cardsplease.ui.main.composables.CardBack
 import de.digitaldealer.cardsplease.ui.main.composables.CardFace
 import de.digitaldealer.cardsplease.ui.main.composables.CustomText
+import de.digitaldealer.cardsplease.ui.main.composables.SimpleDialog
 import de.digitaldealer.cardsplease.ui.theme.fourteen_GU
 import de.digitaldealer.cardsplease.ui.theme.one_GU
 import de.digitaldealer.cardsplease.ui.theme.two_GU
@@ -45,19 +45,34 @@ fun DealerStartScreen(modifier: Modifier = Modifier) {
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
 
-//    val gamePhase by viewModel.gamePhase.observeAsState()
     val addPlayerDeckId by viewModel.addPlayerWithDeckId.observeAsState()
     val deck by viewModel.deck.observeAsState()
-//    val joinedPlayers by viewModel.joinedPlayers.observeAsState()
     val playerCountError by viewModel.onPlayerCountError.observeAsState()
 
     if (addPlayerDeckId != null) AddPlayerDialog(viewModel = viewModel, deckId = addPlayerDeckId?.deckId ?: "", tableName = addPlayerDeckId?.tableName ?: "")
+
+    val showDeleteGameDialog = remember { mutableStateOf(false) }
+
+    if (showDeleteGameDialog.value) SimpleDialog(
+        title = "Wollt ihr das Spiel wirklich beenden?",
+        buttonText = "Spiel beenden",
+        onDismiss = { showDeleteGameDialog.value = false },
+        onConfirmClicked = viewModel::quitTable
+    )
 
     LaunchedEffect(key1 = Unit) {
         launch {
             viewModel.onDealingCardsToPlayersAccomplished.collectLatest {
                 scaffoldState.snackbarHostState.showSnackbar(
                     message = "Karten wurden ausgeteilt",
+                )
+            }
+        }
+
+        launch {
+            viewModel.onShowErrorMessage.collectLatest {
+                scaffoldState.snackbarHostState.showSnackbar(
+                    message = it,
                 )
             }
         }
@@ -85,12 +100,12 @@ fun DealerStartScreen(modifier: Modifier = Modifier) {
         modifier = Modifier,
         scaffoldState = scaffoldState // attaching `scaffoldState` to the `Scaffold`
     ) {
-        DealerContent(viewModel)
+        DealerContent(viewModel, onDismissQuitDialog = { showDeleteGameDialog.value = true })
     }
 }
 
 @Composable
-fun DealerContent(viewModel: DealerViewModel) {
+fun DealerContent(viewModel: DealerViewModel, onDismissQuitDialog: () -> Unit) {
     val deck by viewModel.deck.observeAsState()
     val gamePhase by viewModel.gamePhase.observeAsState()
     val joinedPlayers by viewModel.joinedPlayers.observeAsState()
@@ -116,7 +131,7 @@ fun DealerContent(viewModel: DealerViewModel) {
             start.linkTo(infoButton.end)
             end.linkTo(quitButton.start)
         })
-        FloatingActionButton(onClick = { /*TODO*/ }, modifier = Modifier.constrainAs(quitButton) {
+        FloatingActionButton(onClick = onDismissQuitDialog, modifier = Modifier.constrainAs(quitButton) {
             top.linkTo(parent.top)
             end.linkTo(parent.end)
         }) {
@@ -127,14 +142,10 @@ fun DealerContent(viewModel: DealerViewModel) {
             modifier = Modifier.constrainAs(board) {
                 top.linkTo(tableInfo.bottom, margin = two_GU)
                 start.linkTo(parent.start)
-//                end.linkTo(quitButton.start)
+                end.linkTo(dealerButton.start)
                 bottom.linkTo(playerInfo.top, margin = two_GU)
             }, horizontalArrangement = Arrangement.Start
         ) {
-            CardBack() // fold
-            Spacer(modifier = Modifier.width(one_GU))
-            CardBack() // deck
-            Spacer(modifier = Modifier.width(one_GU))
             Flop(flop = flop)
             Spacer(modifier = Modifier.width(one_GU))
             Turn(turn = turn)
@@ -250,5 +261,5 @@ fun Context.findActivity(): Activity? = when (this) {
 @Composable
 fun Preview_DealerContent(modifier: Modifier = Modifier) {
     val viewModel: DealerViewModel = viewModel()
-    DealerContent(viewModel)
+    DealerContent(viewModel, onDismissQuitDialog = {})
 }

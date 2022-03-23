@@ -54,7 +54,12 @@ fun PlayerHandScreen(modifier: Modifier = Modifier, navController: NavController
         }
     }
 
-    if (showPlayerLeaveDialog.value) PlayerLeaveTableDialog(onDismiss = { showPlayerLeaveDialog.value = false }, onDisconnectPlayer = viewModel::disconnectPlayer)
+    if (showPlayerLeaveDialog.value) SimpleDialog(
+        title = "Willst du den Tisch wirklich verlassen?",
+        buttonText = "Verlassen",
+        onDismiss = { showPlayerLeaveDialog.value = false },
+        onConfirmClicked = viewModel::disconnectPlayer
+    )
 
     BottomSheetScaffold(
         scaffoldState = bottomSheetScaffoldState,
