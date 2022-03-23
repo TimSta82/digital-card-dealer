@@ -68,6 +68,8 @@ fun StartDrawer(modifier: Modifier = Modifier) {
         Spacer(modifier = Modifier.height(one_GU))
         Text("Credits", modifier = Modifier.padding(16.dp))
         Spacer(modifier = Modifier.height(one_GU))
+        Text("<a href=\"https://www.vecteezy.com/free-vector/cartoon\">Cartoon Vectors by Vecteezy</a>", modifier = Modifier.padding(16.dp))
+        Spacer(modifier = Modifier.height(one_GU))
     }
 }
 
