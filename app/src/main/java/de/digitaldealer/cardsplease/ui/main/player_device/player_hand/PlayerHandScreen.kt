@@ -14,6 +14,7 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import de.digitaldealer.cardsplease.R
@@ -22,7 +23,9 @@ import de.digitaldealer.cardsplease.domain.model.Player
 import de.digitaldealer.cardsplease.ui.NavigationRoutes
 import de.digitaldealer.cardsplease.ui.extensions.collectAsStateLifecycleAware
 import de.digitaldealer.cardsplease.ui.main.composables.*
+import de.digitaldealer.cardsplease.ui.theme.half_GU
 import de.digitaldealer.cardsplease.ui.theme.one_GU
+import de.digitaldealer.cardsplease.ui.theme.two_GU
 import kotlinx.coroutines.flow.collectLatest
 
 @Composable
@@ -88,31 +91,53 @@ fun HandContent(
             .fillMaxSize()
             .background(color = colorResource(id = R.color.colorPrimaryDark)),
     ) {
-        Column(
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
+        ConstraintLayout(
+            modifier = Modifier
+                .padding(one_GU)
+                .fillMaxSize()
         ) {
-            Row(
+            val (card, button, revealHand, text) = createRefs()
+            EntryCard(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(one_GU),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                    .padding(horizontal = two_GU)
+                    .constrainAs(card) {
+                        top.linkTo(parent.top)
+                        start.linkTo(parent.start)
+                        end.linkTo(button.start)
+                    },
+                entryType = EntryType.PLAYER,
+                content = {
+                    Column(
+                        modifier = Modifier.padding(one_GU)
+                    ) {
+                        CustomText(text = "Tisch: ${player.tableName}", textAlign = TextAlign.Start)
+                        Spacer(Modifier.height(half_GU))
+                        CustomText(text = "SpielId: ${player.deckId}", textAlign = TextAlign.Start)
+                        Spacer(Modifier.height(half_GU))
+                        CustomText(text = "${player.nickName} ihm seine Hand", textAlign = TextAlign.Start)
+                    }
+                }, onClick = {})
+            FloatingActionButton(
+                modifier = Modifier.constrainAs(button) {
+                    top.linkTo(card.top)
+                    end.linkTo(parent.end)
+                    bottom.linkTo(card.bottom)
+                },
+                onClick = onDisconnectPlayer
             ) {
-                Column {
-                    CustomText(text = "Tisch: ${player.tableName}", textAlign = TextAlign.Start)
-                    CustomText(text = "SpielId: ${player.deckId}", textAlign = TextAlign.Start)
-                    CustomText(text = "${player.nickName} ihm seine Hand", textAlign = TextAlign.Start)
-                }
-                FloatingActionButton(onClick = onDisconnectPlayer) {
-                    Icon(Icons.Filled.ExitToApp, "")
-                }
+                Icon(Icons.Filled.ExitToApp, "")
             }
-            Spacer(modifier = Modifier.height(16.dp))
             if (hand.isValid()) {
                 Row(
-                    modifier = Modifier.padding(top = 24.dp),
-                    horizontalArrangement = Arrangement.SpaceEvenly
+                    modifier = Modifier
+                        .constrainAs(revealHand) {
+                            top.linkTo(parent.top)
+                            start.linkTo(parent.start)
+                            end.linkTo(parent.end)
+                            bottom.linkTo(parent.bottom)
+                        },
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     var cardOneState by remember {
                         mutableStateOf(CardFace.Front)
@@ -139,7 +164,16 @@ fun HandContent(
                     )
                 }
             } else {
-                CustomText(text = "Du hast noch keine Karten erhalten")
+                CustomText(
+                    modifier = Modifier
+                        .constrainAs(revealHand) {
+                            top.linkTo(parent.top)
+                            start.linkTo(parent.start)
+                            end.linkTo(parent.end)
+                            bottom.linkTo(parent.bottom)
+                        },
+                    text = "Du hast noch keine Karten erhalten"
+                )
             }
         }
     }

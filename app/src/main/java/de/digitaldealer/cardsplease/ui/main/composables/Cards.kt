@@ -5,10 +5,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.defaultMinSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.material.ExperimentalMaterialApi
@@ -48,10 +45,12 @@ fun CardFace(
         elevation = elevation ?: 8.dp,
     ) {
         Box(
-            modifier = Modifier.aspectRatio(0.8f)
+            modifier = Modifier
 //                .fillMaxHeight(0.4f)
 //                .fillMaxWidth(0.4f),
-                .defaultMinSize(minHeight = card_height, minWidth = card_width),
+                .width(card_width)
+                .height(card_height)
+                .aspectRatio(0.8f),
             contentAlignment = Alignment.Center
         ) {
             Card(

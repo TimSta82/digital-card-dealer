@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
-import android.content.pm.ActivityInfo
 import android.media.MediaPlayer
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -12,7 +11,6 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.runtime.*
@@ -24,8 +22,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import de.digitaldealer.cardsplease.R
 import de.digitaldealer.cardsplease.domain.model.Card
+import de.digitaldealer.cardsplease.ui.NavigationRoutes
 import de.digitaldealer.cardsplease.ui.main.composables.AddPlayerDialog
 import de.digitaldealer.cardsplease.ui.main.composables.CardFace
 import de.digitaldealer.cardsplease.ui.main.composables.CustomText
@@ -38,11 +38,10 @@ import kotlinx.coroutines.launch
 
 @SuppressLint("CoroutineCreationDuringComposition")
 @Composable
-fun DealerStartScreen(modifier: Modifier = Modifier) {
+fun DealerStartScreen(modifier: Modifier = Modifier, navController: NavController) {
     val viewModel: DealerViewModel = viewModel()
 
     val scaffoldState = rememberScaffoldState() // this contains the `SnackbarHostState`
-    val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
 
     val addPlayerDeckId by viewModel.addPlayerWithDeckId.observeAsState()
@@ -68,7 +67,6 @@ fun DealerStartScreen(modifier: Modifier = Modifier) {
                 )
             }
         }
-
         launch {
             viewModel.onShowErrorMessage.collectLatest {
                 scaffoldState.snackbarHostState.showSnackbar(
@@ -76,9 +74,11 @@ fun DealerStartScreen(modifier: Modifier = Modifier) {
                 )
             }
         }
-    }
-
-    LaunchedEffect(key1 = Unit) {
+        launch {
+            viewModel.onNavigateBack.collectLatest {
+                navController?.navigate(route = NavigationRoutes.START_SCREEN)
+            }
+        }
         launch {
             viewModel.onPlaySound.collectLatest {
                 MediaPlayer.create(context, R.raw.deal_cards_sound).start()
@@ -127,7 +127,8 @@ fun DealerContent(viewModel: DealerViewModel, onDismissQuitDialog: () -> Unit) {
             Icon(Icons.Filled.Info, contentDescription = "")
         }
         CustomText(text = "Tisch: ${deck?.tableName}", modifier = Modifier.constrainAs(tableInfo) {
-            top.linkTo(parent.top)
+            top.linkTo(infoButton.top)
+            bottom.linkTo(infoButton.bottom)
             start.linkTo(infoButton.end)
             end.linkTo(quitButton.start)
         })
@@ -164,30 +165,33 @@ fun DealerContent(viewModel: DealerViewModel, onDismissQuitDialog: () -> Unit) {
             Text(text = gamePhase?.buttonText ?: "")
         }
         if (gamePhase != GamePhase.DEAL) {
-            FloatingActionButton(
+            ExtendedFloatingActionButton(
                 onClick = { viewModel.reset() },
                 modifier = Modifier
                     .padding(top = two_GU)
                     .constrainAs(resetButton) {
                         top.linkTo(dealerButton.bottom)
                         end.linkTo(parent.end)
-                    }
-            ) {
-                Text(text = "Reset")
-            }
+                    },
+                text = {
+                    Text(text = "Reset")
+                }
+            )
         }
         joinedPlayers.let { players ->
             CustomText(text = "Spieler: ${players?.count()}", modifier = Modifier.constrainAs(playerInfo) {
                 start.linkTo(parent.start)
-                bottom.linkTo(parent.bottom)
+                top.linkTo(addPlayerButton.top)
+                bottom.linkTo(addPlayerButton.bottom)
             })
             if (players == null || players.size < 10) {
-                FloatingActionButton(onClick = { viewModel.addPlayer() }, modifier = Modifier.constrainAs(addPlayerButton) {
+                ExtendedFloatingActionButton(onClick = { viewModel.addPlayer() }, modifier = Modifier.constrainAs(addPlayerButton) {
                     end.linkTo(parent.end)
                     bottom.linkTo(parent.bottom)
-                }) {
-                    Icon(Icons.Filled.Add, contentDescription = "")
-                }
+                },
+                    text = {
+                        Text(text = "Spieler hinzufügen")
+                    })
             }
         }
     }
@@ -230,14 +234,8 @@ fun River(river: List<Card?>) {
     }
 }
 
-@Preview
 @Composable
-fun Preview_DealerStartScreen(modifier: Modifier = Modifier) {
-    LockScreenOrientation(orientation = ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR)
-}
-
-@Composable
-fun LockScreenOrientation(orientation: Int) {
+fun LockScreenOrientation(orientation: Int, navController: NavController) {
     val context = LocalContext.current
     DisposableEffect(Unit) {
         val activity = context.findActivity() ?: return@DisposableEffect onDispose {}
@@ -248,7 +246,7 @@ fun LockScreenOrientation(orientation: Int) {
             activity.requestedOrientation = originalOrientation
         }
     }
-    DealerStartScreen()
+    DealerStartScreen(navController = navController)
 }
 
 fun Context.findActivity(): Activity? = when (this) {

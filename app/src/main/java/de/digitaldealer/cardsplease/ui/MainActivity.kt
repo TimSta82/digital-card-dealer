@@ -13,7 +13,10 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.google.gson.Gson
 import de.digitaldealer.cardsplease.domain.model.Player
+import de.digitaldealer.cardsplease.ui.NavigationRoutes.CREDITS_SCREEN
+import de.digitaldealer.cardsplease.ui.NavigationRoutes.DATA_SCREEN
 import de.digitaldealer.cardsplease.ui.NavigationRoutes.DEALER_DEVICE_START_SCREEN
+import de.digitaldealer.cardsplease.ui.NavigationRoutes.IMPRINT_SCREEN
 import de.digitaldealer.cardsplease.ui.NavigationRoutes.INSERT_NAME_SCREEN
 import de.digitaldealer.cardsplease.ui.NavigationRoutes.PLAYER_DEVICE_START_SCREEN
 import de.digitaldealer.cardsplease.ui.NavigationRoutes.PLAYER_HAND_SCREEN
@@ -24,6 +27,9 @@ import de.digitaldealer.cardsplease.ui.main.player_device.PlayerStartScreen
 import de.digitaldealer.cardsplease.ui.main.player_device.insert_name.InsertNameScreen
 import de.digitaldealer.cardsplease.ui.main.player_device.player_hand.PlayerHandScreen
 import de.digitaldealer.cardsplease.ui.main.start.StartScreen
+import de.digitaldealer.cardsplease.ui.main.start.legal.CreditsScreen
+import de.digitaldealer.cardsplease.ui.main.start.legal.DataScreen
+import de.digitaldealer.cardsplease.ui.main.start.legal.ImprintScreen
 import de.digitaldealer.cardsplease.ui.theme.DefaultTheme
 
 class MainActivity : BaseActivity() {
@@ -50,7 +56,7 @@ fun CardsPleaseApp() {
                     StartScreen(navController = navController)
                 }
                 composable(DEALER_DEVICE_START_SCREEN) {
-                    LockScreenOrientation(orientation = ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR)
+                    LockScreenOrientation(orientation = ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR, navController = navController)
                 }
                 composable(PLAYER_DEVICE_START_SCREEN) {
                     PlayerStartScreen(navController = navController)
@@ -73,6 +79,15 @@ fun CardsPleaseApp() {
                     )
                 ) {
                     PlayerHandScreen(navController = navController)
+                }
+                composable(IMPRINT_SCREEN) {
+                    ImprintScreen()
+                }
+                composable(DATA_SCREEN) {
+                    DataScreen()
+                }
+                composable(CREDITS_SCREEN) {
+                    CreditsScreen()
                 }
             }
         }

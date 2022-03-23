@@ -1,8 +1,15 @@
 package de.digitaldealer.cardsplease.ui.main.start
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DataExploration
+import androidx.compose.material.icons.filled.DeviceUnknown
+import androidx.compose.material.icons.filled.FrontHand
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -11,7 +18,9 @@ import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
@@ -20,6 +29,7 @@ import de.digitaldealer.cardsplease.R
 import de.digitaldealer.cardsplease.ui.NavigationRoutes
 import de.digitaldealer.cardsplease.ui.main.composables.CustomText
 import de.digitaldealer.cardsplease.ui.main.composables.EntryCard
+import de.digitaldealer.cardsplease.ui.main.composables.EntryContent
 import de.digitaldealer.cardsplease.ui.main.composables.EntryType
 import de.digitaldealer.cardsplease.ui.theme.four_GU
 import de.digitaldealer.cardsplease.ui.theme.one_GU
@@ -36,7 +46,7 @@ fun StartScreen(modifier: Modifier = Modifier, navController: NavController) {
         scaffoldState = scaffoldState,
         drawerShape = customShape(),
         drawerContent = {
-            StartDrawer()
+            StartDrawer(navController = navController)
         },
         // Defaults to true
         drawerGesturesEnabled = true,
@@ -58,18 +68,42 @@ fun StartScreen(modifier: Modifier = Modifier, navController: NavController) {
 }
 
 @Composable
-fun StartDrawer(modifier: Modifier = Modifier) {
-    Column(modifier = Modifier.fillMaxWidth(0.5f)) {
-        Text("Cards Please", modifier = Modifier.padding(16.dp))
+fun StartDrawer(modifier: Modifier = Modifier, navController: NavController) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth(0.5f)
+            .background(color = colorResource(id = R.color.colorAccent))
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(painter = painterResource(id = R.drawable.ic_clubs), contentDescription = "")
+            Text("Cards Please", modifier = Modifier.padding(16.dp))
+        }
         Divider()
-        Text("Impressum", modifier = Modifier.padding(16.dp))
+        DrawerItem(text = "Imprint", icon = Icons.Filled.DeviceUnknown) {
+            navController.navigate(route = NavigationRoutes.IMPRINT_SCREEN)
+        }
+
         Spacer(modifier = Modifier.height(one_GU))
-        Text("Datenschutz", modifier = Modifier.padding(16.dp))
+        DrawerItem(text = "Datenschutz", icon = Icons.Filled.DataExploration) {
+            navController.navigate(route = NavigationRoutes.DATA_SCREEN)
+        }
         Spacer(modifier = Modifier.height(one_GU))
-        Text("Credits", modifier = Modifier.padding(16.dp))
-        Spacer(modifier = Modifier.height(one_GU))
-        Text("<a href=\"https://www.vecteezy.com/free-vector/cartoon\">Cartoon Vectors by Vecteezy</a>", modifier = Modifier.padding(16.dp))
-        Spacer(modifier = Modifier.height(one_GU))
+        DrawerItem(text = "Credits", icon = Icons.Filled.FrontHand) {
+            navController.navigate(route = NavigationRoutes.CREDITS_SCREEN)
+        }
+    }
+}
+
+@Composable
+fun DrawerItem(modifier: Modifier = Modifier, text: String, icon: ImageVector, onNavigate: () -> Unit) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .padding(two_GU)
+            .clickable { onNavigate() }
+    ) {
+        Icon(icon, contentDescription = "")
+        Text(text = text, modifier = Modifier.padding(16.dp))
     }
 }
 
@@ -83,16 +117,28 @@ fun StartContent(
             .background(color = colorResource(id = R.color.colorPrimary)),
         contentAlignment = Alignment.Center,
     ) {
-        Column(modifier = Modifier.padding(four_GU)) {
+        Column(
+            modifier = Modifier
+                .padding(horizontal = four_GU, vertical = two_GU)
+                .verticalScroll(rememberScrollState())
+        ) {
             CustomText(
-                modifier = Modifier.padding(four_GU),
+                modifier = Modifier.padding(horizontal = four_GU, vertical = two_GU),
                 text = "Cards Please soll euch das gemeinsame Pokern am Tisch erleichtern, indem es Karten mischt und dealt. Hierzu benötigt ihr ein Handy oder Tablet, welches als Dealer fungiert" +
                     ".\nDanach kann jeder Spieler mit seinem Handy ganz einfach einem Spiel beitreten. \nViel Spass und gute Karten!"
             )
             Spacer(modifier = Modifier.height(four_GU))
-            EntryCard(entryType = EntryType.DEALER, onClick = { navController.navigate(route = NavigationRoutes.DEALER_DEVICE_START_SCREEN) })
+            EntryCard(entryType = EntryType.DEALER, content = {
+                EntryContent(entryType = EntryType.DEALER) {
+                    navController.navigate(route = NavigationRoutes.DEALER_DEVICE_START_SCREEN)
+                }
+            }, onClick = { navController.navigate(route = NavigationRoutes.DEALER_DEVICE_START_SCREEN) })
             Spacer(modifier = Modifier.height(two_GU))
-            EntryCard(entryType = EntryType.PLAYER, onClick = { navController.navigate(route = NavigationRoutes.PLAYER_DEVICE_START_SCREEN) })
+            EntryCard(entryType = EntryType.PLAYER, content = {
+                EntryContent(entryType = EntryType.PLAYER) {
+                    navController.navigate(route = NavigationRoutes.PLAYER_DEVICE_START_SCREEN)
+                }
+            }, onClick = { navController.navigate(route = NavigationRoutes.PLAYER_DEVICE_START_SCREEN) })
         }
     }
 }
