@@ -3,6 +3,7 @@ package de.digitaldealer.cardsplease.ui.main.composables
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -23,9 +24,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.constraintlayout.compose.ConstraintLayout
 import de.digitaldealer.cardsplease.domain.model.Card
 import de.digitaldealer.cardsplease.ui.theme.card_height
 import de.digitaldealer.cardsplease.ui.theme.card_width
+import de.digitaldealer.cardsplease.ui.theme.one_GU
 import de.digitaldealer.cardsplease.ui.util.CardUtils
 
 @Composable
@@ -47,10 +50,32 @@ fun CardFace(
                 .defaultMinSize(minHeight = card_height, minWidth = card_width),
             contentAlignment = Alignment.Center
         ) {
-            Column {
-                Image(painter = painterResource(id = CardUtils.getSuitIcon(card.suit)), contentDescription = "")
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(text = card.value, color = colorResource(id = CardUtils.getSuitColor(card.suit)), textAlign = TextAlign.Center)
+            Card(modifier = Modifier.padding(one_GU), border = BorderStroke(2.dp, color = colorResource(id = CardUtils.getSuitColor(card.suit)))) {
+                ConstraintLayout {
+                    val (icon, cardValue) = createRefs()
+                    Text(
+                        modifier = Modifier.constrainAs(cardValue) {
+                            top.linkTo(cardValue.top)
+                            end.linkTo(cardValue.end)
+                            start.linkTo(cardValue.start)
+                            bottom.linkTo(cardValue.bottom)
+                        },
+                        text = card.value,
+                        color = colorResource(id = CardUtils.getSuitColor(card.suit)),
+                        textAlign = TextAlign.Center
+                    )
+                    Image(
+                        modifier = Modifier.constrainAs(icon) {
+                            top.linkTo(parent.top)
+                            end.linkTo(parent.end)
+                            start.linkTo(parent.start)
+                            bottom.linkTo(parent.bottom)
+                        },
+                        painter = painterResource(id = CardUtils.getSuitIcon(card.suit)),
+                        contentDescription = ""
+                    )
+
+                }
             }
         }
     }
