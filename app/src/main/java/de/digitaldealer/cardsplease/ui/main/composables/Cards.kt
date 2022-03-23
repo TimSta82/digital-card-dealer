@@ -5,7 +5,10 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.material.ExperimentalMaterialApi
@@ -25,6 +28,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
+import de.digitaldealer.cardsplease.R
 import de.digitaldealer.cardsplease.domain.model.Card
 import de.digitaldealer.cardsplease.ui.theme.card_height
 import de.digitaldealer.cardsplease.ui.theme.card_width
@@ -44,26 +48,19 @@ fun CardFace(
         elevation = elevation ?: 8.dp,
     ) {
         Box(
-            modifier = Modifier
+            modifier = Modifier.aspectRatio(0.4f)
 //                .fillMaxHeight(0.4f)
 //                .fillMaxWidth(0.4f),
                 .defaultMinSize(minHeight = card_height, minWidth = card_width),
             contentAlignment = Alignment.Center
         ) {
-            Card(modifier = Modifier.padding(one_GU), border = BorderStroke(2.dp, color = colorResource(id = CardUtils.getSuitColor(card.suit)))) {
+            Card(
+                modifier = Modifier.padding(one_GU),
+                backgroundColor = Color.White,
+                border = BorderStroke(2.dp, color = colorResource(id = CardUtils.getSuitColor(card.suit)))
+            ) {
                 ConstraintLayout {
                     val (icon, cardValue) = createRefs()
-                    Text(
-                        modifier = Modifier.constrainAs(cardValue) {
-                            top.linkTo(cardValue.top)
-                            end.linkTo(cardValue.end)
-                            start.linkTo(cardValue.start)
-                            bottom.linkTo(cardValue.bottom)
-                        },
-                        text = card.value,
-                        color = colorResource(id = CardUtils.getSuitColor(card.suit)),
-                        textAlign = TextAlign.Center
-                    )
                     Image(
                         modifier = Modifier.constrainAs(icon) {
                             top.linkTo(parent.top)
@@ -74,7 +71,17 @@ fun CardFace(
                         painter = painterResource(id = CardUtils.getSuitIcon(card.suit)),
                         contentDescription = ""
                     )
-
+                    Text(
+                        modifier = Modifier.constrainAs(cardValue) {
+                            top.linkTo(parent.top)
+                            end.linkTo(parent.end)
+                            start.linkTo(parent.start)
+                            bottom.linkTo(parent.bottom)
+                        },
+                        text = card.value,
+                        color = colorResource(id = R.color.white),
+                        textAlign = TextAlign.Center
+                    )
                 }
             }
         }
