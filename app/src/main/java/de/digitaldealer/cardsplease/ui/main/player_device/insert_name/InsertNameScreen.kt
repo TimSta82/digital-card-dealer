@@ -3,7 +3,6 @@
 package de.digitaldealer.cardsplease.ui.main.player_device.insert_name
 
 import android.net.Uri
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -27,24 +26,35 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.google.gson.Gson
 import de.digitaldealer.cardsplease.R
+import de.digitaldealer.cardsplease.core.utils.Logger
 import de.digitaldealer.cardsplease.ui.NavigationRoutes.PLAYER_HAND_SCREEN
+import de.digitaldealer.cardsplease.ui.NavigationRoutes.START_SCREEN
 import de.digitaldealer.cardsplease.ui.extensions.collectAsStateLifecycleAware
 import de.digitaldealer.cardsplease.ui.theme.half_GU
+import de.digitaldealer.cardsplease.ui.theme.one_GU
 import de.digitaldealer.cardsplease.ui.theme.two_GU
+import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun InsertNameScreen(modifier: Modifier = Modifier, navController: NavController?) {
 
     val viewModel: InsertNameViewModel = viewModel()
 
-    val deckIdWithTableName by viewModel.deckIdWithTableName.observeAsState()
     val player by viewModel.player.observeAsState()
+    val deckFromFireStore by viewModel.deckFromFireStore.collectAsStateLifecycleAware()
     val isLoading by viewModel.isLoading.collectAsStateLifecycleAware()
 
     LaunchedEffect(key1 = player != null) {
         player?.let {
             val playerJson = Uri.encode(Gson().toJson(player))
             navController?.navigate(route = "$PLAYER_HAND_SCREEN/${playerJson}")
+        }
+    }
+
+    LaunchedEffect(key1 = Unit) {
+        Logger.debug("call LaunchedEffect: Unit")
+        viewModel.onNavigateBack.collectLatest { shouldNavigateBack ->
+            if (shouldNavigateBack) navController?.navigate(route = START_SCREEN)
         }
     }
 
@@ -55,9 +65,7 @@ fun InsertNameScreen(modifier: Modifier = Modifier, navController: NavController
         contentAlignment = Alignment.Center
     ) {
         if (isLoading) {
-//            AnimatedVisibility(visible = isLoading) {
-                CircularProgressIndicator(modifier = Modifier.padding(horizontal = two_GU, vertical = two_GU + half_GU))
-//            }
+            CircularProgressIndicator(modifier = Modifier.padding(horizontal = two_GU, vertical = two_GU + half_GU))
         } else {
             Card(elevation = 8.dp) {
                 Column(
@@ -65,10 +73,9 @@ fun InsertNameScreen(modifier: Modifier = Modifier, navController: NavController
                     verticalArrangement = Arrangement.Top,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    deckIdWithTableName?.let {
-                        Text(text = "Tisch: ${it.second}", textAlign = TextAlign.Center)
-                        Text(text = "SpielId: ${it.first}", textAlign = TextAlign.Center)
-                    }
+                    Text(text = "Tisch: ${deckFromFireStore.tableName}", textAlign = TextAlign.Center)
+                    Spacer(modifier = Modifier.height(one_GU))
+                    Text(text = "SpielId: ${deckFromFireStore.deckId}", textAlign = TextAlign.Center)
                     Spacer(modifier = Modifier.height(32.dp))
                     InsertNameTextFieldContainer(viewModel = viewModel)
                 }

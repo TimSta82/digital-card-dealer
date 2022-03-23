@@ -155,11 +155,12 @@ fun DealerContent(viewModel: DealerViewModel) {
         if (gamePhase != GamePhase.DEAL) {
             FloatingActionButton(
                 onClick = { viewModel.reset() },
-                modifier = Modifier.padding(top = two_GU)
+                modifier = Modifier
+                    .padding(top = two_GU)
                     .constrainAs(resetButton) {
-                    top.linkTo(dealerButton.bottom)
-                    end.linkTo(parent.end)
-                }
+                        top.linkTo(dealerButton.bottom)
+                        end.linkTo(parent.end)
+                    }
             ) {
                 Text(text = "Reset")
             }

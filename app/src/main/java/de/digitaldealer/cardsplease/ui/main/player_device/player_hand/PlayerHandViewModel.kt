@@ -23,9 +23,6 @@ class PlayerHandViewModel(val savedState: SavedStateHandle) : ViewModel(), KoinC
     private val _player = MutableStateFlow(savedState.get<Player>("player") ?: Player())
     val player = _player.asStateFlow()
 
-//    private val _currentHand = MutableStateFlow(Hand())
-//    val currentHand = _currentHand.asStateFlow()
-
     private val _currentHand = MutableStateFlow(Hand())
     val currentHand = _currentHand.asStateFlow()
 
@@ -55,7 +52,6 @@ class PlayerHandViewModel(val savedState: SavedStateHandle) : ViewModel(), KoinC
                     }
                     Logger.debug("currentHand: $hands")
                     _currentHand.value = hands.first()
-//                    _currentHand.value = hands.first()
                 } else {
                     _currentHand.value = Hand()
                 }
@@ -74,7 +70,6 @@ class PlayerHandViewModel(val savedState: SavedStateHandle) : ViewModel(), KoinC
                 launch {
                     _onLeaveTable.emit(Unit)
                 }
-//                _onLeaveTable.value = true
             }
             .addOnFailureListener {
                 Logger.debug("Du musst weiter spielen, weil abmelden hat nicht geklappt")

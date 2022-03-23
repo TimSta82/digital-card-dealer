@@ -7,9 +7,9 @@ import de.digitaldealer.cardsplease.ui.util.TableNames
 data class Deck(
     @PropertyName("success")
     val success: Boolean,
-    @PropertyName("deck_id")
+    @PropertyName("deckId")
     val deckId: String,
-    @PropertyName("table_name")
+    @PropertyName("tableName")
     val tableName: String,
     @PropertyName("shuffled")
     val shuffled: Boolean,

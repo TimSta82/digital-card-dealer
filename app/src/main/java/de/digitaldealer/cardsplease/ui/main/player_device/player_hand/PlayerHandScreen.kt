@@ -21,10 +21,7 @@ import de.digitaldealer.cardsplease.domain.model.Hand
 import de.digitaldealer.cardsplease.domain.model.Player
 import de.digitaldealer.cardsplease.ui.NavigationRoutes
 import de.digitaldealer.cardsplease.ui.extensions.collectAsStateLifecycleAware
-import de.digitaldealer.cardsplease.ui.main.composables.CardFace
-import de.digitaldealer.cardsplease.ui.main.composables.FlipCard
-import de.digitaldealer.cardsplease.ui.main.composables.PlayerLeaveTableDialog
-import de.digitaldealer.cardsplease.ui.main.composables.RotationAxis
+import de.digitaldealer.cardsplease.ui.main.composables.*
 import de.digitaldealer.cardsplease.ui.theme.one_GU
 import kotlinx.coroutines.flow.collectLatest
 
@@ -98,9 +95,9 @@ fun HandContent(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column {
-                    Text(text = "Tisch: ${player.tableName}", textAlign = TextAlign.Start)
-                    Text(text = "SpielId: ${player.deckId}", textAlign = TextAlign.Start)
-                    Text(text = "${player.nickName} ihm seine Hand", textAlign = TextAlign.Start)
+                    CustomText(text = "Tisch: ${player.tableName}", textAlign = TextAlign.Start)
+                    CustomText(text = "SpielId: ${player.deckId}", textAlign = TextAlign.Start)
+                    CustomText(text = "${player.nickName} ihm seine Hand", textAlign = TextAlign.Start)
                 }
                 FloatingActionButton(onClick = onDisconnectPlayer) {
                     Icon(Icons.Filled.ExitToApp, "")
@@ -137,7 +134,7 @@ fun HandContent(
                     )
                 }
             } else {
-                Text(text = "Du hast noch keine Karten erhalten")
+                CustomText(text = "Du hast noch keine Karten erhalten")
             }
         }
     }

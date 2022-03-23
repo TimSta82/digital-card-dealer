@@ -31,19 +31,24 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import de.digitaldealer.cardsplease.ui.NavigationRoutes
+import de.digitaldealer.cardsplease.ui.main.composables.QrInputDialog
+import de.digitaldealer.cardsplease.ui.theme.four_GU
 import de.digitaldealer.cardsplease.ui.theme.two_GU
 import de.digitaldealer.cardsplease.ui.util.QrCodeAnalyzer
 
 @Composable
 fun QrScannerScreen(navController: NavController) {
 
-    val showQrInputDialog by remember { mutableStateOf(false) }
+    var showQrInputDialog = remember { mutableStateOf(false) }
     var code by remember { mutableStateOf("") }
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val cameraProviderFuture = remember {
         ProcessCameraProvider.getInstance(context)
     }
+
+    if (showQrInputDialog.value) QrInputDialog(navController = navController, onDismiss = { showQrInputDialog.value = false })
+
     var hasCamPermission by remember {
         mutableStateOf(
             ContextCompat.checkSelfPermission(
@@ -52,15 +57,18 @@ fun QrScannerScreen(navController: NavController) {
             ) == PackageManager.PERMISSION_GRANTED
         )
     }
+
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
         onResult = { granted ->
             hasCamPermission = granted
         }
     )
+
     LaunchedEffect(key1 = true) {
         launcher.launch(Manifest.permission.CAMERA)
     }
+
     ConstraintLayout(modifier = Modifier.fillMaxSize()) {
         val (scanner, text, button, line) = createRefs()
         if (hasCamPermission) {
@@ -109,7 +117,7 @@ fun QrScannerScreen(navController: NavController) {
             )
             Divider(modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = two_GU)
+                .padding(horizontal = four_GU)
                 .background(color = Color.Cyan)
                 .constrainAs(line) {
                     top.linkTo(parent.top)
@@ -132,9 +140,15 @@ fun QrScannerScreen(navController: NavController) {
                     }
             )
             ExtendedFloatingActionButton(
+                modifier = Modifier
+                    .padding(bottom = two_GU, end = two_GU)
+                    .constrainAs(button) {
+                        bottom.linkTo(parent.bottom)
+                        end.linkTo(parent.end)
+                    },
                 text = { Text("QR eintippen") },
                 onClick = {
-
+                    showQrInputDialog.value = true
                 }
             )
         }

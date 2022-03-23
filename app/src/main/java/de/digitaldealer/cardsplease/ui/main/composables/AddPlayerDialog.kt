@@ -35,7 +35,7 @@ fun AddPlayerDialog(
                 Spacer(modifier = Modifier.height(one_GU))
                 Text(text = "deckId: $deckId")
                 Image(
-                    bitmap = getQrCodeAsBitmap(deckId = deckId, tableName = tableName),
+                    bitmap = getQrCodeAsBitmap(deckId = deckId),
                     contentDescription = ""
                 )
             }
@@ -57,8 +57,7 @@ fun AddPlayerDialog(
 }
 
 @Composable
-private fun getQrCodeAsBitmap(deckId: String, tableName: String): ImageBitmap {
-    val combinedData = "$deckId:::$tableName"
-    val bitmap = QRCode.from(combinedData).withSize(400, 400).bitmap().asImageBitmap()
+private fun getQrCodeAsBitmap(deckId: String): ImageBitmap {
+    val bitmap = QRCode.from(deckId).withSize(400, 400).bitmap().asImageBitmap()
     return bitmap
 }
