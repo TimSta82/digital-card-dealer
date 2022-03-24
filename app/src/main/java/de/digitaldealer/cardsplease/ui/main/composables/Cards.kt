@@ -20,6 +20,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -79,7 +81,8 @@ fun CardFace(
                         },
                         text = card.value,
                         color = colorResource(id = R.color.white),
-                        textAlign = TextAlign.Center
+                        textAlign = TextAlign.Center,
+                        style = TextStyle(fontWeight = FontWeight.ExtraBold)
                     )
                 }
             }
@@ -113,7 +116,7 @@ fun CardBack(
 @Preview
 @Composable
 fun Preview_CardFace(modifier: Modifier = Modifier) {
-    CardFace(card = Card())
+    CardFace(card = Card(value = "Queen", code = "Q", suit = "SPADES", image = ""))
 }
 
 @Preview
