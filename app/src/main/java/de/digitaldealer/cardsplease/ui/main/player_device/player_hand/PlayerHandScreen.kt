@@ -23,6 +23,8 @@ import de.digitaldealer.cardsplease.domain.model.Player
 import de.digitaldealer.cardsplease.ui.NavigationRoutes
 import de.digitaldealer.cardsplease.ui.extensions.collectAsStateLifecycleAware
 import de.digitaldealer.cardsplease.ui.main.composables.*
+import de.digitaldealer.cardsplease.ui.main.start.bottomSheetShape
+import de.digitaldealer.cardsplease.ui.theme.five_GU
 import de.digitaldealer.cardsplease.ui.theme.half_GU
 import de.digitaldealer.cardsplease.ui.theme.one_GU
 import de.digitaldealer.cardsplease.ui.theme.two_GU
@@ -69,8 +71,9 @@ fun PlayerHandScreen(modifier: Modifier = Modifier, navController: NavController
         sheetContent = {
             HandBottomSheet(hand = hand)
         },
-        sheetPeekHeight = if (hand.isValid()) 40.dp else 0.dp,
-        sheetShape = MaterialTheme.shapes.small
+        drawerGesturesEnabled = true,
+        sheetPeekHeight = if (hand.isValid()) five_GU else 0.dp,
+        sheetShape = bottomSheetShape()
     ) {
         HandContent(
             player = player,
@@ -115,6 +118,10 @@ fun HandContent(
                         CustomText(text = "SpielId: ${player.deckId}", textAlign = TextAlign.Start)
                         Spacer(Modifier.height(half_GU))
                         CustomText(text = "${player.nickName} ihm seine Hand", textAlign = TextAlign.Start)
+                        if (hand.round != 0) {
+                            Spacer(Modifier.height(half_GU))
+                            CustomText(text = "Runde: ${hand.round}", textAlign = TextAlign.Start)
+                        }
                     }
                 }, onClick = {})
             FloatingActionButton(
@@ -150,7 +157,7 @@ fun HandContent(
                         },
                         axis = RotationAxis.AxisY,
                     )
-                    Spacer(modifier = Modifier.width(16.dp))
+                    Spacer(modifier = Modifier.width(one_GU))
                     var cardTwoState by remember {
                         mutableStateOf(CardFace.Front)
                     }

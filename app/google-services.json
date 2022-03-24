@@ -33,6 +33,35 @@
           ]
         }
       }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:732835296117:android:4d23c4ba5fcdfbdfb7193c",
+        "android_client_info": {
+          "package_name": "dev.de.digitaldealer.cardsplease"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "732835296117-akkj5gvi644h868gskd3ciifni2k567t.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB4UGYtx6gGQIXAhfeSGzzwhbyYA4s0PsA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "732835296117-akkj5gvi644h868gskd3ciifni2k567t.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
     }
   ],
   "configuration_version": "1"

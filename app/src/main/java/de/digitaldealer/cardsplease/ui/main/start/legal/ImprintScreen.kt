@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 @Composable
 fun ImprintScreen(modifier: Modifier = Modifier) {
     Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(text = "Imprint")
+        Text(text = "Freunde treffen - jaaaa\nPokern... - cool\nmit echten Chips - klappert so schön\nKarten mischen und verteilen... - lame! Mach ich nicht!\n\nLass doch einfach Cards Please " +
+            "nehmen!")
     }
 }

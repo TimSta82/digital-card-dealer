@@ -20,7 +20,9 @@ import de.digitaldealer.cardsplease.extensions.second
 import de.digitaldealer.cardsplease.ui.extensions.launch
 import de.digitaldealer.cardsplease.ui.util.SingleLiveEvent
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -74,6 +76,9 @@ class DealerViewModel : ViewModel(), KoinComponent {
 
     private val _onShowErrorMessage = MutableSharedFlow<String>()
     val onShowErrorMessage = _onShowErrorMessage.asSharedFlow()
+
+    private val _round = MutableStateFlow(0)
+    val round = _round.asStateFlow()
 
     private val db = FirebaseFirestore.getInstance()
     private val gamesCollectionRef = db.collection(COLLECTION_GAMES)
@@ -198,8 +203,9 @@ class DealerViewModel : ViewModel(), KoinComponent {
         remainingCards = cards
         Logger.debug("cards.size: ${cards.size}")
         Logger.debug("players.size: ${players.size}")
+        _round.value++
         players.forEachIndexed { index, player ->
-            val currentHand = Hand(one = remainingCards.first(), two = remainingCards.second())
+            val currentHand = Hand(one = remainingCards.first(), two = remainingCards.second(), round = _round.value)
             remainingCards = remainingCards.drop(2)
             checkIfDealingCardsToPlayersHasAccomplished(remainingCards)
             gamesCollectionRef.document(player.deckId).collection(COLLECTION_PLAYERS).document(player.uuid).collection(COLLECTION_HAND_CARDS).document("currentHand").set(currentHand)

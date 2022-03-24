@@ -26,6 +26,7 @@ import androidx.navigation.NavController
 import de.digitaldealer.cardsplease.R
 import de.digitaldealer.cardsplease.domain.model.Card
 import de.digitaldealer.cardsplease.ui.NavigationRoutes
+import de.digitaldealer.cardsplease.ui.extensions.collectAsStateLifecycleAware
 import de.digitaldealer.cardsplease.ui.main.composables.AddPlayerDialog
 import de.digitaldealer.cardsplease.ui.main.composables.CardFace
 import de.digitaldealer.cardsplease.ui.main.composables.CustomText
@@ -112,6 +113,7 @@ fun DealerContent(viewModel: DealerViewModel, onDismissQuitDialog: () -> Unit) {
     val flop by viewModel.flop.observeAsState(emptyList())
     val turn by viewModel.turn.observeAsState(emptyList())
     val river by viewModel.river.observeAsState(emptyList())
+    val round by viewModel.round.collectAsStateLifecycleAware()
 
     ConstraintLayout(
         modifier = Modifier
@@ -126,7 +128,7 @@ fun DealerContent(viewModel: DealerViewModel, onDismissQuitDialog: () -> Unit) {
         }) {
             Icon(Icons.Filled.Info, contentDescription = "")
         }
-        CustomText(text = "Tisch: ${deck?.tableName}", modifier = Modifier.constrainAs(tableInfo) {
+        CustomText(text = "Tisch: ${deck?.tableName} - Runde: $round", modifier = Modifier.constrainAs(tableInfo) {
             top.linkTo(infoButton.top)
             bottom.linkTo(infoButton.bottom)
             start.linkTo(infoButton.end)
