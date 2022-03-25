@@ -10,4 +10,7 @@ object NavigationRoutes {
     const val IMPRINT_SCREEN = "IMPRINT_SCREEN"
     const val DATA_SCREEN = "DATA_SCREEN"
     const val CREDITS_SCREEN = "CREDITS_SCREEN"
+
+    const val NAV_ARG_TABLE_ID = "tableId"
+    const val NAV_ARG_PLAYER = "player"
 }

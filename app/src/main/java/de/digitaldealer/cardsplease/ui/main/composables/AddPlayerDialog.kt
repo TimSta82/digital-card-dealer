@@ -18,7 +18,7 @@ import net.glxn.qrgen.android.QRCode
 fun AddPlayerDialog(
     modifier: Modifier = Modifier,
     viewModel: DealerViewModel,
-    deckId: String,
+    tableId: String,
     tableName: String
 ) {
     AlertDialog(
@@ -33,9 +33,9 @@ fun AddPlayerDialog(
             ) {
                 Text(text = "Tisch: $tableName")
                 Spacer(modifier = Modifier.height(one_GU))
-                Text(text = "deckId: $deckId")
+                Text(text = "tableId: $tableId")
                 Image(
-                    bitmap = getQrCodeAsBitmap(deckId = deckId),
+                    bitmap = getQrCodeAsBitmap(deckId = tableId),
                     contentDescription = ""
                 )
             }

@@ -18,6 +18,8 @@ import de.digitaldealer.cardsplease.ui.NavigationRoutes.DATA_SCREEN
 import de.digitaldealer.cardsplease.ui.NavigationRoutes.DEALER_DEVICE_START_SCREEN
 import de.digitaldealer.cardsplease.ui.NavigationRoutes.IMPRINT_SCREEN
 import de.digitaldealer.cardsplease.ui.NavigationRoutes.INSERT_NAME_SCREEN
+import de.digitaldealer.cardsplease.ui.NavigationRoutes.NAV_ARG_PLAYER
+import de.digitaldealer.cardsplease.ui.NavigationRoutes.NAV_ARG_TABLE_ID
 import de.digitaldealer.cardsplease.ui.NavigationRoutes.PLAYER_DEVICE_START_SCREEN
 import de.digitaldealer.cardsplease.ui.NavigationRoutes.PLAYER_HAND_SCREEN
 import de.digitaldealer.cardsplease.ui.NavigationRoutes.START_SCREEN
@@ -61,9 +63,9 @@ fun CardsPleaseApp() {
                 composable(PLAYER_DEVICE_START_SCREEN) {
                     PlayerStartScreen(navController = navController)
                 }
-                composable(route = "$INSERT_NAME_SCREEN/{deckId}",
+                composable(route = "$INSERT_NAME_SCREEN/{$NAV_ARG_TABLE_ID}",
                     arguments = listOf(
-                        navArgument("deckId") {
+                        navArgument(NAV_ARG_TABLE_ID) {
                             type = NavType.StringType
                         }
                     )
@@ -71,9 +73,9 @@ fun CardsPleaseApp() {
                     InsertNameScreen(navController = navController)
                 }
                 composable(
-                    route = "$PLAYER_HAND_SCREEN/{player}",
+                    route = "$PLAYER_HAND_SCREEN/{$NAV_ARG_PLAYER}",
                     arguments = listOf(
-                        navArgument("player") {
+                        navArgument(NAV_ARG_PLAYER) {
                             type = PlayerNavParamType()
                         }
                     )

@@ -115,9 +115,7 @@ fun HandContent(
                     ) {
                         CustomText(text = "Tisch: ${player.tableName}", textAlign = TextAlign.Start)
                         Spacer(Modifier.height(half_GU))
-                        CustomText(text = "SpielId: ${player.deckId}", textAlign = TextAlign.Start)
-                        Spacer(Modifier.height(half_GU))
-                        CustomText(text = "${player.nickName} ihm seine Hand", textAlign = TextAlign.Start)
+                        CustomText(text = "tableId: ${player.tableId}", textAlign = TextAlign.Start)
                         if (hand.round != 0) {
                             Spacer(Modifier.height(half_GU))
                             CustomText(text = "Runde: ${hand.round}", textAlign = TextAlign.Start)

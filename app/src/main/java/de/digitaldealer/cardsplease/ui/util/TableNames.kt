@@ -3,7 +3,7 @@ package de.digitaldealer.cardsplease.ui.util
 import kotlin.random.Random
 
 object TableNames {
-    val names = listOf(
+    private val names = listOf(
         "Zion",
         "Kai",
         "Maeve",
@@ -209,7 +209,7 @@ object TableNames {
     fun getRandomTableName() = names[Random.nextInt(names.count() - 1)]
 }
 
-
+/**
 //201
 //Niko
 //202
@@ -808,3 +808,4 @@ object TableNames {
 //Cain
 //499
 //Presley
+ */

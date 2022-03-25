@@ -8,32 +8,22 @@ import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.ktx.toObject
 import de.digitaldealer.cardsplease.*
 import de.digitaldealer.cardsplease.core.utils.Logger
-import de.digitaldealer.cardsplease.domain.model.Card
-import de.digitaldealer.cardsplease.domain.model.Deck
-import de.digitaldealer.cardsplease.domain.model.Hand
-import de.digitaldealer.cardsplease.domain.model.Player
-import de.digitaldealer.cardsplease.domain.usecases.BaseUseCase
-import de.digitaldealer.cardsplease.domain.usecases.DrawAmountOfCardsUseCase
-import de.digitaldealer.cardsplease.domain.usecases.GetNewDeckUseCase
-import de.digitaldealer.cardsplease.domain.usecases.ShuffleDeckUseCase
+import de.digitaldealer.cardsplease.domain.model.*
 import de.digitaldealer.cardsplease.extensions.second
 import de.digitaldealer.cardsplease.ui.extensions.launch
 import de.digitaldealer.cardsplease.ui.util.SingleLiveEvent
+import de.digitaldealer.cardsplease.ui.util.TableNames
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
+import java.util.*
 
 class DealerViewModel : ViewModel(), KoinComponent {
 
-    private val getNewDeckUseCase by inject<GetNewDeckUseCase>()
-    private val shuffleDeckUseCase by inject<ShuffleDeckUseCase>()
-    private val drawAmountOfCardsUseCase by inject<DrawAmountOfCardsUseCase>()
-
-    private val _deck = MutableLiveData<Deck>()
-    val deck: LiveData<Deck> = _deck
+    private val _table = MutableStateFlow(PokerTable())
+    val table = _table.asStateFlow()
 
     private val _flop = MutableLiveData<List<Card?>>()
     val flop: LiveData<List<Card?>> = _flop
@@ -44,14 +34,8 @@ class DealerViewModel : ViewModel(), KoinComponent {
     private val _river = MutableLiveData<List<Card?>>()
     val river: LiveData<List<Card?>> = _river
 
-    private val _addPlayerWithDeckId = MutableLiveData<Deck?>()
-    val addPlayerWithDeckId: LiveData<Deck?> = _addPlayerWithDeckId
-
-    private val _onDeckLoadingFailure = SingleLiveEvent<Any>()
-    val onDeckLoadingFailure: LiveData<Any> = _onDeckLoadingFailure
-
-    private val _onDrawCardsFailure = SingleLiveEvent<Any>()
-    val onDrawCardsFailure: LiveData<Any> = _onDrawCardsFailure
+    private val _onOpenAddPlayerDialog = MutableLiveData<PokerTable?>()
+    val onOpenAddPlayerDialog: LiveData<PokerTable?> = _onOpenAddPlayerDialog
 
     private val _gamePhase = MutableLiveData(GamePhase.DEAL)
     val gamePhase: LiveData<GamePhase> = _gamePhase
@@ -61,9 +45,6 @@ class DealerViewModel : ViewModel(), KoinComponent {
 
     private val _onPlayerCountError = SingleLiveEvent<PlayerCountError>()
     val onPlayerCountError: LiveData<PlayerCountError> = _onPlayerCountError
-
-    private val _onShuffleError = SingleLiveEvent<Any>()
-    val onShuffleError: LiveData<Any> = _onShuffleError
 
     private val _onDealingCardsToPlayersAccomplished = MutableSharedFlow<Unit>()
     val onDealingCardsToPlayersAccomplished = _onDealingCardsToPlayersAccomplished.asSharedFlow()
@@ -85,31 +66,26 @@ class DealerViewModel : ViewModel(), KoinComponent {
 
     private var playersListener: ListenerRegistration? = null
     private var remainingCards: List<Card> = emptyList()
+    private var pokerTable: PokerTable? = null
 
     init {
+        pokerTable = PokerTable(tableId = UUID.randomUUID().toString().take(12), tableName = TableNames.getRandomTableName())
         launch {
-            when (val result = getNewDeckUseCase.call()) {
-                is BaseUseCase.UseCaseResult.Success -> {
-                    result.resultObject?.let { deck ->
-                        initGameWithDeckId(deck)
-                    }
-                }
-                else -> _onDeckLoadingFailure.callAsync()
-            }
+            initPokerTable(table = pokerTable!!)
         }
     }
 
-    fun onStart(deck: Deck) {
-        watchForPlayersJoining(deck.deckId)
+    fun onStart() {
+        watchForPlayersJoining(pokerTable!!.tableId)
     }
 
     fun onStop() {
         playersListener?.remove()
     }
 
-    private fun watchForPlayersJoining(deckId: String) {
+    private fun watchForPlayersJoining(tableId: String) {
         playersListener?.remove()
-        playersListener = gamesCollectionRef.document(deckId).collection(COLLECTION_PLAYERS).addSnapshotListener { snapshot, error ->
+        playersListener = gamesCollectionRef.document(tableId).collection(COLLECTION_PLAYERS).addSnapshotListener { snapshot, error ->
             val players = ArrayList<Player>()
             if (snapshot?.isEmpty?.not() == true) {
                 for (doc in snapshot) {
@@ -138,33 +114,24 @@ class DealerViewModel : ViewModel(), KoinComponent {
     }
 
 
-    private fun initGameWithDeckId(deck: Deck) {
-        gamesCollectionRef.document(deck.deckId).set(deck)
+    private fun initPokerTable(table: PokerTable) {
+        gamesCollectionRef.document(table.tableId).set(table)
             .addOnSuccessListener {
-                _deck.value = deck
-                Logger.debug("Successfully init game -> deckId: ${deck.deckId}")
+                _table.value = table
+                Logger.debug("Successfully init table -> table: $table")
             }
             .addOnFailureListener {
-                Logger.debug("Game init failed -> deckId: ${deck.deckId}")
+                Logger.debug("Table init failed -> table: $table")
             }
     }
 
     fun deal(gamePhase: GamePhase) {
         launch {
-            _deck.value?.let { deck ->
-                if (deck.deckId.isNotBlank())
-                    when (gamePhase) {
-                        GamePhase.DEAL -> shuffleCards(deckId = deck.deckId, gamePhase)
-                        else -> handleGamePhase(gamePhase)
-                    }
-            }
-        }
-    }
-
-    private suspend fun shuffleCards(deckId: String, gamePhase: GamePhase) {
-        when (val result = shuffleDeckUseCase.call(deckId = deckId)) {
-            is BaseUseCase.UseCaseResult.Success -> if (result.resultObject.shuffled) drawCards(deckId = deckId, gamePhase) else _onShuffleError.callAsync()
-            else -> _onShuffleError.callAsync()
+            if (_table.value.tableId.isNotBlank())
+                when (gamePhase) {
+                    GamePhase.DEAL -> dealHandCardsToPlayers(gamePhase)
+                    else -> handleGamePhase(gamePhase)
+                }
         }
     }
 
@@ -186,37 +153,29 @@ class DealerViewModel : ViewModel(), KoinComponent {
         return cardsToDeal
     }
 
-    private suspend fun drawCards(deckId: String, gamePhase: GamePhase) {
+    private fun dealHandCardsToPlayers(gamePhase: GamePhase) {
         _joinedPlayers.value?.let { players ->
-            val totalCardsAmount = (players.size * 2) + 8
-            when (val result = drawAmountOfCardsUseCase.call(amount = totalCardsAmount, deckId = deckId)) {
-                is BaseUseCase.UseCaseResult.Success -> result.resultObject?.let { cards ->
-                    dealHandCardsToPlayers(players, cards)
-                    updateGamePhase(gamePhase)
-                }
-                else -> _onDrawCardsFailure.callAsync()
+            val cards = DeckHelper.getRandomCardsByPlayerCount(playerCount = players.count())
+            _round.value++
+            remainingCards = cards.toList()
+            players.forEachIndexed { index, player ->
+                val currentHand = Hand(one = remainingCards.first(), two = remainingCards.second(), round = _round.value)
+                remainingCards = remainingCards.drop(2)
+                checkIfDealingCardsToPlayersHasAccomplished(remainingCards)
+                gamesCollectionRef.document(player.tableId).collection(COLLECTION_PLAYERS).document(player.uuid).collection(COLLECTION_HAND_CARDS).document("currentHand").set(currentHand)
+                    .addOnSuccessListener {
+                        Logger.debug("Spieler ${player.nickName} sollte jetzt ne hand haben")
+                        if (index == players.size - 1) {
+                            updateGamePhase(gamePhase = gamePhase)
+                            launch { _onPlaySound.emit(Unit) }
+                        }
+                    }
+                    .addOnFailureListener {
+                        Logger.debug("Karten konnten nicht an Spieler ${player.nickName} verteilt werden")
+                        return@addOnFailureListener
+                    }
             }
-        }
-    }
 
-    private fun dealHandCardsToPlayers(players: List<Player>, cards: List<Card>) {
-        remainingCards = cards
-        Logger.debug("cards.size: ${cards.size}")
-        Logger.debug("players.size: ${players.size}")
-        _round.value++
-        players.forEachIndexed { index, player ->
-            val currentHand = Hand(one = remainingCards.first(), two = remainingCards.second(), round = _round.value)
-            remainingCards = remainingCards.drop(2)
-            checkIfDealingCardsToPlayersHasAccomplished(remainingCards)
-            gamesCollectionRef.document(player.deckId).collection(COLLECTION_PLAYERS).document(player.uuid).collection(COLLECTION_HAND_CARDS).document("currentHand").set(currentHand)
-                .addOnSuccessListener {
-                    Logger.debug("Spieler ${player.nickName} sollte jetzt ne hand haben")
-                    if (index == players.size - 1) launch { _onPlaySound.emit(Unit) }
-                }
-                .addOnFailureListener {
-                    Logger.debug("Karten konnten nicht an Spieler ${player.nickName} verteilt werden")
-                    return@addOnFailureListener
-                }
         }
     }
 
@@ -238,10 +197,10 @@ class DealerViewModel : ViewModel(), KoinComponent {
     }
 
     private fun clearCards() {
-        _deck.value?.let { deck1 ->
+        _table.value.tableId.let { tableId ->
             _joinedPlayers.value?.let { players ->
                 players.forEach { player ->
-                    gamesCollectionRef.document(deck1.deckId).collection(COLLECTION_PLAYERS).document(player.uuid).collection(COLLECTION_HAND_CARDS).document(DOCUMENT_CURRENT_HAND).delete()
+                    gamesCollectionRef.document(tableId).collection(COLLECTION_PLAYERS).document(player.uuid).collection(COLLECTION_HAND_CARDS).document(DOCUMENT_CURRENT_HAND).delete()
                         .addOnSuccessListener {
                             Logger.debug("currentHand of player ${player.nickName} is deleted")
                         }
@@ -259,23 +218,22 @@ class DealerViewModel : ViewModel(), KoinComponent {
     }
 
     fun quitTable() {
-        _deck.value?.let { deck ->
-            gamesCollectionRef.document(deck.deckId).delete()
+        if (_table.value.tableId != "") {
+            gamesCollectionRef.document(_table.value.tableId).delete()
                 .addOnSuccessListener {
-                    Logger.debug("deckId: ${deck.deckId} Spiel löschen hat geklappt")
+                    Logger.debug("tableId: ${_table.value.tableId} Spiel löschen hat geklappt")
+                    pokerTable = null
                     launch { _onNavigateBack.emit(Unit) }
                 }
                 .addOnFailureListener {
-                    Logger.debug("deckId: ${deck.deckId} Spiel löschen hat NICHT geklappt")
+                    Logger.debug("tableId: ${_table.value.tableId} Spiel löschen hat NICHT geklappt")
                     launch { _onShowErrorMessage.emit("Spiel beenden hat nicht geklappt") }
                 }
         }
     }
 
     fun addPlayer() {
-        _deck.value?.let {
-            _addPlayerWithDeckId.value = it
-        }
+        _onOpenAddPlayerDialog.value = _table.value
     }
 
     fun reset() {
@@ -283,7 +241,7 @@ class DealerViewModel : ViewModel(), KoinComponent {
     }
 
     fun resetPlayerDeckId() {
-        _addPlayerWithDeckId.value = null
+        _onOpenAddPlayerDialog.value = null
     }
 }
 

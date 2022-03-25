@@ -9,8 +9,9 @@ import com.google.firebase.firestore.ktx.toObject
 import de.digitaldealer.cardsplease.COLLECTION_GAMES
 import de.digitaldealer.cardsplease.COLLECTION_PLAYERS
 import de.digitaldealer.cardsplease.core.utils.Logger
-import de.digitaldealer.cardsplease.domain.model.Deck
 import de.digitaldealer.cardsplease.domain.model.Player
+import de.digitaldealer.cardsplease.domain.model.PokerTable
+import de.digitaldealer.cardsplease.ui.NavigationRoutes.NAV_ARG_TABLE_ID
 import de.digitaldealer.cardsplease.ui.extensions.launch
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,25 +34,25 @@ class InsertNameViewModel(val savedState: SavedStateHandle) : ViewModel(), KoinC
     private val _player = MutableLiveData<Player>()
     val player: LiveData<Player> = _player
 
-    private val _deckFromFirestore = MutableStateFlow(Deck())
-    val deckFromFireStore = _deckFromFirestore.asStateFlow()
+    private val _tableFromFirestore = MutableStateFlow(PokerTable())
+    val tableFromFireStore = _tableFromFirestore.asStateFlow()
 
     init {
         checkIfDeckExists()
     }
 
     private fun checkIfDeckExists() {
-        val deckId = savedState.get<String>("deckId") ?: "-1"
-        if (deckId != "-1") {
-            gamesCollectionRef.document(deckId).get()
+        val tableId = savedState.get<String>(NAV_ARG_TABLE_ID) ?: "-1"
+        if (tableId != "-1") {
+            gamesCollectionRef.document(tableId).get()
                 .addOnSuccessListener { snapshot ->
                     Logger.debug("snapshot: $snapshot")
                     if (snapshot?.exists() == true) {
-                        val deck = snapshot.toObject<Deck>()
-                        Logger.debug("deck? = $deck")
-                        deck?.let {
-                            Logger.debug("deck = $it")
-                            _deckFromFirestore.value = it
+                        val pokerTable = snapshot.toObject<PokerTable>()
+                        Logger.debug("pokerTable? = $pokerTable")
+                        pokerTable?.let {
+                            Logger.debug("pokerTable = $it")
+                            _tableFromFirestore.value = it
                         } ?: launch { _onNavigateBack.emit(true) }
                     }
                 }
@@ -63,9 +64,9 @@ class InsertNameViewModel(val savedState: SavedStateHandle) : ViewModel(), KoinC
     }
 
     fun submitToGame(nickName: String) {
-        _deckFromFirestore.value.let { deck ->
-            if (deck.deckId != "") {
-                val player = Player(deckId = deck.deckId, tableName = deck.tableName, nickName = nickName, uuid = UUID.randomUUID().toString())
+        _tableFromFirestore.value.let { table ->
+            if (table.tableId != "") {
+                val player = Player(tableId = table.tableId, tableName = table.tableName, nickName = nickName, uuid = UUID.randomUUID().toString())
                 addPlayerToGameAtFireStore(player = player)
             } else launch { _onNavigateBack.emit(true) }
         }
@@ -73,7 +74,7 @@ class InsertNameViewModel(val savedState: SavedStateHandle) : ViewModel(), KoinC
 
     private fun addPlayerToGameAtFireStore(player: Player) {
         _isLoading.value = true
-        gamesCollectionRef.document(player.deckId).collection(COLLECTION_PLAYERS).document(player.uuid).set(player)
+        gamesCollectionRef.document(player.tableId).collection(COLLECTION_PLAYERS).document(player.uuid).set(player)
             .addOnSuccessListener {
                 Logger.debug("Bingo, Spieler wurde dem Game hinzugefügt")
                 _isLoading.value = false
@@ -81,7 +82,7 @@ class InsertNameViewModel(val savedState: SavedStateHandle) : ViewModel(), KoinC
             }
             .addOnFailureListener {
                 _isLoading.value = false
-                 launch { _onNavigateBack.emit(true) }
+                launch { _onNavigateBack.emit(true) }
                 Logger.debug("Zonk, spieler hinzufügen hat nicht geklappt")
             }
     }

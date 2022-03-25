@@ -45,11 +45,10 @@ fun DealerStartScreen(modifier: Modifier = Modifier, navController: NavControlle
     val scaffoldState = rememberScaffoldState() // this contains the `SnackbarHostState`
     val context = LocalContext.current
 
-    val addPlayerDeckId by viewModel.addPlayerWithDeckId.observeAsState()
-    val deck by viewModel.deck.observeAsState()
-    val playerCountError by viewModel.onPlayerCountError.observeAsState()
+    val onOpenAddPlayerDialog by viewModel.onOpenAddPlayerDialog.observeAsState()
+    val table by viewModel.table.collectAsStateLifecycleAware()
 
-    if (addPlayerDeckId != null) AddPlayerDialog(viewModel = viewModel, deckId = addPlayerDeckId?.deckId ?: "", tableName = addPlayerDeckId?.tableName ?: "")
+    if (onOpenAddPlayerDialog != null) AddPlayerDialog(viewModel = viewModel, tableId = onOpenAddPlayerDialog!!.tableId, tableName = onOpenAddPlayerDialog!!.tableName)
 
     val showDeleteGameDialog = remember { mutableStateOf(false) }
 
@@ -87,10 +86,8 @@ fun DealerStartScreen(modifier: Modifier = Modifier, navController: NavControlle
         }
     }
 
-    LaunchedEffect(key1 = deck?.deckId) {
-        deck?.let {
-            viewModel.onStart(it)
-        }
+    LaunchedEffect(key1 = Unit) {
+        viewModel.onStart()
     }
 
     DisposableEffect(key1 = Unit) {
@@ -107,7 +104,7 @@ fun DealerStartScreen(modifier: Modifier = Modifier, navController: NavControlle
 
 @Composable
 fun DealerContent(viewModel: DealerViewModel, onDismissQuitDialog: () -> Unit) {
-    val deck by viewModel.deck.observeAsState()
+    val table by viewModel.table.collectAsStateLifecycleAware()
     val gamePhase by viewModel.gamePhase.observeAsState()
     val joinedPlayers by viewModel.joinedPlayers.observeAsState()
     val flop by viewModel.flop.observeAsState(emptyList())
@@ -128,7 +125,7 @@ fun DealerContent(viewModel: DealerViewModel, onDismissQuitDialog: () -> Unit) {
         }) {
             Icon(Icons.Filled.Info, contentDescription = "")
         }
-        CustomText(text = "Tisch: ${deck?.tableName} - Runde: $round", modifier = Modifier.constrainAs(tableInfo) {
+        CustomText(text = "Tisch: ${table.tableName} - Runde: $round", modifier = Modifier.constrainAs(tableInfo) {
             top.linkTo(infoButton.top)
             bottom.linkTo(infoButton.bottom)
             start.linkTo(infoButton.end)

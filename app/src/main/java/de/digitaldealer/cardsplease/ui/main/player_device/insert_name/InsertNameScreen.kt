@@ -41,7 +41,7 @@ fun InsertNameScreen(modifier: Modifier = Modifier, navController: NavController
     val viewModel: InsertNameViewModel = viewModel()
 
     val player by viewModel.player.observeAsState()
-    val deckFromFireStore by viewModel.deckFromFireStore.collectAsStateLifecycleAware()
+    val deckFromFireStore by viewModel.tableFromFireStore.collectAsStateLifecycleAware()
     val isLoading by viewModel.isLoading.collectAsStateLifecycleAware()
 
     LaunchedEffect(key1 = player != null) {
@@ -75,7 +75,7 @@ fun InsertNameScreen(modifier: Modifier = Modifier, navController: NavController
                 ) {
                     Text(text = "Tisch: ${deckFromFireStore.tableName}", textAlign = TextAlign.Center)
                     Spacer(modifier = Modifier.height(one_GU))
-                    Text(text = "SpielId: ${deckFromFireStore.deckId}", textAlign = TextAlign.Center)
+                    Text(text = "SpielId: ${deckFromFireStore.tableId}", textAlign = TextAlign.Center)
                     Spacer(modifier = Modifier.height(32.dp))
                     InsertNameTextFieldContainer(viewModel = viewModel)
                 }

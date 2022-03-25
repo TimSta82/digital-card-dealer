@@ -6,8 +6,8 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class Player(
-    @PropertyName("deckId")
-    val deckId: String,
+    @PropertyName("tableId")
+    val tableId: String,
     @PropertyName("tableName")
     val tableName: String,
     @PropertyName("nickName")
@@ -16,7 +16,7 @@ data class Player(
     val uuid: String
 ) : Parcelable {
     constructor() : this(
-        deckId = "-1",
+        tableId = "-1",
         nickName = "",
         tableName = "",
         uuid = ""

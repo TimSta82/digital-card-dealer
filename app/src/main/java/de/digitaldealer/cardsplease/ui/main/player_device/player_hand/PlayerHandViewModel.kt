@@ -11,6 +11,7 @@ import de.digitaldealer.cardsplease.COLLECTION_PLAYERS
 import de.digitaldealer.cardsplease.core.utils.Logger
 import de.digitaldealer.cardsplease.domain.model.Hand
 import de.digitaldealer.cardsplease.domain.model.Player
+import de.digitaldealer.cardsplease.ui.NavigationRoutes.NAV_ARG_PLAYER
 import de.digitaldealer.cardsplease.ui.extensions.launch
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,7 +21,7 @@ import org.koin.core.component.KoinComponent
 
 class PlayerHandViewModel(val savedState: SavedStateHandle) : ViewModel(), KoinComponent {
 
-    private val _player = MutableStateFlow(savedState.get<Player>("player") ?: Player())
+    private val _player = MutableStateFlow(savedState.get<Player>(NAV_ARG_PLAYER) ?: Player())
     val player = _player.asStateFlow()
 
     private val _currentHand = MutableStateFlow(Hand())
@@ -42,7 +43,7 @@ class PlayerHandViewModel(val savedState: SavedStateHandle) : ViewModel(), KoinC
 
     fun onStart() {
         playerHandListener?.remove()
-        playerHandListener = gamesCollectionRef.document(_player.value.deckId).collection(COLLECTION_PLAYERS).document(_player.value.uuid).collection(COLLECTION_HAND_CARDS)
+        playerHandListener = gamesCollectionRef.document(_player.value.tableId).collection(COLLECTION_PLAYERS).document(_player.value.uuid).collection(COLLECTION_HAND_CARDS)
             .addSnapshotListener { snapshot, error ->
                 if (snapshot?.isEmpty?.not() == true) {
                     val hands = ArrayList<Hand>()
@@ -64,7 +65,7 @@ class PlayerHandViewModel(val savedState: SavedStateHandle) : ViewModel(), KoinC
     }
 
     fun disconnectPlayer() {
-        gamesCollectionRef.document(_player.value.deckId).collection(COLLECTION_PLAYERS).document(_player.value.uuid).delete()
+        gamesCollectionRef.document(_player.value.tableId).collection(COLLECTION_PLAYERS).document(_player.value.uuid).delete()
             .addOnSuccessListener {
                 Logger.debug("Tschüss ${_player.value.nickName}")
                 launch {
