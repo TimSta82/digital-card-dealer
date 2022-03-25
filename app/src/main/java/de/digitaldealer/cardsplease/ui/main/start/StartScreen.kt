@@ -14,6 +14,7 @@ import androidx.compose.material.icons.filled.DataExploration
 import androidx.compose.material.icons.filled.DeviceUnknown
 import androidx.compose.material.icons.filled.FrontHand
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -27,13 +28,16 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import de.digitaldealer.cardsplease.R
 import de.digitaldealer.cardsplease.ui.NavigationRoutes
+import de.digitaldealer.cardsplease.ui.extensions.collectAsStateLifecycleAware
 import de.digitaldealer.cardsplease.ui.main.composables.CustomText
 import de.digitaldealer.cardsplease.ui.main.composables.EntryCard
 import de.digitaldealer.cardsplease.ui.main.composables.EntryContent
@@ -72,7 +76,14 @@ fun StartScreen(modifier: Modifier = Modifier, navController: NavController) {
             )
         }
     ) {
-        StartContent(navController = navController)
+        StartContent(
+            onStartAsDealer = {
+                navController.navigate(route = NavigationRoutes.DEALER_DEVICE_START_SCREEN)
+            },
+            onStartAsPlayer = {
+                navController.navigate(route = NavigationRoutes.PLAYER_DEVICE_START_SCREEN)
+            }
+        )
     }
 }
 
@@ -126,36 +137,47 @@ fun DrawerItem(modifier: Modifier = Modifier, text: String, icon: ImageVector, o
 
 @Composable
 fun StartContent(
-    navController: NavController
+    onStartAsDealer: () -> Unit,
+    onStartAsPlayer: () -> Unit
 ) {
+    val viewModel: StartViewModel = viewModel()
+    val shouldSwitchColors by viewModel.alternatingColors.collectAsStateLifecycleAware()
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(color = colorResource(id = R.color.colorPrimary)),
-        contentAlignment = Alignment.Center,
+        contentAlignment = Alignment.TopCenter,
     ) {
         Column(
             modifier = Modifier
                 .padding(horizontal = four_GU, vertical = two_GU)
                 .verticalScroll(rememberScrollState())
         ) {
+            Row(horizontalArrangement = Arrangement.SpaceEvenly, modifier = Modifier.fillMaxWidth()) {
+                Icon(painter = painterResource(id = R.drawable.ic_clubs2), tint = colorResource(id = if (shouldSwitchColors) R.color.card_red else R.color.black), contentDescription = "")
+                Icon(painter = painterResource(id = R.drawable.ic_hearts2), tint = colorResource(id = if (shouldSwitchColors) R.color.black else R.color.card_red), contentDescription = "")
+                Icon(painter = painterResource(id = R.drawable.ic_spades2), tint = colorResource(id = if (shouldSwitchColors) R.color.card_red else R.color.black), contentDescription = "")
+                Icon(painter = painterResource(id = R.drawable.ic_diamonds2), tint = colorResource(id = if (shouldSwitchColors) R.color.black else R.color.card_red), contentDescription = "")
+            }
             CustomText(
                 modifier = Modifier.padding(horizontal = four_GU, vertical = two_GU),
                 text = "Cards Please soll euch das gemeinsame Pokern am Tisch erleichtern, indem es Karten mischt und dealt. Hierzu benötigt ihr ein Handy oder Tablet, welches als Dealer fungiert" +
                     ".\nDanach kann jeder Spieler mit seinem Handy ganz einfach einem Spiel beitreten. \nViel Spass und gute Karten!"
             )
             Spacer(modifier = Modifier.height(four_GU))
-            EntryCard(entryType = EntryType.DEALER, content = {
-                EntryContent(entryType = EntryType.DEALER) {
-                    navController.navigate(route = NavigationRoutes.DEALER_DEVICE_START_SCREEN)
-                }
-            }, onClick = { navController.navigate(route = NavigationRoutes.DEALER_DEVICE_START_SCREEN) })
+            EntryCard(
+                entryType = EntryType.DEALER,
+                content = {
+                    EntryContent(entryType = EntryType.DEALER) { onStartAsDealer() }
+                },
+                onClick = { onStartAsDealer() })
             Spacer(modifier = Modifier.height(two_GU))
-            EntryCard(entryType = EntryType.PLAYER, content = {
-                EntryContent(entryType = EntryType.PLAYER) {
-                    navController.navigate(route = NavigationRoutes.PLAYER_DEVICE_START_SCREEN)
-                }
-            }, onClick = { navController.navigate(route = NavigationRoutes.PLAYER_DEVICE_START_SCREEN) })
+            EntryCard(
+                entryType = EntryType.PLAYER,
+                content = {
+                    EntryContent(entryType = EntryType.PLAYER) { onStartAsPlayer() }
+                },
+                onClick = { onStartAsPlayer() })
         }
     }
 }
@@ -166,7 +188,7 @@ fun drawerShape() = object : Shape {
         layoutDirection: LayoutDirection,
         density: Density
     ): Outline {
-        return Outline.Rectangle(Rect(0f, 0f, right = size.width / 2, bottom = size.height))
+        return Outline.Rectangle(Rect(0f, 0f, right = size.width / 3 * 2, bottom = size.height))
     }
 }
 
@@ -187,4 +209,10 @@ fun bottomSheetShape() = object : Shape {
             )
         )
     }
+}
+
+@Preview
+@Composable
+fun Preview_StartContent(modifier: Modifier = Modifier) {
+    StartContent(onStartAsDealer = {}, onStartAsPlayer = {})
 }

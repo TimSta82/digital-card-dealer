@@ -1,6 +1,5 @@
 package de.digitaldealer.cardsplease.domain.model
 
-import com.google.firebase.firestore.PropertyName
 import kotlin.random.Random
 
 object DeckHelper {
@@ -68,25 +67,23 @@ object DeckHelper {
         Card(image = "", code = "KH", value = "KING", suit = HEARTS),
     )
 
-    fun getDeck(): List<Card> = deck
+    private fun getDeck(): List<Card> = deck
 
-    @PropertyName("getRandomCardsByPlayerCount")
     fun getRandomCardsByPlayerCount(playerCount: Int): Set<Card> {
         val amount = (playerCount * 2) + 8
         val randomCards = mutableSetOf<Card>()
         while (randomCards.size != amount) {
-            val randomCard = deck[Random.nextInt(52)]
+            val randomCard = getDeck()[Random.nextInt(52)]
             if (randomCards.contains(randomCard).not()) randomCards.add(randomCard)
         }
         return if (randomCards.size == amount) randomCards else emptySet<Card>()
     }
 
-    @PropertyName("getRandomCardsByAmount")
     fun getRandomCardsByAmount(amount: Int): Set<Card> {
         val randomCards = mutableSetOf<Card>()
         while (randomCards.size != amount) {
             if (amount > 52) break
-            val randomCard = deck[Random.nextInt(52)]
+            val randomCard = getDeck()[Random.nextInt(52)]
             if (randomCards.contains(randomCard).not()) randomCards.add(randomCard)
         }
         return if (randomCards.size == amount) randomCards else emptySet<Card>()
