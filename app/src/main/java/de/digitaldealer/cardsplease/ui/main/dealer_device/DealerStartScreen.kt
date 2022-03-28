@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalMaterialApi::class)
+
 package de.digitaldealer.cardsplease.ui.main.dealer_device
 
 import android.annotation.SuppressLint
@@ -16,6 +18,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
@@ -23,13 +26,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import de.digitaldealer.cardsplease.R
 import de.digitaldealer.cardsplease.domain.model.Card
-import de.digitaldealer.cardsplease.domain.model.Player
+import de.digitaldealer.cardsplease.domain.model.DeckHelper
 import de.digitaldealer.cardsplease.ui.NavigationRoutes
 import de.digitaldealer.cardsplease.ui.extensions.collectAsStateLifecycleAware
-import de.digitaldealer.cardsplease.ui.main.composables.AddPlayerDialog
-import de.digitaldealer.cardsplease.ui.main.composables.CardFace
-import de.digitaldealer.cardsplease.ui.main.composables.CustomText
-import de.digitaldealer.cardsplease.ui.main.composables.SimpleDialog
+import de.digitaldealer.cardsplease.ui.main.composables.*
 import de.digitaldealer.cardsplease.ui.theme.fourteen_GU
 import de.digitaldealer.cardsplease.ui.theme.one_GU
 import de.digitaldealer.cardsplease.ui.theme.two_GU
@@ -117,7 +117,7 @@ fun DealerContent(viewModel: DealerViewModel, onDismissQuitDialog: () -> Unit) {
             .background(color = colorResource(id = R.color.dealer_background))
             .padding(two_GU)
     ) {
-        val (infoButton, tableInfo, quitButton, board, dealerButton, playerInfo, addPlayerButton, resetButton) = createRefs()
+        val (infoButton, tableInfo, quitButton, board, dealerButton, playerInfo, addPlayerButton, resetButton, boardInfo) = createRefs()
         FloatingActionButton(onClick = { /*TODO*/ }, modifier = Modifier.constrainAs(infoButton) {
             top.linkTo(parent.top)
             start.linkTo(parent.start)
@@ -136,24 +136,35 @@ fun DealerContent(viewModel: DealerViewModel, onDismissQuitDialog: () -> Unit) {
         }) {
             Icon(Icons.Filled.ExitToApp, contentDescription = "")
         }
-        Row(
-            /** Board */
-            modifier = Modifier
-                .fillMaxWidth()
-                .constrainAs(board) {
-                    top.linkTo(tableInfo.bottom, margin = two_GU)
-                    start.linkTo(parent.start)
-                    if (joinedPlayers?.size ?: 0 > 1) end.linkTo(dealerButton.start) else end.linkTo(parent.end)
-                    bottom.linkTo(playerInfo.top, margin = two_GU)
-                }, horizontalArrangement = Arrangement.Start
-        ) {
-            ShowBoardMessage(joinedPlayers)
-            Flop(flop = flop)
-            Spacer(modifier = Modifier.width(one_GU))
-            Turn(turn = turn)
-            Spacer(modifier = Modifier.width(one_GU))
-            River(river = river)
-        }
+        if (joinedPlayers != null || joinedPlayers?.size ?: 0 < 2) CustomText(modifier = Modifier.constrainAs(boardInfo) {
+            top.linkTo(tableInfo.bottom, margin = two_GU)
+            start.linkTo(parent.start)
+            end.linkTo(parent.start)
+            bottom.linkTo(playerInfo.top, margin = two_GU)
+        }, text = getBoardPlayerMessage(joinedPlayers?.size ?: 0))
+        Board(modifier = Modifier.constrainAs(board) {
+            top.linkTo(tableInfo.bottom, margin = two_GU)
+            start.linkTo(parent.start)
+            end.linkTo(dealerButton.start)
+            bottom.linkTo(playerInfo.top, margin = two_GU)
+        }, flop, turn, river)
+//        Row(
+//            /** Board */
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .constrainAs(board) {
+//                    top.linkTo(tableInfo.bottom, margin = two_GU)
+//                    start.linkTo(parent.start)
+//                    end.linkTo(dealerButton.start)
+//                    bottom.linkTo(playerInfo.top, margin = two_GU)
+//                }, horizontalArrangement = Arrangement.Start
+//        ) {
+//            Flop(flop = flop)
+//            Spacer(modifier = Modifier.width(one_GU))
+//            Turn(turn = turn)
+//            Spacer(modifier = Modifier.width(one_GU))
+//            River(river = river)
+//        }
         FloatingActionButton(
             onClick = { gamePhase?.let { phase -> viewModel.deal(gamePhase = phase) } },
             modifier = Modifier
@@ -199,21 +210,46 @@ fun DealerContent(viewModel: DealerViewModel, onDismissQuitDialog: () -> Unit) {
 }
 
 @Composable
-fun ShowBoardMessage(players: List<Player>?) {
-    when (players?.size) {
-        null, 0 -> CustomText(text = "Um spielen zu können, müssen mindestens 2 Spieler teilnehmen")
-        1 -> CustomText(text = "Jetzt fehlt noch 1 Spieler")
-        else -> {}
+fun Board(modifier: Modifier, flop: List<Card?>, turn: List<Card?>, river: List<Card?>) {
+    Row(modifier = modifier.fillMaxHeight()) {
+        Flop(flop = flop)
+        Spacer(modifier = Modifier.width(one_GU))
+        Turn(turn = turn)
+        Spacer(modifier = Modifier.width(one_GU))
+        River(river = river)
     }
 }
 
+@Preview(device = Devices.AUTOMOTIVE_1024p, widthDp = 720, heightDp = 360)
+@Composable
+fun Preview_Board(modifier: Modifier = Modifier) {
+    Board(
+        modifier = modifier,
+        flop = listOf(DeckHelper.getCard(), DeckHelper.getCard(), DeckHelper.getCard()),
+        turn = listOf(DeckHelper.getCard()),
+        river = listOf(DeckHelper.getCard())
+    )
+}
 
+fun getBoardPlayerMessage(count: Int): String {
+    return when (count) {
+        0 -> "Um spielen zu können, müssen mindestens 2 Spieler teilnehmen"
+        else -> "Jetzt fehlt noch 1 Spieler"
+    }
+}
+
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun Flop(flop: List<Card?>) {
     Row {
         flop.forEach { card ->
-            card?.let {
-                CardFace(card = card, modifier = Modifier.weight(1.0f))
+            card?.let { c ->
+                FlipCard(
+                    cardFace = CardFace.Back,
+                    modifier = Modifier.weight(0.2f),
+                    card = c,
+                    onClick = {}
+                )
                 Spacer(modifier = Modifier.width(8.dp))
             }
         }
@@ -224,8 +260,13 @@ fun Flop(flop: List<Card?>) {
 fun Turn(turn: List<Card?>) {
     Row {
         turn.forEach { card ->
-            card?.let {
-                CardFace(card = card, modifier = Modifier.weight(1.0f))
+            card?.let { c ->
+                FlipCard(
+                    cardFace = CardFace.Back,
+                    modifier = Modifier.weight(0.2f),
+                    card = c,
+                    onClick = {}
+                )
                 Spacer(modifier = Modifier.width(8.dp))
             }
         }
@@ -237,8 +278,13 @@ fun Turn(turn: List<Card?>) {
 fun River(river: List<Card?>) {
     Row {
         river.forEach { card ->
-            card?.let {
-                CardFace(card = card, modifier = Modifier.weight(1.0f))
+            card?.let { c ->
+                FlipCard(
+                    cardFace = CardFace.Back,
+                    modifier = Modifier.weight(0.2f),
+                    card = c,
+                    onClick = {}
+                )
                 Spacer(modifier = Modifier.width(8.dp))
             }
         }

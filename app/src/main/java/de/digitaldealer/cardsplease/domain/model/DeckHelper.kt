@@ -69,6 +69,8 @@ object DeckHelper {
 
     private fun getDeck(): List<Card> = deck
 
+    fun getCard(): Card = deck[0]
+
     fun getRandomCardsByPlayerCount(playerCount: Int): Set<Card> {
         val amount = (playerCount * 2) + 8
         val randomCards = mutableSetOf<Card>()
