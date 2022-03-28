@@ -91,7 +91,7 @@ fun StartScreen(modifier: Modifier = Modifier, navController: NavController) {
 fun StartDrawer(modifier: Modifier = Modifier, navController: NavController, context: Context) {
     Column(
         modifier = Modifier
-            .fillMaxWidth(0.5f)
+            .fillMaxWidth()
             .fillMaxHeight()
             .background(color = colorResource(id = R.color.colorAccent))
             .padding(two_GU)
@@ -107,7 +107,6 @@ fun StartDrawer(modifier: Modifier = Modifier, navController: NavController, con
         DrawerItem(text = "Imprint", icon = Icons.Filled.DeviceUnknown) {
             navController.navigate(route = NavigationRoutes.IMPRINT_SCREEN)
         }
-
         Spacer(modifier = Modifier.height(one_GU))
         DrawerItem(text = "Datenschutz", icon = Icons.Filled.DataExploration) {
             navController.navigate(route = NavigationRoutes.DATA_SCREEN)
@@ -150,17 +149,41 @@ fun StartContent(
     ) {
         Column(
             modifier = Modifier
-                .padding(horizontal = four_GU, vertical = two_GU)
+                .padding(horizontal = four_GU)
                 .verticalScroll(rememberScrollState())
         ) {
-            Row(horizontalArrangement = Arrangement.SpaceEvenly, modifier = Modifier.fillMaxWidth()) {
-                Icon(painter = painterResource(id = R.drawable.ic_clubs2), tint = colorResource(id = if (shouldSwitchColors) R.color.card_red else R.color.black), contentDescription = "")
-                Icon(painter = painterResource(id = R.drawable.ic_hearts2), tint = colorResource(id = if (shouldSwitchColors) R.color.black else R.color.card_red), contentDescription = "")
-                Icon(painter = painterResource(id = R.drawable.ic_spades2), tint = colorResource(id = if (shouldSwitchColors) R.color.card_red else R.color.black), contentDescription = "")
-                Icon(painter = painterResource(id = R.drawable.ic_diamonds2), tint = colorResource(id = if (shouldSwitchColors) R.color.black else R.color.card_red), contentDescription = "")
+            Row(
+                horizontalArrangement = Arrangement.SpaceEvenly, modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = two_GU)
+            ) {
+                Icon(
+                    modifier = Modifier.weight(1f, fill = true),
+                    painter = painterResource(id = R.drawable.ic_clubs2),
+                    tint = colorResource(id = if (shouldSwitchColors) R.color.card_red else R.color.black),
+                    contentDescription = ""
+                )
+                Icon(
+                    modifier = Modifier.weight(1f, fill = true),
+                    painter = painterResource(id = R.drawable.ic_hearts2),
+                    tint = colorResource(id = if (shouldSwitchColors) R.color.black else R.color.card_red),
+                    contentDescription = ""
+                )
+                Icon(
+                    modifier = Modifier.weight(1f, fill = true),
+                    painter = painterResource(id = R.drawable.ic_spades2),
+                    tint = colorResource(id = if (shouldSwitchColors) R.color.card_red else R.color.black),
+                    contentDescription = ""
+                )
+                Icon(
+                    modifier = Modifier.weight(1f, fill = true),
+                    painter = painterResource(id = R.drawable.ic_diamonds2),
+                    tint = colorResource(id = if (shouldSwitchColors) R.color.black else R.color.card_red),
+                    contentDescription = ""
+                )
             }
             CustomText(
-                modifier = Modifier.padding(horizontal = four_GU, vertical = two_GU),
+                modifier = Modifier.padding(horizontal = two_GU, vertical = two_GU),
                 text = "Cards Please soll euch das gemeinsame Pokern am Tisch erleichtern, indem es Karten mischt und dealt. Hierzu benötigt ihr ein Handy oder Tablet, welches als Dealer fungiert" +
                     ".\nDanach kann jeder Spieler mit seinem Handy ganz einfach einem Spiel beitreten. \nViel Spass und gute Karten!"
             )
@@ -178,6 +201,7 @@ fun StartContent(
                     EntryContent(entryType = EntryType.PLAYER) { onStartAsPlayer() }
                 },
                 onClick = { onStartAsPlayer() })
+            Spacer(modifier = Modifier.height(two_GU))
         }
     }
 }

@@ -5,7 +5,9 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.material.ExperimentalMaterialApi
@@ -27,10 +29,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
+import de.digitaldealer.cardsplease.CARD_ASPECT_RATIO
 import de.digitaldealer.cardsplease.R
 import de.digitaldealer.cardsplease.domain.model.Card
-import de.digitaldealer.cardsplease.ui.theme.card_height
-import de.digitaldealer.cardsplease.ui.theme.card_width
 import de.digitaldealer.cardsplease.ui.theme.one_GU
 import de.digitaldealer.cardsplease.ui.util.CardUtils
 
@@ -47,12 +48,7 @@ fun CardFace(
         elevation = elevation ?: 8.dp,
     ) {
         Box(
-            modifier = Modifier
-//                .fillMaxHeight(0.4f)
-//                .fillMaxWidth(0.4f),
-                .width(card_width)
-                .height(card_height)
-                .aspectRatio(0.8f),
+            modifier = Modifier.aspectRatio(CARD_ASPECT_RATIO),
             contentAlignment = Alignment.Center
         ) {
             Card(
@@ -102,10 +98,7 @@ fun CardBack(
         elevation = elevation ?: 8.dp,
     ) {
         Box(
-            modifier = Modifier
-//                .fillMaxHeight(0.4f)
-//                .fillMaxWidth(0.4f),
-                .defaultMinSize(minHeight = card_height, minWidth = card_width),
+            modifier = Modifier.aspectRatio(CARD_ASPECT_RATIO),
             contentAlignment = Alignment.Center
         ) {
             Image(Icons.Filled.Api, contentDescription = "")

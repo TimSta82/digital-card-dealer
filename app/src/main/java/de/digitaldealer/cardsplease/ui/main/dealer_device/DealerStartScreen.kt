@@ -7,8 +7,6 @@ import android.content.ContextWrapper
 import android.media.MediaPlayer
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExitToApp
@@ -25,6 +23,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import de.digitaldealer.cardsplease.R
 import de.digitaldealer.cardsplease.domain.model.Card
+import de.digitaldealer.cardsplease.domain.model.Player
 import de.digitaldealer.cardsplease.ui.NavigationRoutes
 import de.digitaldealer.cardsplease.ui.extensions.collectAsStateLifecycleAware
 import de.digitaldealer.cardsplease.ui.main.composables.AddPlayerDialog
@@ -139,13 +138,16 @@ fun DealerContent(viewModel: DealerViewModel, onDismissQuitDialog: () -> Unit) {
         }
         Row(
             /** Board */
-            modifier = Modifier.constrainAs(board) {
-                top.linkTo(tableInfo.bottom, margin = two_GU)
-                start.linkTo(parent.start)
-                end.linkTo(dealerButton.start)
-                bottom.linkTo(playerInfo.top, margin = two_GU)
-            }, horizontalArrangement = Arrangement.Start
+            modifier = Modifier
+                .fillMaxWidth()
+                .constrainAs(board) {
+                    top.linkTo(tableInfo.bottom, margin = two_GU)
+                    start.linkTo(parent.start)
+                    if (joinedPlayers?.size ?: 0 > 1) end.linkTo(dealerButton.start) else end.linkTo(parent.end)
+                    bottom.linkTo(playerInfo.top, margin = two_GU)
+                }, horizontalArrangement = Arrangement.Start
         ) {
+            ShowBoardMessage(joinedPlayers)
             Flop(flop = flop)
             Spacer(modifier = Modifier.width(one_GU))
             Turn(turn = turn)
@@ -196,13 +198,22 @@ fun DealerContent(viewModel: DealerViewModel, onDismissQuitDialog: () -> Unit) {
     }
 }
 
+@Composable
+fun ShowBoardMessage(players: List<Player>?) {
+    when (players?.size) {
+        null, 0 -> CustomText(text = "Um spielen zu können, müssen mindestens 2 Spieler teilnehmen")
+        1 -> CustomText(text = "Jetzt fehlt noch 1 Spieler")
+        else -> {}
+    }
+}
+
 
 @Composable
 fun Flop(flop: List<Card?>) {
-    LazyRow {
-        itemsIndexed(flop) { index, card ->
+    Row {
+        flop.forEach { card ->
             card?.let {
-                CardFace(card = card)
+                CardFace(card = card, modifier = Modifier.weight(1.0f))
                 Spacer(modifier = Modifier.width(8.dp))
             }
         }
@@ -211,10 +222,10 @@ fun Flop(flop: List<Card?>) {
 
 @Composable
 fun Turn(turn: List<Card?>) {
-    LazyRow {
-        itemsIndexed(turn) { index, card ->
+    Row {
+        turn.forEach { card ->
             card?.let {
-                CardFace(card = card)
+                CardFace(card = card, modifier = Modifier.weight(1.0f))
                 Spacer(modifier = Modifier.width(8.dp))
             }
         }
@@ -224,10 +235,11 @@ fun Turn(turn: List<Card?>) {
 
 @Composable
 fun River(river: List<Card?>) {
-    LazyRow {
-        itemsIndexed(river) { index, card ->
+    Row {
+        river.forEach { card ->
             card?.let {
-                CardFace(card = card)
+                CardFace(card = card, modifier = Modifier.weight(1.0f))
+                Spacer(modifier = Modifier.width(8.dp))
             }
         }
     }

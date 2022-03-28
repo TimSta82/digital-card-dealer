@@ -135,6 +135,7 @@ fun HandContent(
             if (hand.isValid()) {
                 Row(
                     modifier = Modifier
+                        .fillMaxHeight()
                         .constrainAs(revealHand) {
                             top.linkTo(parent.top)
                             start.linkTo(parent.start)
@@ -148,6 +149,7 @@ fun HandContent(
                         mutableStateOf(CardFace.Front)
                     }
                     FlipCard(
+                        modifier = Modifier.weight(1f),
                         card = hand.one,
                         cardFace = cardOneState,
                         onClick = {
@@ -160,6 +162,7 @@ fun HandContent(
                         mutableStateOf(CardFace.Front)
                     }
                     FlipCard(
+                        modifier = Modifier.weight(1f),
                         card = hand.two,
                         cardFace = cardTwoState,
                         onClick = {
@@ -186,26 +189,26 @@ fun HandContent(
 
 @Composable
 fun HandBottomSheet(modifier: Modifier = Modifier, hand: Hand) {
-    Box(
-        contentAlignment = Alignment.TopCenter,
-        modifier = Modifier.padding(one_GU)
+    Row(
+        modifier = Modifier
+            .padding(one_GU),
+        horizontalArrangement = Arrangement.SpaceEvenly,
     ) {
-        Row(
-            horizontalArrangement = Arrangement.Center,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            CardFace(card = hand.one)
-            Spacer(modifier = Modifier.width(one_GU))
-            CardFace(card = hand.two)
-        }
+        FlipCard(
+            cardFace = CardFace.Back,
+            modifier = Modifier.weight(1f),
+            card = hand.one,
+            onClick = {}
+        )
+        Spacer(modifier = Modifier.width(one_GU))
+        FlipCard(
+            cardFace = CardFace.Back,
+            modifier = Modifier.weight(1f),
+            card = hand.two,
+            onClick = {}
+        )
     }
 }
-
-//@Preview
-//@Composable
-//fun Preview_PlayerHandScreen(modifier: Modifier = Modifier) {
-////    PlayerHandScreen()
-//}
 
 @Preview
 @Composable
