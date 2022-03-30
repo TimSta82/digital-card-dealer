@@ -228,8 +228,8 @@ fun Preview_DealerContent() {
         boardCards = listOf(
             DeckHelper.getClubsCard(),
             DeckHelper.getDiamondsCard(),
-//            DeckHelper.getClubsCard(),
-//            DeckHelper.getDiamondsCard(),
+            DeckHelper.getClubsCard(),
+            DeckHelper.getDiamondsCard(),
             DeckHelper.getClubsCard()
         ),
         round = 1
@@ -246,15 +246,15 @@ fun getBoardPlayerMessage(count: Int): String {
 @Composable
 fun BoardCards(modifier: Modifier = Modifier, cards: List<Card>) {
     if (isValidAction(cards)) {
-        Row(modifier = modifier.fillMaxSize(0.5f)) {
+        Row(modifier = modifier.fillMaxSize(0.5f),
+        horizontalArrangement = Arrangement.SpaceAround
+            ) {
             cards.forEach { card ->
                 FlipCard(
-                    modifier = modifier.weight(0.8f),
                     cardFace = CardFace.Back,
                     card = card,
                     onClick = {}
                 )
-                Spacer(modifier = Modifier.width(8.dp))
             }
         }
     }
