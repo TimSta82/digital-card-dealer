@@ -118,8 +118,8 @@ fun DealerStartScreen(modifier: Modifier = Modifier, navController: NavControlle
             gamePhase = gamePhase,
             joinedPlayers = joinedPlayers,
             flop = flop,
-            turn = turn,
-            river = river,
+//            turn = turn,
+//            river = river,
             round = round
         )
     }
@@ -135,8 +135,8 @@ fun DealerContent(
     gamePhase: GamePhase?,
     joinedPlayers: List<Player>?,
     flop: List<Card>,
-    turn: List<Card>,
-    river: List<Card>,
+//    turn: List<Card>,
+//    river: List<Card>,
     round: Int
 ) {
     ConstraintLayout(
@@ -212,14 +212,14 @@ fun DealerContent(
                     start.linkTo(parent.start)
                     end.linkTo(dealerButton.start)
                     bottom.linkTo(playerInfo.top, margin = two_GU)
-                    width = Dimension.fillToConstraints
+                    width = Dimension.wrapContent
                 }, horizontalArrangement = Arrangement.Start
         ) {
             Flop(flop = flop)
-            Spacer(modifier = Modifier.width(one_GU))
-            Turn(turn = turn)
-            Spacer(modifier = Modifier.width(one_GU))
-            River(river = river)
+//            Spacer(modifier = Modifier.width(one_GU))
+//            Turn(turn = turn)
+//            Spacer(modifier = Modifier.width(one_GU))
+//            River(river = river)
         }
         FloatingActionButton(
             onClick = onDeal,
@@ -269,9 +269,9 @@ fun DealerContent(
 @Composable
 fun Preview_DealerContent() {
     DealerContent(onDeal = {}, onReset = {}, onAddPlayer = {}, onDismissQuitDialog = { }, table = PokerTable(), gamePhase = GamePhase.SHUFFLE, joinedPlayers = listOf(Player(), Player()),
-        flop = listOf(DeckHelper.getClubsCard(), DeckHelper.getClubsCard(), DeckHelper.getClubsCard()),
-        turn = listOf(DeckHelper.getDiamondsCard()),
-        river = listOf(DeckHelper.getSpadesCard()),
+        flop = listOf(DeckHelper.getClubsCard(), DeckHelper.getClubsCard(), DeckHelper.getClubsCard(), DeckHelper.getDiamondsCard(), DeckHelper.getSpadesCard()),
+//        turn = listOf(DeckHelper.getDiamondsCard()),
+//        river = listOf(DeckHelper.getSpadesCard()),
         round = 1
     )
 }
@@ -299,26 +299,34 @@ fun Flop(modifier: Modifier = Modifier, flop: List<Card>) {
     if (isValidAction(flop)) {
         Row(modifier = modifier) {
             FlipCard(
-                modifier = modifier.weight(0.5f),
                 cardFace = CardFace.Back,
                 card = flop.first(),
                 onClick = {}
             )
             Spacer(modifier = Modifier.width(8.dp))
             FlipCard(
-                modifier = modifier.weight(0.25f),
                 cardFace = CardFace.Back,
                 card = flop.second(),
                 onClick = {}
             )
             Spacer(modifier = Modifier.width(8.dp))
             FlipCard(
-                modifier = modifier.weight(0.25f),
                 cardFace = CardFace.Back,
                 card = flop.last(),
                 onClick = {}
             )
             Spacer(modifier = Modifier.width(8.dp))
+            FlipCard(
+                cardFace = CardFace.Back,
+                card = flop.last(),
+                onClick = {}
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            FlipCard(
+                cardFace = CardFace.Back,
+                card = flop.last(),
+                onClick = {}
+            )
         }
     }
 }
