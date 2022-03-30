@@ -35,7 +35,6 @@ import de.digitaldealer.cardsplease.ui.NavigationRoutes
 import de.digitaldealer.cardsplease.ui.extensions.collectAsStateLifecycleAware
 import de.digitaldealer.cardsplease.ui.main.composables.*
 import de.digitaldealer.cardsplease.ui.theme.fourteen_GU
-import de.digitaldealer.cardsplease.ui.theme.one_GU
 import de.digitaldealer.cardsplease.ui.theme.two_GU
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -53,9 +52,7 @@ fun DealerStartScreen(modifier: Modifier = Modifier, navController: NavControlle
     val table by viewModel.table.collectAsStateLifecycleAware()
     val gamePhase by viewModel.gamePhase.observeAsState()
     val joinedPlayers by viewModel.joinedPlayers.observeAsState()
-    val flop by viewModel.flop.collectAsStateLifecycleAware()
-    val turn by viewModel.turn.collectAsStateLifecycleAware()
-    val river by viewModel.river.collectAsStateLifecycleAware()
+    val boardCards by viewModel.boardCards.collectAsStateLifecycleAware()
     val round by viewModel.round.collectAsStateLifecycleAware()
 
     if (onOpenAddPlayerDialog != null) AddPlayerDialog(viewModel = viewModel, tableId = onOpenAddPlayerDialog!!.tableId, tableName = onOpenAddPlayerDialog!!.tableName)
@@ -117,9 +114,7 @@ fun DealerStartScreen(modifier: Modifier = Modifier, navController: NavControlle
             table = table,
             gamePhase = gamePhase,
             joinedPlayers = joinedPlayers,
-            flop = flop,
-//            turn = turn,
-//            river = river,
+            boardCards = boardCards,
             round = round
         )
     }
@@ -134,9 +129,7 @@ fun DealerContent(
     table: PokerTable,
     gamePhase: GamePhase?,
     joinedPlayers: List<Player>?,
-    flop: List<Card>,
-//    turn: List<Card>,
-//    river: List<Card>,
+    boardCards: List<Card>,
     round: Int
 ) {
     ConstraintLayout(
@@ -206,20 +199,16 @@ fun DealerContent(
         Row(
             /** Board */
             modifier = Modifier
-                .fillMaxWidth()
+                .padding(horizontal = two_GU)
                 .constrainAs(board) {
                     top.linkTo(tableInfo.bottom, margin = two_GU)
                     start.linkTo(parent.start)
                     end.linkTo(dealerButton.start)
                     bottom.linkTo(playerInfo.top, margin = two_GU)
-                    width = Dimension.wrapContent
+                    width = Dimension.fillToConstraints
                 }, horizontalArrangement = Arrangement.Start
         ) {
-            Flop(flop = flop)
-//            Spacer(modifier = Modifier.width(one_GU))
-//            Turn(turn = turn)
-//            Spacer(modifier = Modifier.width(one_GU))
-//            River(river = river)
+            BoardCards(cards = boardCards)
         }
         FloatingActionButton(
             onClick = onDeal,
@@ -265,11 +254,17 @@ fun DealerContent(
     }
 }
 
-@Preview(device = Devices.AUTOMOTIVE_1024p, widthDp = 720, heightDp = 360)
+@Preview(device = Devices.AUTOMOTIVE_1024p, widthDp = 1028, heightDp = 480)
 @Composable
 fun Preview_DealerContent() {
     DealerContent(onDeal = {}, onReset = {}, onAddPlayer = {}, onDismissQuitDialog = { }, table = PokerTable(), gamePhase = GamePhase.SHUFFLE, joinedPlayers = listOf(Player(), Player()),
-        flop = listOf(DeckHelper.getClubsCard(), DeckHelper.getClubsCard(), DeckHelper.getClubsCard(), DeckHelper.getDiamondsCard(), DeckHelper.getSpadesCard()),
+        boardCards = listOf(
+            DeckHelper.getClubsCard(),
+            DeckHelper.getDiamondsCard(),
+            DeckHelper.getClubsCard(),
+            DeckHelper.getDiamondsCard(),
+            DeckHelper.getClubsCard()
+        ),
 //        turn = listOf(DeckHelper.getDiamondsCard()),
 //        river = listOf(DeckHelper.getSpadesCard()),
         round = 1
@@ -295,38 +290,18 @@ fun getBoardPlayerMessage(count: Int): String {
 }
 
 @Composable
-fun Flop(modifier: Modifier = Modifier, flop: List<Card>) {
-    if (isValidAction(flop)) {
+fun BoardCards(modifier: Modifier = Modifier, cards: List<Card>) {
+    if (isValidAction(cards)) {
         Row(modifier = modifier) {
-            FlipCard(
-                cardFace = CardFace.Back,
-                card = flop.first(),
-                onClick = {}
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            FlipCard(
-                cardFace = CardFace.Back,
-                card = flop.second(),
-                onClick = {}
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            FlipCard(
-                cardFace = CardFace.Back,
-                card = flop.last(),
-                onClick = {}
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            FlipCard(
-                cardFace = CardFace.Back,
-                card = flop.last(),
-                onClick = {}
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            FlipCard(
-                cardFace = CardFace.Back,
-                card = flop.last(),
-                onClick = {}
-            )
+            cards.forEach { card ->
+                FlipCard(
+                    modifier = modifier.weight(0.8f),
+                    cardFace = CardFace.Back,
+                    card = card,
+                    onClick = {}
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+            }
         }
     }
 }

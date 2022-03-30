@@ -25,8 +25,8 @@ class DealerViewModel : ViewModel(), KoinComponent {
     private val _table = MutableStateFlow(PokerTable())
     val table = _table.asStateFlow()
 
-    private val _flop = MutableStateFlow(listOf(Card(), Card(), Card()))
-    val flop = _flop.asStateFlow()
+    private val _boardCards = MutableStateFlow(listOf(Card(), Card(), Card(), Card(), Card()))
+    val boardCards = _boardCards.asStateFlow()
 
     private val _turn = MutableStateFlow(listOf(Card()))
     val turn = _turn.asStateFlow()
@@ -66,6 +66,7 @@ class DealerViewModel : ViewModel(), KoinComponent {
 
     private var playersListener: ListenerRegistration? = null
     private var remainingCards: List<Card> = emptyList()
+    private var phaseDependingCards = mutableListOf<Card>()
     private var pokerTable: PokerTable? = null
 
     init {
@@ -113,7 +114,6 @@ class DealerViewModel : ViewModel(), KoinComponent {
         }
     }
 
-
     private fun initPokerTable(table: PokerTable) {
         gamesCollectionRef.document(table.tableId).set(table)
             .addOnSuccessListener {
@@ -136,11 +136,20 @@ class DealerViewModel : ViewModel(), KoinComponent {
     }
 
     private fun handleGamePhase(gamePhase: GamePhase) {
-        when (gamePhase) {
-            GamePhase.FLOP -> _flop.value = getCardsAndHandleRemainingCardStack(gamePhase)
-            GamePhase.TURN -> _turn.value = getCardsAndHandleRemainingCardStack(gamePhase)
-            GamePhase.RIVER -> _river.value = getCardsAndHandleRemainingCardStack(gamePhase)
-        }
+        phaseDependingCards.addAll(
+            when (gamePhase) {
+                GamePhase.FLOP -> getCardsAndHandleRemainingCardStack(gamePhase)
+                GamePhase.TURN -> getCardsAndHandleRemainingCardStack(gamePhase)
+                GamePhase.RIVER -> getCardsAndHandleRemainingCardStack(gamePhase)
+                GamePhase.DEAL -> {
+                    emptyList<Card>()
+                }
+                GamePhase.SHUFFLE -> {
+                    emptyList<Card>()
+                }
+            }
+        )
+        _boardCards.value = phaseDependingCards
         updateGamePhase(gamePhase)
     }
 
@@ -210,9 +219,8 @@ class DealerViewModel : ViewModel(), KoinComponent {
                 }
             }
             Logger.debug("delete all player hand cards")
-            _flop.value = emptyList()
-            _turn.value = emptyList()
-            _river.value = emptyList()
+            _boardCards.value = emptyList()
+            phaseDependingCards.clear()
             remainingCards = emptyList()
         }
     }
