@@ -25,14 +25,14 @@ class DealerViewModel : ViewModel(), KoinComponent {
     private val _table = MutableStateFlow(PokerTable())
     val table = _table.asStateFlow()
 
-    private val _flop = MutableLiveData<List<Card?>>()
-    val flop: LiveData<List<Card?>> = _flop
+    private val _flop = MutableStateFlow(listOf(Card(), Card(), Card()))
+    val flop = _flop.asStateFlow()
 
-    private val _turn = MutableLiveData<List<Card?>>()
-    val turn: LiveData<List<Card?>> = _turn
+    private val _turn = MutableStateFlow(listOf(Card()))
+    val turn = _turn.asStateFlow()
 
-    private val _river = MutableLiveData<List<Card?>>()
-    val river: LiveData<List<Card?>> = _river
+    private val _river = MutableStateFlow(listOf(Card()))
+    val river = _river.asStateFlow()
 
     private val _onOpenAddPlayerDialog = MutableLiveData<PokerTable?>()
     val onOpenAddPlayerDialog: LiveData<PokerTable?> = _onOpenAddPlayerDialog
@@ -137,9 +137,9 @@ class DealerViewModel : ViewModel(), KoinComponent {
 
     private fun handleGamePhase(gamePhase: GamePhase) {
         when (gamePhase) {
-            GamePhase.FLOP -> _flop.postValue(getCardsAndHandleRemainingCardStack(gamePhase))
-            GamePhase.TURN -> _turn.postValue(getCardsAndHandleRemainingCardStack(gamePhase))
-            GamePhase.RIVER -> _river.postValue(getCardsAndHandleRemainingCardStack(gamePhase))
+            GamePhase.FLOP -> _flop.value = getCardsAndHandleRemainingCardStack(gamePhase)
+            GamePhase.TURN -> _turn.value = getCardsAndHandleRemainingCardStack(gamePhase)
+            GamePhase.RIVER -> _river.value = getCardsAndHandleRemainingCardStack(gamePhase)
         }
         updateGamePhase(gamePhase)
     }
@@ -210,9 +210,9 @@ class DealerViewModel : ViewModel(), KoinComponent {
                 }
             }
             Logger.debug("delete all player hand cards")
-            _flop.postValue(emptyList())
-            _turn.postValue(emptyList())
-            _river.postValue(emptyList())
+            _flop.value = emptyList()
+            _turn.value = emptyList()
+            _river.value = emptyList()
             remainingCards = emptyList()
         }
     }

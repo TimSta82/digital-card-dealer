@@ -106,9 +106,9 @@ fun DealerContent(viewModel: DealerViewModel, onDismissQuitDialog: () -> Unit) {
     val table by viewModel.table.collectAsStateLifecycleAware()
     val gamePhase by viewModel.gamePhase.observeAsState()
     val joinedPlayers by viewModel.joinedPlayers.observeAsState()
-    val flop by viewModel.flop.observeAsState(emptyList())
-    val turn by viewModel.turn.observeAsState(emptyList())
-    val river by viewModel.river.observeAsState(emptyList())
+    val flop by viewModel.flop.collectAsStateLifecycleAware()
+    val turn by viewModel.turn.collectAsStateLifecycleAware()
+    val river by viewModel.river.collectAsStateLifecycleAware()
     val round by viewModel.round.collectAsStateLifecycleAware()
 
     ConstraintLayout(
@@ -139,15 +139,18 @@ fun DealerContent(viewModel: DealerViewModel, onDismissQuitDialog: () -> Unit) {
         if (joinedPlayers != null || joinedPlayers?.size ?: 0 < 2) CustomText(modifier = Modifier.constrainAs(boardInfo) {
             top.linkTo(tableInfo.bottom, margin = two_GU)
             start.linkTo(parent.start)
-            end.linkTo(parent.start)
+            end.linkTo(parent.end)
             bottom.linkTo(playerInfo.top, margin = two_GU)
         }, text = getBoardPlayerMessage(joinedPlayers?.size ?: 0))
-        Board(modifier = Modifier.constrainAs(board) {
-            top.linkTo(tableInfo.bottom, margin = two_GU)
-            start.linkTo(parent.start)
-            end.linkTo(dealerButton.start)
-            bottom.linkTo(playerInfo.top, margin = two_GU)
-        }, flop, turn, river)
+        Box(modifier = Modifier
+            .constrainAs(board) {
+                top.linkTo(tableInfo.bottom, margin = two_GU)
+                start.linkTo(parent.start)
+                end.linkTo(dealerButton.start)
+                bottom.linkTo(playerInfo.top, margin = two_GU)
+            }) {
+            Board(flop = flop, turn = turn, river = river)
+        }
 //        Row(
 //            /** Board */
 //            modifier = Modifier
@@ -210,13 +213,19 @@ fun DealerContent(viewModel: DealerViewModel, onDismissQuitDialog: () -> Unit) {
 }
 
 @Composable
-fun Board(modifier: Modifier, flop: List<Card?>, turn: List<Card?>, river: List<Card?>) {
-    Row(modifier = modifier.fillMaxHeight()) {
-        Flop(flop = flop)
+fun Board(flop: List<Card>, turn: List<Card>, river: List<Card>) {
+    Row() {
+        Box(modifier = Modifier.weight(0.7f)) {
+            Flop(flop = flop)
+        }
         Spacer(modifier = Modifier.width(one_GU))
-        Turn(turn = turn)
+        Box(modifier = Modifier.weight(0.15f)) {
+            Turn(turn = turn)
+        }
         Spacer(modifier = Modifier.width(one_GU))
-        River(river = river)
+        Box(modifier = Modifier.weight(0.15f)) {
+            River(river = river)
+        }
     }
 }
 
@@ -224,10 +233,9 @@ fun Board(modifier: Modifier, flop: List<Card?>, turn: List<Card?>, river: List<
 @Composable
 fun Preview_Board(modifier: Modifier = Modifier) {
     Board(
-        modifier = modifier,
-        flop = listOf(DeckHelper.getCard(), DeckHelper.getCard(), DeckHelper.getCard()),
-        turn = listOf(DeckHelper.getCard()),
-        river = listOf(DeckHelper.getCard())
+        flop = listOf(DeckHelper.getSpadesCard(), DeckHelper.getSpadesCard(), DeckHelper.getSpadesCard()),
+        turn = listOf(DeckHelper.getClubsCard()),
+        river = listOf(DeckHelper.getDiamondsCard())
     )
 }
 
@@ -240,14 +248,13 @@ fun getBoardPlayerMessage(count: Int): String {
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun Flop(flop: List<Card?>) {
-    Row {
-        flop.forEach { card ->
-            card?.let { c ->
+fun Flop(flop: List<Card>) {
+    if (isValidAction(flop)) {
+        Row {
+            flop.forEach { card ->
                 FlipCard(
                     cardFace = CardFace.Back,
-                    modifier = Modifier.weight(0.2f),
-                    card = c,
+                    card = card,
                     onClick = {}
                 )
                 Spacer(modifier = Modifier.width(8.dp))
@@ -257,14 +264,13 @@ fun Flop(flop: List<Card?>) {
 }
 
 @Composable
-fun Turn(turn: List<Card?>) {
-    Row {
-        turn.forEach { card ->
-            card?.let { c ->
+fun Turn(turn: List<Card>) {
+    if (isValidAction(turn)) {
+        Row {
+            turn.forEach { card ->
                 FlipCard(
                     cardFace = CardFace.Back,
-                    modifier = Modifier.weight(0.2f),
-                    card = c,
+                    card = card,
                     onClick = {}
                 )
                 Spacer(modifier = Modifier.width(8.dp))
@@ -273,22 +279,24 @@ fun Turn(turn: List<Card?>) {
     }
 }
 
-
 @Composable
-fun River(river: List<Card?>) {
-    Row {
-        river.forEach { card ->
-            card?.let { c ->
+fun River(river: List<Card>) {
+    if (isValidAction(river)) {
+        Row {
+            river.forEach { card ->
                 FlipCard(
                     cardFace = CardFace.Back,
-                    modifier = Modifier.weight(0.2f),
-                    card = c,
+                    card = card,
                     onClick = {}
                 )
                 Spacer(modifier = Modifier.width(8.dp))
             }
         }
     }
+}
+
+fun isValidAction(cards: List<Card>): Boolean {
+    return cards.none { card -> card.value == "" }
 }
 
 @Composable
