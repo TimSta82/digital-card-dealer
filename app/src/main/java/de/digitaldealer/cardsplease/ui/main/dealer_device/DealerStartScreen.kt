@@ -28,6 +28,9 @@ import androidx.navigation.NavController
 import de.digitaldealer.cardsplease.R
 import de.digitaldealer.cardsplease.domain.model.Card
 import de.digitaldealer.cardsplease.domain.model.DeckHelper
+import de.digitaldealer.cardsplease.domain.model.Player
+import de.digitaldealer.cardsplease.domain.model.PokerTable
+import de.digitaldealer.cardsplease.extensions.second
 import de.digitaldealer.cardsplease.ui.NavigationRoutes
 import de.digitaldealer.cardsplease.ui.extensions.collectAsStateLifecycleAware
 import de.digitaldealer.cardsplease.ui.main.composables.*
@@ -46,7 +49,14 @@ fun DealerStartScreen(modifier: Modifier = Modifier, navController: NavControlle
     val context = LocalContext.current
 
     val onOpenAddPlayerDialog by viewModel.onOpenAddPlayerDialog.observeAsState()
+
     val table by viewModel.table.collectAsStateLifecycleAware()
+    val gamePhase by viewModel.gamePhase.observeAsState()
+    val joinedPlayers by viewModel.joinedPlayers.observeAsState()
+    val flop by viewModel.flop.collectAsStateLifecycleAware()
+    val turn by viewModel.turn.collectAsStateLifecycleAware()
+    val river by viewModel.river.collectAsStateLifecycleAware()
+    val round by viewModel.round.collectAsStateLifecycleAware()
 
     if (onOpenAddPlayerDialog != null) AddPlayerDialog(viewModel = viewModel, tableId = onOpenAddPlayerDialog!!.tableId, tableName = onOpenAddPlayerDialog!!.tableName)
 
@@ -94,31 +104,48 @@ fun DealerStartScreen(modifier: Modifier = Modifier, navController: NavControlle
         onDispose { viewModel.onStop() }
     }
 
+
     Scaffold(
         modifier = Modifier,
         scaffoldState = scaffoldState // attaching `scaffoldState` to the `Scaffold`
     ) {
-        DealerContent(viewModel, onDismissQuitDialog = { showDeleteGameDialog.value = true })
+        DealerContent(
+            onDeal = { gamePhase?.let { phase -> viewModel.deal(gamePhase = phase) } },
+            onReset = { viewModel.reset() },
+            onAddPlayer = { viewModel.addPlayer() },
+            onDismissQuitDialog = { showDeleteGameDialog.value = true },
+            table = table,
+            gamePhase = gamePhase,
+            joinedPlayers = joinedPlayers,
+            flop = flop,
+            turn = turn,
+            river = river,
+            round = round
+        )
     }
 }
 
 @Composable
-fun DealerContent(viewModel: DealerViewModel, onDismissQuitDialog: () -> Unit) {
-    val table by viewModel.table.collectAsStateLifecycleAware()
-    val gamePhase by viewModel.gamePhase.observeAsState()
-    val joinedPlayers by viewModel.joinedPlayers.observeAsState()
-    val flop by viewModel.flop.collectAsStateLifecycleAware()
-    val turn by viewModel.turn.collectAsStateLifecycleAware()
-    val river by viewModel.river.collectAsStateLifecycleAware()
-    val round by viewModel.round.collectAsStateLifecycleAware()
-
+fun DealerContent(
+    onDeal: () -> Unit,
+    onReset: () -> Unit,
+    onAddPlayer: () -> Unit,
+    onDismissQuitDialog: () -> Unit,
+    table: PokerTable,
+    gamePhase: GamePhase?,
+    joinedPlayers: List<Player>?,
+    flop: List<Card>,
+    turn: List<Card>,
+    river: List<Card>,
+    round: Int
+) {
     ConstraintLayout(
         modifier = Modifier
             .fillMaxSize()
             .background(color = colorResource(id = R.color.dealer_background))
             .padding(two_GU)
     ) {
-        val (infoButton, tableInfo, quitButton, flopRow, turnRow, riverRow, dealerButton, playerInfo, addPlayerButton, resetButton, boardInfo) = createRefs()
+        val (infoButton, tableInfo, quitButton, board, flopRow, turnRow, riverRow, dealerButton, playerInfo, addPlayerButton, resetButton, boardInfo) = createRefs()
         FloatingActionButton(onClick = { /*TODO*/ }, modifier = Modifier.constrainAs(infoButton) {
             top.linkTo(parent.top)
             start.linkTo(parent.start)
@@ -137,75 +164,65 @@ fun DealerContent(viewModel: DealerViewModel, onDismissQuitDialog: () -> Unit) {
         }) {
             Icon(Icons.Filled.ExitToApp, contentDescription = "")
         }
-        if (joinedPlayers != null || joinedPlayers?.size ?: 0 < 2) CustomText(modifier = Modifier.constrainAs(boardInfo) {
+        if (joinedPlayers?.size ?: 0 <= 1) CustomText(modifier = Modifier.constrainAs(boardInfo) {
             top.linkTo(infoButton.bottom, margin = two_GU)
             start.linkTo(parent.start)
             end.linkTo(parent.end)
             bottom.linkTo(addPlayerButton.top, margin = two_GU)
         }, text = getBoardPlayerMessage(joinedPlayers?.size ?: 0))
-        Flop(
-            modifier = Modifier
-                .constrainAs(flopRow) {
-                    top.linkTo(infoButton.bottom, margin = two_GU)
-                    start.linkTo(parent.start, margin = two_GU)
-                    end.linkTo(turnRow.start)
-                    bottom.linkTo(addPlayerButton.top, margin = two_GU)
-                    width = Dimension.preferredWrapContent
-                },
-            flop = flop
-        )
-        Turn(
-            modifier = Modifier
-                .constrainAs(turnRow) {
-                    top.linkTo(flopRow.top, margin = two_GU)
-                    start.linkTo(flopRow.end, margin = one_GU)
-                    end.linkTo(riverRow.start, margin = one_GU)
-                    bottom.linkTo(flopRow.bottom, margin = two_GU)
-                    width = Dimension.preferredWrapContent
-                },
-            turn = turn
-        )
-        River(
-            modifier = Modifier
-                .constrainAs(turnRow) {
-                    top.linkTo(turnRow.top, margin = two_GU)
-                    start.linkTo(turnRow.end)
-                    end.linkTo(dealerButton.start, margin = two_GU)
-                    bottom.linkTo(turnRow.bottom, margin = two_GU)
-                    width = Dimension.preferredWrapContent
-                },
-            river = river
-        )
-//        Board(
+//        Flop(
 //            modifier = Modifier
-//                .constrainAs(board) {
+//                .constrainAs(flopRow) {
 //                    top.linkTo(tableInfo.bottom, margin = two_GU)
-//                    start.linkTo(parent.start)
-//                    end.linkTo(dealerButton.start)
+//                    start.linkTo(parent.start, margin = two_GU)
+//                    end.linkTo(turnRow.start)
 //                    bottom.linkTo(playerInfo.top, margin = two_GU)
 //                    width = Dimension.preferredWrapContent
 //                },
-//            flop = flop, turn = turn, river = river
+//            flop = flop
 //        )
-//        Row(
-//            /** Board */
+//        Turn(
 //            modifier = Modifier
-//                .fillMaxWidth()
-//                .constrainAs(board) {
-//                    top.linkTo(tableInfo.bottom, margin = two_GU)
-//                    start.linkTo(parent.start)
-//                    end.linkTo(dealerButton.start)
-//                    bottom.linkTo(playerInfo.top, margin = two_GU)
-//                }, horizontalArrangement = Arrangement.Start
-//        ) {
-//            Flop(flop = flop)
-//            Spacer(modifier = Modifier.width(one_GU))
-//            Turn(turn = turn)
-//            Spacer(modifier = Modifier.width(one_GU))
-//            River(river = river)
-//        }
+//                .constrainAs(turnRow) {
+//                    top.linkTo(flopRow.top, margin = two_GU)
+//                    start.linkTo(flopRow.end, margin = one_GU)
+//                    end.linkTo(riverRow.start, margin = one_GU)
+//                    bottom.linkTo(flopRow.bottom, margin = two_GU)
+//                    width = Dimension.preferredWrapContent
+//                },
+//            turn = turn
+//        )
+//        River(
+//            modifier = Modifier
+//                .constrainAs(turnRow) {
+//                    top.linkTo(turnRow.top, margin = two_GU)
+//                    start.linkTo(turnRow.end)
+//                    end.linkTo(parent.end, margin = seven_GU)
+//                    bottom.linkTo(turnRow.bottom, margin = two_GU)
+//                    width = Dimension.preferredWrapContent
+//                },
+//            river = river
+//        )
+        Row(
+            /** Board */
+            modifier = Modifier
+                .fillMaxWidth()
+                .constrainAs(board) {
+                    top.linkTo(tableInfo.bottom, margin = two_GU)
+                    start.linkTo(parent.start)
+                    end.linkTo(dealerButton.start)
+                    bottom.linkTo(playerInfo.top, margin = two_GU)
+                    width = Dimension.fillToConstraints
+                }, horizontalArrangement = Arrangement.Start
+        ) {
+            Flop(flop = flop)
+            Spacer(modifier = Modifier.width(one_GU))
+            Turn(turn = turn)
+            Spacer(modifier = Modifier.width(one_GU))
+            River(river = river)
+        }
         FloatingActionButton(
-            onClick = { gamePhase?.let { phase -> viewModel.deal(gamePhase = phase) } },
+            onClick = onDeal,
             modifier = Modifier
                 .size(fourteen_GU)
                 .constrainAs(dealerButton) {
@@ -217,7 +234,7 @@ fun DealerContent(viewModel: DealerViewModel, onDismissQuitDialog: () -> Unit) {
         }
         if (gamePhase != GamePhase.DEAL) {
             ExtendedFloatingActionButton(
-                onClick = { viewModel.reset() },
+                onClick = onReset,
                 modifier = Modifier
                     .padding(top = two_GU)
                     .constrainAs(resetButton) {
@@ -236,7 +253,7 @@ fun DealerContent(viewModel: DealerViewModel, onDismissQuitDialog: () -> Unit) {
                 bottom.linkTo(addPlayerButton.bottom)
             })
             if (players == null || players.size < 10) {
-                ExtendedFloatingActionButton(onClick = { viewModel.addPlayer() }, modifier = Modifier.constrainAs(addPlayerButton) {
+                ExtendedFloatingActionButton(onClick = onAddPlayer, modifier = Modifier.constrainAs(addPlayerButton) {
                     end.linkTo(parent.end)
                     bottom.linkTo(parent.bottom)
                 },
@@ -247,17 +264,17 @@ fun DealerContent(viewModel: DealerViewModel, onDismissQuitDialog: () -> Unit) {
         }
     }
 }
-//
-//@Composable
-//fun Board(modifier: Modifier, flop: List<Card>, turn: List<Card>, river: List<Card>) {
-//    Row(modifier = modifier) {
-//        Flop(flop = flop)
-//        Spacer(modifier = Modifier.width(one_GU))
-//        Turn(turn = turn)
-//        Spacer(modifier = Modifier.width(one_GU))
-//        River(river = river)
-//    }
-//}
+
+@Preview(device = Devices.AUTOMOTIVE_1024p, widthDp = 720, heightDp = 360)
+@Composable
+fun Preview_DealerContent() {
+    DealerContent(onDeal = {}, onReset = {}, onAddPlayer = {}, onDismissQuitDialog = { }, table = PokerTable(), gamePhase = GamePhase.SHUFFLE, joinedPlayers = listOf(Player(), Player()),
+        flop = listOf(DeckHelper.getClubsCard(), DeckHelper.getClubsCard(), DeckHelper.getClubsCard()),
+        turn = listOf(DeckHelper.getDiamondsCard()),
+        river = listOf(DeckHelper.getSpadesCard()),
+        round = 1
+    )
+}
 //
 //@Preview(device = Devices.AUTOMOTIVE_1024p, widthDp = 720, heightDp = 360)
 //@Composable
@@ -278,49 +295,60 @@ fun getBoardPlayerMessage(count: Int): String {
 }
 
 @Composable
-fun Flop(modifier: Modifier, flop: List<Card>) {
+fun Flop(modifier: Modifier = Modifier, flop: List<Card>) {
     if (isValidAction(flop)) {
         Row(modifier = modifier) {
-            flop.forEach { card ->
-                FlipCard(
-                    cardFace = CardFace.Back,
-                    card = card,
-                    onClick = {}
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-            }
+            FlipCard(
+                modifier = modifier.weight(0.5f),
+                cardFace = CardFace.Back,
+                card = flop.first(),
+                onClick = {}
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            FlipCard(
+                modifier = modifier.weight(0.25f),
+                cardFace = CardFace.Back,
+                card = flop.second(),
+                onClick = {}
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            FlipCard(
+                modifier = modifier.weight(0.25f),
+                cardFace = CardFace.Back,
+                card = flop.last(),
+                onClick = {}
+            )
+            Spacer(modifier = Modifier.width(8.dp))
         }
     }
 }
 
 @Composable
-fun Turn(modifier: Modifier, turn: List<Card>) {
+fun Turn(modifier: Modifier = Modifier, turn: List<Card>) {
     if (isValidAction(turn)) {
         Row(modifier = modifier) {
-            turn.forEach { card ->
-                FlipCard(
-                    cardFace = CardFace.Back,
-                    card = card,
-                    onClick = {}
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-            }
+            FlipCard(
+                modifier = modifier.weight(1f),
+                cardFace = CardFace.Back,
+                card = turn.first(),
+                onClick = {}
+            )
+            Spacer(modifier = Modifier.width(8.dp))
         }
     }
 }
 
 @Composable
-fun River(modifier: Modifier, river: List<Card>) {
+fun River(modifier: Modifier = Modifier, river: List<Card>) {
     if (isValidAction(river)) {
         Row(modifier = modifier) {
-            river.forEach { card ->
-                FlipCard(
-                    cardFace = CardFace.Back,
-                    card = card,
-                    onClick = {}
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-            }
+            FlipCard(
+                modifier = modifier.weight(1f),
+                cardFace = CardFace.Back,
+                card = river.first(),
+                onClick = {}
+            )
+            Spacer(modifier = Modifier.width(8.dp))
         }
     }
 }
@@ -348,11 +376,4 @@ fun Context.findActivity(): Activity? = when (this) {
     is Activity -> this
     is ContextWrapper -> baseContext.findActivity()
     else -> null
-}
-
-@Preview
-@Composable
-fun Preview_DealerContent(modifier: Modifier = Modifier) {
-    val viewModel: DealerViewModel = viewModel()
-    DealerContent(viewModel, onDismissQuitDialog = {})
 }
