@@ -1,5 +1,7 @@
 package de.digitaldealer.cardsplease.ui
 
+import android.app.Activity
+import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.os.Bundle
 import androidx.activity.compose.setContent
@@ -35,6 +37,12 @@ import de.digitaldealer.cardsplease.ui.main.start.legal.ImprintScreen
 import de.digitaldealer.cardsplease.ui.theme.DefaultTheme
 
 class MainActivity : BaseActivity() {
+
+    companion object {
+        fun startActivity(origin: Activity) {
+            origin.startActivity(Intent(origin, MainActivity::class.java))
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

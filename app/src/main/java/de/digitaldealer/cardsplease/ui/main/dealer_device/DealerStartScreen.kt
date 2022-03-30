@@ -163,39 +163,6 @@ fun DealerContent(
             end.linkTo(parent.end)
             bottom.linkTo(addPlayerButton.top, margin = two_GU)
         }, text = getBoardPlayerMessage(joinedPlayers?.size ?: 0))
-//        Flop(
-//            modifier = Modifier
-//                .constrainAs(flopRow) {
-//                    top.linkTo(tableInfo.bottom, margin = two_GU)
-//                    start.linkTo(parent.start, margin = two_GU)
-//                    end.linkTo(turnRow.start)
-//                    bottom.linkTo(playerInfo.top, margin = two_GU)
-//                    width = Dimension.preferredWrapContent
-//                },
-//            flop = flop
-//        )
-//        Turn(
-//            modifier = Modifier
-//                .constrainAs(turnRow) {
-//                    top.linkTo(flopRow.top, margin = two_GU)
-//                    start.linkTo(flopRow.end, margin = one_GU)
-//                    end.linkTo(riverRow.start, margin = one_GU)
-//                    bottom.linkTo(flopRow.bottom, margin = two_GU)
-//                    width = Dimension.preferredWrapContent
-//                },
-//            turn = turn
-//        )
-//        River(
-//            modifier = Modifier
-//                .constrainAs(turnRow) {
-//                    top.linkTo(turnRow.top, margin = two_GU)
-//                    start.linkTo(turnRow.end)
-//                    end.linkTo(parent.end, margin = seven_GU)
-//                    bottom.linkTo(turnRow.bottom, margin = two_GU)
-//                    width = Dimension.preferredWrapContent
-//                },
-//            river = river
-//        )
         Row(
             /** Board */
             modifier = Modifier
@@ -205,7 +172,7 @@ fun DealerContent(
                     start.linkTo(parent.start)
                     end.linkTo(dealerButton.start)
                     bottom.linkTo(playerInfo.top, margin = two_GU)
-                    width = Dimension.fillToConstraints
+                    width = Dimension.wrapContent
                 }, horizontalArrangement = Arrangement.Start
         ) {
             BoardCards(cards = boardCards)
@@ -254,33 +221,20 @@ fun DealerContent(
     }
 }
 
-@Preview(device = Devices.AUTOMOTIVE_1024p, widthDp = 1028, heightDp = 480)
+@Preview(device = Devices.AUTOMOTIVE_1024p, widthDp = 1024, heightDp = 480)
 @Composable
 fun Preview_DealerContent() {
     DealerContent(onDeal = {}, onReset = {}, onAddPlayer = {}, onDismissQuitDialog = { }, table = PokerTable(), gamePhase = GamePhase.SHUFFLE, joinedPlayers = listOf(Player(), Player()),
         boardCards = listOf(
             DeckHelper.getClubsCard(),
             DeckHelper.getDiamondsCard(),
-            DeckHelper.getClubsCard(),
-            DeckHelper.getDiamondsCard(),
+//            DeckHelper.getClubsCard(),
+//            DeckHelper.getDiamondsCard(),
             DeckHelper.getClubsCard()
         ),
-//        turn = listOf(DeckHelper.getDiamondsCard()),
-//        river = listOf(DeckHelper.getSpadesCard()),
         round = 1
     )
 }
-//
-//@Preview(device = Devices.AUTOMOTIVE_1024p, widthDp = 720, heightDp = 360)
-//@Composable
-//fun Preview_Board(modifier: Modifier = Modifier) {
-//    Board(
-//        modifier = modifier,
-//        flop = listOf(DeckHelper.getSpadesCard(), DeckHelper.getSpadesCard(), DeckHelper.getSpadesCard()),
-//        turn = listOf(DeckHelper.getClubsCard()),
-//        river = listOf(DeckHelper.getDiamondsCard())
-//    )
-//}
 
 fun getBoardPlayerMessage(count: Int): String {
     return when (count) {
@@ -292,7 +246,7 @@ fun getBoardPlayerMessage(count: Int): String {
 @Composable
 fun BoardCards(modifier: Modifier = Modifier, cards: List<Card>) {
     if (isValidAction(cards)) {
-        Row(modifier = modifier) {
+        Row(modifier = modifier.fillMaxSize(0.5f)) {
             cards.forEach { card ->
                 FlipCard(
                     modifier = modifier.weight(0.8f),
@@ -302,36 +256,6 @@ fun BoardCards(modifier: Modifier = Modifier, cards: List<Card>) {
                 )
                 Spacer(modifier = Modifier.width(8.dp))
             }
-        }
-    }
-}
-
-@Composable
-fun Turn(modifier: Modifier = Modifier, turn: List<Card>) {
-    if (isValidAction(turn)) {
-        Row(modifier = modifier) {
-            FlipCard(
-                modifier = modifier.weight(1f),
-                cardFace = CardFace.Back,
-                card = turn.first(),
-                onClick = {}
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-        }
-    }
-}
-
-@Composable
-fun River(modifier: Modifier = Modifier, river: List<Card>) {
-    if (isValidAction(river)) {
-        Row(modifier = modifier) {
-            FlipCard(
-                modifier = modifier.weight(1f),
-                cardFace = CardFace.Back,
-                card = river.first(),
-                onClick = {}
-            )
-            Spacer(modifier = Modifier.width(8.dp))
         }
     }
 }
