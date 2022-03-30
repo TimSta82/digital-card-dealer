@@ -28,20 +28,14 @@ class DealerViewModel : ViewModel(), KoinComponent {
     private val _boardCards = MutableStateFlow(listOf(Card(), Card(), Card(), Card(), Card()))
     val boardCards = _boardCards.asStateFlow()
 
-    private val _turn = MutableStateFlow(listOf(Card()))
-    val turn = _turn.asStateFlow()
-
-    private val _river = MutableStateFlow(listOf(Card()))
-    val river = _river.asStateFlow()
-
     private val _onOpenAddPlayerDialog = MutableLiveData<PokerTable?>()
     val onOpenAddPlayerDialog: LiveData<PokerTable?> = _onOpenAddPlayerDialog
 
-    private val _gamePhase = MutableLiveData(GamePhase.DEAL)
-    val gamePhase: LiveData<GamePhase> = _gamePhase
+    private val _gamePhase = MutableStateFlow(GamePhase.DEAL)
+    val gamePhase = _gamePhase.asStateFlow()
 
-    private val _joinedPlayers = MutableLiveData<List<Player>>()
-    val joinedPlayers: LiveData<List<Player>> = _joinedPlayers
+    private val _joinedPlayers = MutableStateFlow(listOf(Player()))
+    val joinedPlayers = _joinedPlayers.asStateFlow()
 
     private val _onPlayerCountError = SingleLiveEvent<PlayerCountError>()
     val onPlayerCountError: LiveData<PlayerCountError> = _onPlayerCountError

@@ -20,7 +20,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -30,11 +29,11 @@ import de.digitaldealer.cardsplease.domain.model.Card
 import de.digitaldealer.cardsplease.domain.model.DeckHelper
 import de.digitaldealer.cardsplease.domain.model.Player
 import de.digitaldealer.cardsplease.domain.model.PokerTable
-import de.digitaldealer.cardsplease.extensions.second
 import de.digitaldealer.cardsplease.ui.NavigationRoutes
 import de.digitaldealer.cardsplease.ui.extensions.collectAsStateLifecycleAware
 import de.digitaldealer.cardsplease.ui.main.composables.*
 import de.digitaldealer.cardsplease.ui.theme.fourteen_GU
+import de.digitaldealer.cardsplease.ui.theme.one_GU
 import de.digitaldealer.cardsplease.ui.theme.two_GU
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -50,8 +49,8 @@ fun DealerStartScreen(modifier: Modifier = Modifier, navController: NavControlle
     val onOpenAddPlayerDialog by viewModel.onOpenAddPlayerDialog.observeAsState()
 
     val table by viewModel.table.collectAsStateLifecycleAware()
-    val gamePhase by viewModel.gamePhase.observeAsState()
-    val joinedPlayers by viewModel.joinedPlayers.observeAsState()
+    val gamePhase by viewModel.gamePhase.collectAsStateLifecycleAware()
+    val joinedPlayers by viewModel.joinedPlayers.collectAsStateLifecycleAware()
     val boardCards by viewModel.boardCards.collectAsStateLifecycleAware()
     val round by viewModel.round.collectAsStateLifecycleAware()
 
@@ -107,7 +106,7 @@ fun DealerStartScreen(modifier: Modifier = Modifier, navController: NavControlle
         scaffoldState = scaffoldState // attaching `scaffoldState` to the `Scaffold`
     ) {
         DealerContent(
-            onDeal = { gamePhase?.let { phase -> viewModel.deal(gamePhase = phase) } },
+            onDeal = { viewModel.deal(gamePhase = gamePhase) },
             onReset = { viewModel.reset() },
             onAddPlayer = { viewModel.addPlayer() },
             onDismissQuitDialog = { showDeleteGameDialog.value = true },
@@ -128,7 +127,7 @@ fun DealerContent(
     onDismissQuitDialog: () -> Unit,
     table: PokerTable,
     gamePhase: GamePhase?,
-    joinedPlayers: List<Player>?,
+    joinedPlayers: List<Player>,
     boardCards: List<Card>,
     round: Int
 ) {
@@ -157,12 +156,12 @@ fun DealerContent(
         }) {
             Icon(Icons.Filled.ExitToApp, contentDescription = "")
         }
-        if (joinedPlayers?.size ?: 0 <= 1) CustomText(modifier = Modifier.constrainAs(boardInfo) {
+        if (isDefaultPlayer(joinedPlayers) || joinedPlayers.size <= 1) CustomText(modifier = Modifier.constrainAs(boardInfo) {
             top.linkTo(infoButton.bottom, margin = two_GU)
             start.linkTo(parent.start)
             end.linkTo(parent.end)
             bottom.linkTo(addPlayerButton.top, margin = two_GU)
-        }, text = getBoardPlayerMessage(joinedPlayers?.size ?: 0))
+        }, text = getBoardPlayerMessage(joinedPlayers))
         Row(
             /** Board */
             modifier = Modifier
@@ -173,7 +172,7 @@ fun DealerContent(
                     end.linkTo(dealerButton.start)
                     bottom.linkTo(playerInfo.top, margin = two_GU)
                     width = Dimension.wrapContent
-                }, horizontalArrangement = Arrangement.Start
+                }, horizontalArrangement = Arrangement.Center
         ) {
             BoardCards(cards = boardCards)
         }
@@ -202,21 +201,19 @@ fun DealerContent(
                 }
             )
         }
-        joinedPlayers.let { players ->
-            CustomText(text = "Spieler: ${players?.count()}", modifier = Modifier.constrainAs(playerInfo) {
-                start.linkTo(parent.start)
-                top.linkTo(addPlayerButton.top)
-                bottom.linkTo(addPlayerButton.bottom)
-            })
-            if (players == null || players.size < 10) {
-                ExtendedFloatingActionButton(onClick = onAddPlayer, modifier = Modifier.constrainAs(addPlayerButton) {
-                    end.linkTo(parent.end)
-                    bottom.linkTo(parent.bottom)
-                },
-                    text = {
-                        Text(text = "Spieler hinzufügen")
-                    })
-            }
+        CustomText(text = "Spieler: ${if (isDefaultPlayer(players = joinedPlayers)) 0 else joinedPlayers.count()}", modifier = Modifier.constrainAs(playerInfo) {
+            start.linkTo(parent.start)
+            top.linkTo(addPlayerButton.top)
+            bottom.linkTo(addPlayerButton.bottom)
+        })
+        if (joinedPlayers.size < 10) {
+            ExtendedFloatingActionButton(onClick = onAddPlayer, modifier = Modifier.constrainAs(addPlayerButton) {
+                end.linkTo(parent.end)
+                bottom.linkTo(parent.bottom)
+            },
+                text = {
+                    Text(text = "Spieler hinzufügen")
+                })
         }
     }
 }
@@ -236,8 +233,12 @@ fun Preview_DealerContent() {
     )
 }
 
-fun getBoardPlayerMessage(count: Int): String {
-    return when (count) {
+fun isDefaultPlayer(players: List<Player>): Boolean {
+    return players.any { player -> player.uuid == "" }
+}
+
+fun getBoardPlayerMessage(players: List<Player>): String {
+    return when (if (isDefaultPlayer(players)) players.size - 1 else players.size) {
         0 -> "Um spielen zu können, müssen mindestens 2 Spieler teilnehmen"
         else -> "Jetzt fehlt noch 1 Spieler"
     }
@@ -246,15 +247,21 @@ fun getBoardPlayerMessage(count: Int): String {
 @Composable
 fun BoardCards(modifier: Modifier = Modifier, cards: List<Card>) {
     if (isValidAction(cards)) {
-        Row(modifier = modifier.fillMaxSize(0.5f),
-        horizontalArrangement = Arrangement.SpaceAround
-            ) {
+        Row(
+            modifier = modifier
+                .fillMaxHeight(0.5f)
+                .fillMaxWidth(0.5f),
+            horizontalArrangement = Arrangement.Start
+        ) {
             cards.forEach { card ->
+//                CardFace(card = card)
                 FlipCard(
+                    modifier = modifier.weight(0.8f),
                     cardFace = CardFace.Back,
                     card = card,
                     onClick = {}
                 )
+                Spacer(modifier = modifier.width(one_GU))
             }
         }
     }
