@@ -58,22 +58,22 @@ fun <T> ViewModel.stateFlow(
 val Context.executor: Executor
     get() = ContextCompat.getMainExecutor(this)
 
-inline fun <reified T : ViewModel> Fragment.viewModelsFactory(crossinline viewModelInitialization: () -> T): Lazy<T> {
-    return viewModels {
-        object : ViewModelProvider.Factory {
-            override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-                return viewModelInitialization.invoke() as T
-            }
-        }
-    }
-}
-
-inline fun <reified T : ViewModel> AppCompatActivity.viewModelsFactory(crossinline viewModelInitialization: () -> T): Lazy<T> {
-    return viewModels {
-        object : ViewModelProvider.Factory {
-            override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-                return viewModelInitialization.invoke() as T
-            }
-        }
-    }
-}
+//inline fun <reified T : ViewModel> Fragment.viewModelsFactory(crossinline viewModelInitialization: () -> T): Lazy<T> {
+//    return viewModels {
+//        object : ViewModelProvider.Factory {
+//            override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+//                return viewModelInitialization.invoke() as T
+//            }
+//        }
+//    }
+//}
+//
+//inline fun <reified T : ViewModel> AppCompatActivity.viewModelsFactory(crossinline viewModelInitialization: () -> T): Lazy<T> {
+//    return viewModels {
+//        object : ViewModelProvider.Factory {
+//            override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+//                return viewModelInitialization.invoke() as T
+//            }
+//        }
+//    }
+//}

@@ -13,5 +13,5 @@ const val COLLECTION_PLAYERS = "players"
 const val COLLECTION_HAND_CARDS = "handCards"
 const val DOCUMENT_CURRENT_HAND = "currentHand"
 
-const val CARD_ASPECT_RATIO = 0.6f
+const val CARD_ASPECT_RATIO = 0.55f
 

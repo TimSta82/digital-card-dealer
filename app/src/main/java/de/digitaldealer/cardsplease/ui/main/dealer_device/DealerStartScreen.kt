@@ -32,6 +32,7 @@ import de.digitaldealer.cardsplease.ui.NavigationRoutes
 import de.digitaldealer.cardsplease.ui.extensions.collectAsStateLifecycleAware
 import de.digitaldealer.cardsplease.ui.main.composables.*
 import de.digitaldealer.cardsplease.ui.theme.fourteen_GU
+import de.digitaldealer.cardsplease.ui.theme.half_GU
 import de.digitaldealer.cardsplease.ui.theme.one_GU
 import de.digitaldealer.cardsplease.ui.theme.two_GU
 import kotlinx.coroutines.flow.collectLatest
@@ -133,7 +134,6 @@ fun DealerContent(
     ConstraintLayout(
         modifier = Modifier
             .fillMaxSize()
-//            .background(color = colorResource(id = R.color.dealer_background))
             .padding(two_GU)
     ) {
         val (infoButton, tableInfo, quitButton, board, flopRow, turnRow, riverRow, dealerButton, playerInfo, addPlayerButton, resetButton, boardInfo) = createRefs()
@@ -164,13 +164,13 @@ fun DealerContent(
         BoardCards(
             /** Board */
             modifier = Modifier
-                .padding(horizontal = two_GU)
+                .padding(horizontal = half_GU)
                 .constrainAs(board) {
                     top.linkTo(tableInfo.bottom, margin = two_GU)
-                    start.linkTo(parent.start, margin = two_GU)
-                    end.linkTo(dealerButton.start, margin = two_GU)
+                    start.linkTo(parent.start, margin = one_GU)
+                    end.linkTo(dealerButton.start, margin = one_GU)
                     bottom.linkTo(playerInfo.top, margin = two_GU)
-                    width = Dimension.wrapContent
+                    width = Dimension.preferredWrapContent
                 },
             cards = boardCards
         )
@@ -249,7 +249,6 @@ fun BoardCards(modifier: Modifier = Modifier, cards: List<Card>) {
             modifier = modifier
                 .fillMaxWidth()
                 .fillMaxHeight(0.5f),
-            horizontalArrangement = Arrangement.Start
         ) {
             Box(modifier.weight(1f)) {
                 if (isValidCard(cards.first())) {
@@ -258,7 +257,6 @@ fun BoardCards(modifier: Modifier = Modifier, cards: List<Card>) {
                         card = cards.first(),
                         onClick = {}
                     )
-                    Spacer(modifier = modifier.width(one_GU))
                 }
             }
             Box(modifier.weight(1f)) {
@@ -268,7 +266,6 @@ fun BoardCards(modifier: Modifier = Modifier, cards: List<Card>) {
                         card = cards.second(),
                         onClick = {}
                     )
-                    Spacer(modifier = modifier.width(one_GU))
                 }
             }
             Box(modifier.weight(1f)) {
@@ -278,7 +275,6 @@ fun BoardCards(modifier: Modifier = Modifier, cards: List<Card>) {
                         card = cards[2],
                         onClick = {}
                     )
-                    Spacer(modifier = modifier.width(one_GU))
                 }
             }
             Box(modifier.weight(1f)) {
@@ -288,7 +284,6 @@ fun BoardCards(modifier: Modifier = Modifier, cards: List<Card>) {
                         card = cards[3],
                         onClick = {}
                     )
-                    Spacer(modifier = modifier.width(one_GU))
                 }
             }
             Box(modifier.weight(1f)) {
@@ -298,7 +293,6 @@ fun BoardCards(modifier: Modifier = Modifier, cards: List<Card>) {
                         card = cards[4],
                         onClick = {}
                     )
-                    Spacer(modifier = modifier.width(one_GU))
                 }
             }
         }

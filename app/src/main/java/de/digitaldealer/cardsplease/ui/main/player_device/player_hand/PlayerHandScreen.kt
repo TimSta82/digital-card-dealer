@@ -4,6 +4,8 @@ package de.digitaldealer.cardsplease.ui.main.player_device.player_hand
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CornerSize
+import androidx.compose.foundation.shape.ZeroCornerSize
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExitToApp
@@ -23,7 +25,6 @@ import de.digitaldealer.cardsplease.domain.model.Player
 import de.digitaldealer.cardsplease.ui.NavigationRoutes
 import de.digitaldealer.cardsplease.ui.extensions.collectAsStateLifecycleAware
 import de.digitaldealer.cardsplease.ui.main.composables.*
-import de.digitaldealer.cardsplease.ui.main.start.bottomSheetShape
 import de.digitaldealer.cardsplease.ui.theme.five_GU
 import de.digitaldealer.cardsplease.ui.theme.half_GU
 import de.digitaldealer.cardsplease.ui.theme.one_GU
@@ -73,7 +74,12 @@ fun PlayerHandScreen(modifier: Modifier = Modifier, navController: NavController
         },
         drawerGesturesEnabled = true,
         sheetPeekHeight = if (hand.isValid()) five_GU else 0.dp,
-        sheetShape = bottomSheetShape()
+        sheetShape = MaterialTheme.shapes.small.copy(
+            topStart = CornerSize(one_GU),
+            topEnd = CornerSize(one_GU),
+            bottomEnd = ZeroCornerSize,
+            bottomStart = ZeroCornerSize
+        )
     ) {
         HandContent(
             player = player,
