@@ -93,7 +93,7 @@ fun StartDrawer(modifier: Modifier = Modifier, navController: NavController, con
         modifier = Modifier
             .fillMaxWidth()
             .fillMaxHeight()
-            .background(color = colorResource(id = R.color.colorAccent))
+//            .background(color = colorResource(id = R.color.colorAccent))
             .padding(two_GU)
     ) {
         Row(
@@ -143,8 +143,8 @@ fun StartContent(
     val shouldSwitchColors by viewModel.alternatingColors.collectAsStateLifecycleAware()
     Box(
         modifier = Modifier
-            .fillMaxSize()
-            .background(color = colorResource(id = R.color.colorPrimary)),
+            .fillMaxSize(),
+//            .background(color = colorResource(id = R.color.colorPrimary)),
         contentAlignment = Alignment.TopCenter,
     ) {
         Column(

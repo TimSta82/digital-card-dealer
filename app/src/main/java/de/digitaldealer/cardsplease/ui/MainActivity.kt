@@ -34,7 +34,7 @@ import de.digitaldealer.cardsplease.ui.main.start.StartScreen
 import de.digitaldealer.cardsplease.ui.main.start.legal.CreditsScreen
 import de.digitaldealer.cardsplease.ui.main.start.legal.DataScreen
 import de.digitaldealer.cardsplease.ui.main.start.legal.ImprintScreen
-import de.digitaldealer.cardsplease.ui.theme.DefaultTheme
+import de.digitaldealer.cardsplease.ui.theme.MainTheme
 
 class MainActivity : BaseActivity() {
 
@@ -57,7 +57,7 @@ fun CardsPleaseApp() {
     val scaffoldState = rememberScaffoldState()
     val navController = rememberNavController()
 
-    DefaultTheme {
+    MainTheme {
         Scaffold(
             scaffoldState = scaffoldState,
         ) {

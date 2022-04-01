@@ -92,7 +92,7 @@ fun HandContent(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(color = colorResource(id = R.color.colorPrimaryDark)),
+            .background(color = colorResource(id = R.color.player_background)),
     ) {
         ConstraintLayout(
             modifier = Modifier

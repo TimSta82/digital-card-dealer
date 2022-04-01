@@ -7,7 +7,6 @@ import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
 import android.media.MediaPlayer
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -17,7 +16,6 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.constraintlayout.compose.ConstraintLayout
@@ -29,6 +27,7 @@ import de.digitaldealer.cardsplease.domain.model.Card
 import de.digitaldealer.cardsplease.domain.model.DeckHelper
 import de.digitaldealer.cardsplease.domain.model.Player
 import de.digitaldealer.cardsplease.domain.model.PokerTable
+import de.digitaldealer.cardsplease.extensions.second
 import de.digitaldealer.cardsplease.ui.NavigationRoutes
 import de.digitaldealer.cardsplease.ui.extensions.collectAsStateLifecycleAware
 import de.digitaldealer.cardsplease.ui.main.composables.*
@@ -134,7 +133,7 @@ fun DealerContent(
     ConstraintLayout(
         modifier = Modifier
             .fillMaxSize()
-            .background(color = colorResource(id = R.color.dealer_background))
+//            .background(color = colorResource(id = R.color.dealer_background))
             .padding(two_GU)
     ) {
         val (infoButton, tableInfo, quitButton, board, flopRow, turnRow, riverRow, dealerButton, playerInfo, addPlayerButton, resetButton, boardInfo) = createRefs()
@@ -162,20 +161,19 @@ fun DealerContent(
             end.linkTo(parent.end)
             bottom.linkTo(addPlayerButton.top, margin = two_GU)
         }, text = getBoardPlayerMessage(joinedPlayers))
-        Row(
+        BoardCards(
             /** Board */
             modifier = Modifier
                 .padding(horizontal = two_GU)
                 .constrainAs(board) {
                     top.linkTo(tableInfo.bottom, margin = two_GU)
-                    start.linkTo(parent.start)
-                    end.linkTo(dealerButton.start)
+                    start.linkTo(parent.start, margin = two_GU)
+                    end.linkTo(dealerButton.start, margin = two_GU)
                     bottom.linkTo(playerInfo.top, margin = two_GU)
                     width = Dimension.wrapContent
-                }, horizontalArrangement = Arrangement.Center
-        ) {
-            BoardCards(cards = boardCards)
-        }
+                },
+            cards = boardCards
+        )
         FloatingActionButton(
             onClick = onDeal,
             modifier = Modifier
@@ -249,22 +247,66 @@ fun BoardCards(modifier: Modifier = Modifier, cards: List<Card>) {
     if (isValidAction(cards)) {
         Row(
             modifier = modifier
-                .fillMaxHeight(0.5f)
-                .fillMaxWidth(0.5f),
+                .fillMaxWidth()
+                .fillMaxHeight(0.5f),
             horizontalArrangement = Arrangement.Start
         ) {
-            cards.forEach { card ->
-//                CardFace(card = card)
-                FlipCard(
-                    modifier = modifier.weight(0.8f),
-                    cardFace = CardFace.Back,
-                    card = card,
-                    onClick = {}
-                )
-                Spacer(modifier = modifier.width(one_GU))
+            Box(modifier.weight(1f)) {
+                if (isValidCard(cards.first())) {
+                    FlipCard(
+                        cardFace = CardFace.Back,
+                        card = cards.first(),
+                        onClick = {}
+                    )
+                    Spacer(modifier = modifier.width(one_GU))
+                }
+            }
+            Box(modifier.weight(1f)) {
+                if (isValidCard(cards.second())) {
+                    FlipCard(
+                        cardFace = CardFace.Back,
+                        card = cards.second(),
+                        onClick = {}
+                    )
+                    Spacer(modifier = modifier.width(one_GU))
+                }
+            }
+            Box(modifier.weight(1f)) {
+                if (isValidCard(cards[2])) {
+                    FlipCard(
+                        cardFace = CardFace.Back,
+                        card = cards[2],
+                        onClick = {}
+                    )
+                    Spacer(modifier = modifier.width(one_GU))
+                }
+            }
+            Box(modifier.weight(1f)) {
+                if (cards.size >= 4 && isValidCard(cards[3])) {
+                    FlipCard(
+                        cardFace = CardFace.Back,
+                        card = cards[3],
+                        onClick = {}
+                    )
+                    Spacer(modifier = modifier.width(one_GU))
+                }
+            }
+            Box(modifier.weight(1f)) {
+                if (cards.size == 5 && isValidCard(cards[4])) {
+                    FlipCard(
+                        cardFace = CardFace.Back,
+                        card = cards[4],
+                        onClick = {}
+                    )
+                    Spacer(modifier = modifier.width(one_GU))
+                }
             }
         }
     }
+}
+
+fun isValidCard(card: Card): Boolean {
+    return card.value != ""
 }
 
 fun isValidAction(cards: List<Card>): Boolean {

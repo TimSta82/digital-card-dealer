@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.Card
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -16,9 +17,7 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import de.digitaldealer.cardsplease.R
-import de.digitaldealer.cardsplease.ui.theme.four_GU
-import de.digitaldealer.cardsplease.ui.theme.one_GU
-import de.digitaldealer.cardsplease.ui.theme.two_GU
+import de.digitaldealer.cardsplease.ui.theme.*
 
 @Composable
 fun EntryCard(

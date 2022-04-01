@@ -22,10 +22,14 @@ import java.util.*
 
 class DealerViewModel : ViewModel(), KoinComponent {
 
+    companion object {
+        private val defaultBoard = listOf(Card(), Card(), Card(), Card(), Card())
+    }
+
     private val _table = MutableStateFlow(PokerTable())
     val table = _table.asStateFlow()
 
-    private val _boardCards = MutableStateFlow(listOf(Card(), Card(), Card(), Card(), Card()))
+    private val _boardCards = MutableStateFlow(defaultBoard)
     val boardCards = _boardCards.asStateFlow()
 
     private val _onOpenAddPlayerDialog = MutableLiveData<PokerTable?>()
@@ -213,7 +217,7 @@ class DealerViewModel : ViewModel(), KoinComponent {
                 }
             }
             Logger.debug("delete all player hand cards")
-            _boardCards.value = emptyList()
+            _boardCards.value = defaultBoard
             phaseDependingCards.clear()
             remainingCards = emptyList()
         }

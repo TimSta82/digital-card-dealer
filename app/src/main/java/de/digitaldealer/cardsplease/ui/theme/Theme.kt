@@ -46,3 +46,35 @@ fun DefaultTheme(
         content = content
     )
 }
+
+private val MainColorsLight = lightColors(
+    primary = lightPrimary,
+    primaryVariant = lightAccent,
+    secondary = lightAccent,
+    surface = lightPrimaryDark,
+    error = lightAlert,
+//    onSurface = White,
+    background = lightPrimaryDark
+)
+
+private val MainColorsDark = darkColors(
+    primary = darkPrimary,
+    primaryVariant = lightAccent,
+    secondary = lightAccent,
+    surface = darkPrimaryDark,
+    error = lightAlert,
+//    onSurface = White,
+    background = darkPrimaryDark
+)
+
+@Composable
+fun MainTheme(
+    useDarkTheme: Boolean = isSystemInDarkTheme(),
+    content: @Composable() () -> Unit
+) {
+    MaterialTheme(
+        colors = if (useDarkTheme) MainColorsDark else MainColorsLight,
+        shapes = Shapes,
+        content = content
+    )
+}

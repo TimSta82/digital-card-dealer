@@ -43,10 +43,10 @@ fun AddPlayerDialog(
         buttons = {
             Row(
                 modifier = Modifier.padding(all = one_GU),
-                horizontalArrangement = Arrangement.Center
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Button(
-                    modifier = Modifier.fillMaxWidth(),
                     onClick = { viewModel.resetPlayerDeckId() }
                 ) {
                     Text("Aha!")

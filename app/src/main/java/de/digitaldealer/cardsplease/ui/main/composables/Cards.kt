@@ -28,6 +28,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import de.digitaldealer.cardsplease.CARD_ASPECT_RATIO
 import de.digitaldealer.cardsplease.R
@@ -78,7 +79,7 @@ fun CardFace(
                         text = card.value,
                         color = colorResource(id = R.color.white),
                         textAlign = TextAlign.Center,
-                        style = TextStyle(fontWeight = FontWeight.ExtraBold)
+                        style = TextStyle(fontWeight = FontWeight.ExtraBold, fontSize = 24.sp),
                     )
                 }
             }

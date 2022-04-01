@@ -20,3 +20,42 @@ val DogwoodRose = Color(0xFF00574B)
 val Gunmetal = Color(0xFF39AC9E)
 val RichBlack = Color(0xFF118A7E)
 val MetallicSeaweed = Color(0xFF1F6F78)
+
+
+/**
+ * Main Light
+ */
+val lightPrimary = Color(0xFF2B9720)
+val lightPrimaryDark = Color(0xFF1A263A)
+val lightAccent = Color(0xFFBDB246)
+val lightAlert = Color(0xFFA80874)
+val MainCeleste = Color(0xFFB7FDFE)
+
+/**
+ * Main Dark
+ */
+val darkPrimary= Color(0xFF465775)
+val darkPrimaryDark = Color(0xFF34312D)
+
+
+/**
+ * Player Light
+ */
+val PlayerPrimary = Color(0xFF329F5B)
+val PlayerPrimaryDark = Color(0xFF465775)
+val PlayerAccent = Color(0xFFBDB246)
+
+/**
+ * Player Dark
+ */
+
+/**
+ * Dealer Light
+ */
+val DealerPrimary = Color(0xFF04773B)
+val DealerPrimaryDark = Color(0xFF34312D)
+val DealerAccent = Color(0xFF3E78B2)
+/**
+ * Dealer Dark
+ */
+
