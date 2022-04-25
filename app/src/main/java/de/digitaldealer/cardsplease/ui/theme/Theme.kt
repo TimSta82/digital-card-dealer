@@ -49,22 +49,24 @@ fun DefaultTheme(
 
 private val MainColorsLight = lightColors(
     primary = lightPrimary,
-    primaryVariant = lightAccent,
+    primaryVariant = lightPrimaryVariant,
     secondary = lightAccent,
     surface = lightPrimaryDark,
     error = lightAlert,
 //    onSurface = White,
-    background = lightPrimaryDark
+    background = lightPrimaryDark,
+    secondaryVariant = dialogColor
 )
 
 private val MainColorsDark = darkColors(
     primary = darkPrimary,
-    primaryVariant = lightAccent,
+    primaryVariant = darkPrimaryVariant,
     secondary = lightAccent,
     surface = darkPrimaryDark,
     error = lightAlert,
 //    onSurface = White,
-    background = darkPrimaryDark
+    background = darkPrimaryDark,
+    secondaryVariant = dialogColor
 )
 
 @Composable

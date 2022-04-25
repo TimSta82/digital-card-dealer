@@ -4,6 +4,11 @@ import android.content.Context
 import androidx.datastore.preferences.core.*
 import androidx.datastore.preferences.preferencesDataStore
 import de.digitaldealer.cardsplease.data.database.KeyValueStore.Keys.APP_DATA_STORE_NAME
+import de.digitaldealer.cardsplease.data.database.KeyValueStore.Keys.KEY_PLAYER_NICK_NAME
+import de.digitaldealer.cardsplease.data.database.KeyValueStore.Keys.KEY_PLAYER_TABLE_ID
+import de.digitaldealer.cardsplease.data.database.KeyValueStore.Keys.KEY_PLAYER_TABLE_NAME
+import de.digitaldealer.cardsplease.data.database.KeyValueStore.Keys.KEY_PLAYER_UUID
+import de.digitaldealer.cardsplease.domain.model.Player
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
@@ -30,9 +35,44 @@ class KeyValueStore(private val context: Context) {
         val EXAMPLE_BOOLEAN = booleanPreferencesKey("EXAMPLE_BOOLEAN")
         val EXAMPLE_DOUBLE = doublePreferencesKey("EXAMPLE_DOUBLE")
         val EXAMPLE_STRING_SET = stringSetPreferencesKey("EXAMPLE_STRING_SET")
+
+        //        val KEY_PLAYER = stringPreferencesKey("KEY_PLAYER")
+        val KEY_PLAYER_UUID = stringPreferencesKey("KEY_PLAYER_UUID")
+        val KEY_PLAYER_NICK_NAME = stringPreferencesKey("KEY_PLAYER_NICK_NAME")
+        val KEY_PLAYER_TABLE_NAME = stringPreferencesKey("KEY_PLAYER_TABLE_NAME")
+        val KEY_PLAYER_TABLE_ID = stringPreferencesKey("KEY_PLAYER_TABLE_ID")
     }
 
     private val Context.dataStore by preferencesDataStore(name = APP_DATA_STORE_NAME)
+
+    suspend fun setPlayer(player: Player) {
+        context.dataStore.edit { preferences ->
+            preferences[KEY_PLAYER_UUID] = player.uuid
+            preferences[KEY_PLAYER_NICK_NAME] = player.nickName
+            preferences[KEY_PLAYER_TABLE_ID] = player.tableId
+            preferences[KEY_PLAYER_TABLE_NAME] = player.tableName
+        }
+    }
+
+    fun watchPlayer(): Flow<Player> {
+        return context.dataStore.data.map { preferences ->
+            Player(
+                uuid = preferences[KEY_PLAYER_UUID] ?: "",
+                nickName = preferences[KEY_PLAYER_NICK_NAME] ?: "",
+                tableId = preferences[KEY_PLAYER_TABLE_ID] ?: "",
+                tableName = preferences[KEY_PLAYER_TABLE_NAME] ?: ""
+            )
+        }
+    }
+
+    suspend fun deletePlayer() {
+        context.dataStore.edit { preferences ->
+            preferences.remove(KEY_PLAYER_UUID)
+            preferences.remove(KEY_PLAYER_NICK_NAME)
+            preferences.remove(KEY_PLAYER_TABLE_ID)
+            preferences.remove(KEY_PLAYER_TABLE_NAME)
+        }
+    }
 
     fun watchExampleBoolean(): Flow<Boolean> = watchDataStoreValue(Keys.EXAMPLE_BOOLEAN).map { value -> value ?: false }
     suspend fun getExampleBoolean(): Boolean = getDataStoreValue(Keys.EXAMPLE_BOOLEAN) ?: false

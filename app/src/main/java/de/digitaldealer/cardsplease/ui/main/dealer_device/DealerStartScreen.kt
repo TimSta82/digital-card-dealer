@@ -13,7 +13,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.runtime.*
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Devices
@@ -46,17 +45,14 @@ fun DealerStartScreen(modifier: Modifier = Modifier, navController: NavControlle
     val scaffoldState = rememberScaffoldState() // this contains the `SnackbarHostState`
     val context = LocalContext.current
 
-    val onOpenAddPlayerDialog by viewModel.onOpenAddPlayerDialog.observeAsState()
-
+    val showDeleteGameDialog = remember { mutableStateOf(false) }
+    val onShowAddPlayerDialog = remember { mutableStateOf(false) }
+    val onShowHasInternetErrorDialog = remember { mutableStateOf(false) }
     val table by viewModel.table.collectAsStateLifecycleAware()
     val gamePhase by viewModel.gamePhase.collectAsStateLifecycleAware()
     val joinedPlayers by viewModel.joinedPlayers.collectAsStateLifecycleAware()
     val boardCards by viewModel.boardCards.collectAsStateLifecycleAware()
     val round by viewModel.round.collectAsStateLifecycleAware()
-
-    if (onOpenAddPlayerDialog != null) AddPlayerDialog(viewModel = viewModel, tableId = onOpenAddPlayerDialog!!.tableId, tableName = onOpenAddPlayerDialog!!.tableName)
-
-    val showDeleteGameDialog = remember { mutableStateOf(false) }
 
     if (showDeleteGameDialog.value) SimpleDialog(
         title = "Wollt ihr das Spiel wirklich beenden?",
@@ -64,6 +60,22 @@ fun DealerStartScreen(modifier: Modifier = Modifier, navController: NavControlle
         onDismiss = { showDeleteGameDialog.value = false },
         onConfirmClicked = viewModel::quitTable
     )
+
+    if (onShowAddPlayerDialog.value) QrCodePlayerDialog(onDismiss = { onShowAddPlayerDialog.value = false }, tableId = table.tableId, tableName = table.tableName)
+    if (!onShowHasInternetErrorDialog.value) SimpleDialog(
+        title = "Überprüfe deine Internetverbindung",
+        buttonText = "Ok",
+        onDismiss = { onShowHasInternetErrorDialog.value = false },
+        onConfirmClicked = { onShowHasInternetErrorDialog.value = false }
+    )
+
+    LaunchedEffect(key1 = onShowHasInternetErrorDialog) {
+        launch {
+            viewModel.hasInternetAccess.collectLatest {
+                onShowHasInternetErrorDialog.value = it
+            }
+        }
+    }
 
     LaunchedEffect(key1 = Unit) {
         launch {
@@ -100,7 +112,6 @@ fun DealerStartScreen(modifier: Modifier = Modifier, navController: NavControlle
         onDispose { viewModel.onStop() }
     }
 
-
     Scaffold(
         modifier = Modifier,
         scaffoldState = scaffoldState // attaching `scaffoldState` to the `Scaffold`
@@ -108,7 +119,7 @@ fun DealerStartScreen(modifier: Modifier = Modifier, navController: NavControlle
         DealerContent(
             onDeal = { viewModel.deal(gamePhase = gamePhase) },
             onReset = { viewModel.reset() },
-            onAddPlayer = { viewModel.addPlayer() },
+            onAddPlayer = { onShowAddPlayerDialog.value = true },
             onDismissQuitDialog = { showDeleteGameDialog.value = true },
             table = table,
             gamePhase = gamePhase,
@@ -137,30 +148,42 @@ fun DealerContent(
             .padding(two_GU)
     ) {
         val (infoButton, tableInfo, quitButton, board, flopRow, turnRow, riverRow, dealerButton, playerInfo, addPlayerButton, resetButton, boardInfo) = createRefs()
-        FloatingActionButton(onClick = { /*TODO*/ }, modifier = Modifier.constrainAs(infoButton) {
-            top.linkTo(parent.top)
-            start.linkTo(parent.start)
-        }) {
+        FloatingActionButton(
+            onClick = { /*TODO*/ },
+            modifier = Modifier.constrainAs(infoButton) {
+                top.linkTo(parent.top)
+                start.linkTo(parent.start)
+            }
+        ) {
             Icon(Icons.Filled.Info, contentDescription = "")
         }
-        CustomText(text = "Tisch: ${table.tableName} - Runde: $round", modifier = Modifier.constrainAs(tableInfo) {
-            top.linkTo(infoButton.top)
-            bottom.linkTo(infoButton.bottom)
-            start.linkTo(infoButton.end)
-            end.linkTo(quitButton.start)
-        })
-        FloatingActionButton(onClick = onDismissQuitDialog, modifier = Modifier.constrainAs(quitButton) {
-            top.linkTo(parent.top)
-            end.linkTo(parent.end)
-        }) {
+        CustomText(
+            text = "Tisch: ${table.tableName} - Runde: $round",
+            modifier = Modifier.constrainAs(tableInfo) {
+                top.linkTo(infoButton.top)
+                bottom.linkTo(infoButton.bottom)
+                start.linkTo(infoButton.end)
+                end.linkTo(quitButton.start)
+            }
+        )
+        FloatingActionButton(
+            onClick = onDismissQuitDialog,
+            modifier = Modifier.constrainAs(quitButton) {
+                top.linkTo(parent.top)
+                end.linkTo(parent.end)
+            }
+        ) {
             Icon(Icons.Filled.ExitToApp, contentDescription = "")
         }
-        if (isDefaultPlayer(joinedPlayers) || joinedPlayers.size <= 1) CustomText(modifier = Modifier.constrainAs(boardInfo) {
-            top.linkTo(infoButton.bottom, margin = two_GU)
-            start.linkTo(parent.start)
-            end.linkTo(parent.end)
-            bottom.linkTo(addPlayerButton.top, margin = two_GU)
-        }, text = getBoardPlayerMessage(joinedPlayers))
+        if (isDefaultPlayer(joinedPlayers) || joinedPlayers.size <= 1) CustomText(
+            modifier = Modifier.constrainAs(boardInfo) {
+                top.linkTo(infoButton.bottom, margin = two_GU)
+                start.linkTo(parent.start)
+                end.linkTo(parent.end)
+                bottom.linkTo(addPlayerButton.top, margin = two_GU)
+            },
+            text = getBoardPlayerMessage(joinedPlayers)
+        )
         BoardCards(
             /** Board */
             modifier = Modifier
@@ -182,7 +205,8 @@ fun DealerContent(
                     top.linkTo(quitButton.bottom)
                     end.linkTo(parent.end)
                     bottom.linkTo(addPlayerButton.top)
-                }) {
+                }
+        ) {
             Text(text = gamePhase?.buttonText ?: "")
         }
         if (gamePhase != GamePhase.DEAL) {
@@ -199,19 +223,25 @@ fun DealerContent(
                 }
             )
         }
-        CustomText(text = "Spieler: ${if (isDefaultPlayer(players = joinedPlayers)) 0 else joinedPlayers.count()}", modifier = Modifier.constrainAs(playerInfo) {
-            start.linkTo(parent.start)
-            top.linkTo(addPlayerButton.top)
-            bottom.linkTo(addPlayerButton.bottom)
-        })
+        CustomText(
+            text = "Spieler: ${if (isDefaultPlayer(players = joinedPlayers)) 0 else joinedPlayers.count()}",
+            modifier = Modifier.constrainAs(playerInfo) {
+                start.linkTo(parent.start)
+                top.linkTo(addPlayerButton.top)
+                bottom.linkTo(addPlayerButton.bottom)
+            }
+        )
         if (joinedPlayers.size < 10) {
-            ExtendedFloatingActionButton(onClick = onAddPlayer, modifier = Modifier.constrainAs(addPlayerButton) {
-                end.linkTo(parent.end)
-                bottom.linkTo(parent.bottom)
-            },
+            ExtendedFloatingActionButton(
+                onClick = onAddPlayer,
+                modifier = Modifier.constrainAs(addPlayerButton) {
+                    end.linkTo(parent.end)
+                    bottom.linkTo(parent.bottom)
+                },
                 text = {
                     Text(text = "Spieler hinzufügen")
-                })
+                }
+            )
         }
     }
 }
@@ -219,7 +249,14 @@ fun DealerContent(
 @Preview(device = Devices.AUTOMOTIVE_1024p, widthDp = 1024, heightDp = 480)
 @Composable
 fun Preview_DealerContent() {
-    DealerContent(onDeal = {}, onReset = {}, onAddPlayer = {}, onDismissQuitDialog = { }, table = PokerTable(), gamePhase = GamePhase.SHUFFLE, joinedPlayers = listOf(Player(), Player()),
+    DealerContent(
+        onDeal = {},
+        onReset = {},
+        onAddPlayer = {},
+        onDismissQuitDialog = { },
+        table = PokerTable(),
+        gamePhase = GamePhase.SHUFFLE,
+        joinedPlayers = listOf(Player(), Player()),
         boardCards = listOf(
             DeckHelper.getClubsCard(),
             DeckHelper.getDiamondsCard(),

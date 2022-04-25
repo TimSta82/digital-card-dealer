@@ -9,5 +9,6 @@
     <color name="white">#FFFFFFFF</color>
     <color name="dealer_background">#1526C7</color>
     <color name="player_background">#0555AE</color>
+    <color name="dialog_background">#FF0848A8</color>
     <color name="card_red">#DC1414</color>
 </resources>

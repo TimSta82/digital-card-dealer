@@ -1,7 +1,6 @@
 package de.digitaldealer.cardsplease.ui.main.dealer_device
 
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
@@ -9,15 +8,15 @@ import com.google.firebase.firestore.ktx.toObject
 import de.digitaldealer.cardsplease.*
 import de.digitaldealer.cardsplease.core.utils.Logger
 import de.digitaldealer.cardsplease.domain.model.*
+import de.digitaldealer.cardsplease.domain.usecases.WatchHasInternetAccessUseCase
 import de.digitaldealer.cardsplease.extensions.second
 import de.digitaldealer.cardsplease.ui.extensions.launch
+import de.digitaldealer.cardsplease.ui.extensions.stateFlow
 import de.digitaldealer.cardsplease.ui.util.SingleLiveEvent
 import de.digitaldealer.cardsplease.ui.util.TableNames
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.*
 import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import java.util.*
 
 class DealerViewModel : ViewModel(), KoinComponent {
@@ -26,14 +25,13 @@ class DealerViewModel : ViewModel(), KoinComponent {
         private val defaultBoard = listOf(Card(), Card(), Card(), Card(), Card())
     }
 
+    private val watchHasInternetAccessUseCase by inject<WatchHasInternetAccessUseCase>()
+
     private val _table = MutableStateFlow(PokerTable())
     val table = _table.asStateFlow()
 
     private val _boardCards = MutableStateFlow(defaultBoard)
     val boardCards = _boardCards.asStateFlow()
-
-    private val _onOpenAddPlayerDialog = MutableLiveData<PokerTable?>()
-    val onOpenAddPlayerDialog: LiveData<PokerTable?> = _onOpenAddPlayerDialog
 
     private val _gamePhase = MutableStateFlow(GamePhase.DEAL)
     val gamePhase = _gamePhase.asStateFlow()
@@ -59,6 +57,8 @@ class DealerViewModel : ViewModel(), KoinComponent {
     private val _round = MutableStateFlow(0)
     val round = _round.asStateFlow()
 
+    val hasInternetAccess: StateFlow<Boolean> = stateFlow(flow = watchHasInternetAccessUseCase.call(), initialValue = true)
+
     private val db = FirebaseFirestore.getInstance()
     private val gamesCollectionRef = db.collection(COLLECTION_GAMES)
 
@@ -68,7 +68,7 @@ class DealerViewModel : ViewModel(), KoinComponent {
     private var pokerTable: PokerTable? = null
 
     init {
-        pokerTable = PokerTable(tableId = UUID.randomUUID().toString().take(12), tableName = TableNames.getRandomTableName())
+        pokerTable = PokerTable(tableId = UUID.randomUUID().toString().take(UUID_COUNT), tableName = TableNames.getRandomTableName())
         launch {
             initPokerTable(table = pokerTable!!)
         }
@@ -182,13 +182,12 @@ class DealerViewModel : ViewModel(), KoinComponent {
                         return@addOnFailureListener
                     }
             }
-
         }
     }
 
     private fun checkIfDealingCardsToPlayersHasAccomplished(remainingCards: List<Card>) {
         launch {
-            if (remainingCards.count() == 8) _onDealingCardsToPlayersAccomplished.emit(Unit)
+            if (remainingCards.count() == BOARD_CARDS_COUNT) _onDealingCardsToPlayersAccomplished.emit(Unit)
         }
     }
 
@@ -238,16 +237,8 @@ class DealerViewModel : ViewModel(), KoinComponent {
         }
     }
 
-    fun addPlayer() {
-        _onOpenAddPlayerDialog.value = _table.value
-    }
-
     fun reset() {
         updateGamePhase(GamePhase.SHUFFLE)
-    }
-
-    fun resetPlayerDeckId() {
-        _onOpenAddPlayerDialog.value = null
     }
 }
 

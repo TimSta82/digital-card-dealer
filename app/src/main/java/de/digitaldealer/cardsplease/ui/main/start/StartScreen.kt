@@ -2,7 +2,7 @@ package de.digitaldealer.cardsplease.ui.main.start
 
 import android.content.Context
 import android.content.Intent
-import androidx.compose.foundation.background
+import android.net.Uri
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -13,9 +13,7 @@ import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.DataExploration
 import androidx.compose.material.icons.filled.DeviceUnknown
 import androidx.compose.material.icons.filled.FrontHand
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
@@ -35,17 +33,17 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
+import com.google.gson.Gson
 import de.digitaldealer.cardsplease.R
+import de.digitaldealer.cardsplease.domain.model.Player
 import de.digitaldealer.cardsplease.ui.NavigationRoutes
 import de.digitaldealer.cardsplease.ui.extensions.collectAsStateLifecycleAware
-import de.digitaldealer.cardsplease.ui.main.composables.CustomText
-import de.digitaldealer.cardsplease.ui.main.composables.EntryCard
-import de.digitaldealer.cardsplease.ui.main.composables.EntryContent
-import de.digitaldealer.cardsplease.ui.main.composables.EntryType
+import de.digitaldealer.cardsplease.ui.main.composables.*
 import de.digitaldealer.cardsplease.ui.main.dealer_device.findActivity
 import de.digitaldealer.cardsplease.ui.theme.four_GU
 import de.digitaldealer.cardsplease.ui.theme.one_GU
 import de.digitaldealer.cardsplease.ui.theme.two_GU
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 @Composable
@@ -54,6 +52,29 @@ fun StartScreen(modifier: Modifier = Modifier, navController: NavController) {
     val scaffoldState = rememberScaffoldState()
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
+    val viewModel: StartViewModel = viewModel()
+
+    var showPlayerRejoinTableDialog = remember { mutableStateOf(Player()) }
+
+    val shouldSwitchColors by viewModel.alternatingColors.collectAsStateLifecycleAware()
+
+    LaunchedEffect(key1 = Unit) {
+        viewModel.localPlayer.collectLatest {
+            showPlayerRejoinTableDialog.value = it
+        }
+    }
+
+    if (showPlayerRejoinTableDialog.value.tableId != "") TwoButtonDialog(
+        text = "Willst du dem Spiel am Tisch ${showPlayerRejoinTableDialog.value.tableName} beitreten?",
+        onConfirm = {
+            val playerJson = Uri.encode(Gson().toJson(showPlayerRejoinTableDialog.value))
+            navController.navigate(route = "${NavigationRoutes.PLAYER_HAND_SCREEN}/$playerJson")
+        },
+        onDismiss = { showPlayerRejoinTableDialog.value = Player() },
+        onDecline = viewModel::onDeclineJoinTable,
+        confirmButtonText = "Betreten",
+        declineButtonText = "Ablehnen"
+    )
 
     Scaffold(
         scaffoldState = scaffoldState,
@@ -77,6 +98,7 @@ fun StartScreen(modifier: Modifier = Modifier, navController: NavController) {
         }
     ) {
         StartContent(
+            shouldSwitchColors = shouldSwitchColors,
             onStartAsDealer = {
                 navController.navigate(route = NavigationRoutes.DEALER_DEVICE_START_SCREEN)
             },
@@ -93,7 +115,6 @@ fun StartDrawer(modifier: Modifier = Modifier, navController: NavController, con
         modifier = Modifier
             .fillMaxWidth()
             .fillMaxHeight()
-//            .background(color = colorResource(id = R.color.colorAccent))
             .padding(two_GU)
     ) {
         Row(
@@ -122,7 +143,12 @@ fun StartDrawer(modifier: Modifier = Modifier, navController: NavController, con
 }
 
 @Composable
-fun DrawerItem(modifier: Modifier = Modifier, text: String, icon: ImageVector, onNavigate: () -> Unit) {
+fun DrawerItem(
+    modifier: Modifier = Modifier,
+    text: String,
+    icon: ImageVector,
+    onNavigate: () -> Unit
+) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
@@ -136,11 +162,10 @@ fun DrawerItem(modifier: Modifier = Modifier, text: String, icon: ImageVector, o
 
 @Composable
 fun StartContent(
+    shouldSwitchColors: Boolean,
     onStartAsDealer: () -> Unit,
     onStartAsPlayer: () -> Unit
 ) {
-    val viewModel: StartViewModel = viewModel()
-    val shouldSwitchColors by viewModel.alternatingColors.collectAsStateLifecycleAware()
     Box(
         modifier = Modifier
             .fillMaxSize(),
@@ -153,7 +178,8 @@ fun StartContent(
                 .verticalScroll(rememberScrollState())
         ) {
             Row(
-                horizontalArrangement = Arrangement.SpaceEvenly, modifier = Modifier
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = two_GU)
             ) {
@@ -193,14 +219,16 @@ fun StartContent(
                 content = {
                     EntryContent(entryType = EntryType.DEALER) { onStartAsDealer() }
                 },
-                onClick = { onStartAsDealer() })
+                onClick = { onStartAsDealer() }
+            )
             Spacer(modifier = Modifier.height(two_GU))
             EntryCard(
                 entryType = EntryType.PLAYER,
                 content = {
                     EntryContent(entryType = EntryType.PLAYER) { onStartAsPlayer() }
                 },
-                onClick = { onStartAsPlayer() })
+                onClick = { onStartAsPlayer() }
+            )
             Spacer(modifier = Modifier.height(two_GU))
         }
     }
@@ -238,5 +266,5 @@ fun bottomSheetShape() = object : Shape {
 @Preview
 @Composable
 fun Preview_StartContent(modifier: Modifier = Modifier) {
-    StartContent(onStartAsDealer = {}, onStartAsPlayer = {})
+    StartContent(onStartAsDealer = {}, onStartAsPlayer = {}, shouldSwitchColors = false)
 }

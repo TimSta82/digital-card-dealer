@@ -1,11 +1,11 @@
 package de.digitaldealer.cardsplease.ui.main.composables
 
 import androidx.compose.material.Button
-import androidx.compose.material.Text
+import androidx.compose.material.ButtonDefaults.buttonColors
+import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import de.digitaldealer.cardsplease.ui.theme.White
 
 @Composable
 fun TriggerButton(
@@ -14,13 +14,12 @@ fun TriggerButton(
     onClick: () -> Unit
 ) {
     Button(
-        modifier = modifier,
-        onClick = onClick
+//        modifier = modifier
+//            .background(color = MaterialTheme.colors.primaryVariant),
+        onClick = onClick,
+        colors = buttonColors(backgroundColor = MaterialTheme.colors.primaryVariant)
     ) {
-        Text(
-            text = text,
-            color = White
-        )
+        CustomText(text = text)
     }
 }
 

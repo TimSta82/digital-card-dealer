@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.AlertDialog
-import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
@@ -26,7 +25,11 @@ import de.digitaldealer.cardsplease.ui.NavigationRoutes
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun QrInputDialog(modifier: Modifier = Modifier, navController: NavController, onDismiss: () -> Unit) {
+fun QrInputDialog(
+    modifier: Modifier = Modifier,
+    navController: NavController,
+    onDismiss: () -> Unit
+) {
     val qrCode = remember { mutableStateOf(TextFieldValue()) }
     var isError = rememberSaveable { mutableStateOf(false) }
     val keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done, capitalization = KeyboardCapitalization.None)
@@ -70,17 +73,16 @@ fun QrInputDialog(modifier: Modifier = Modifier, navController: NavController, o
             }
         },
         buttons = {
-            Button(
+            TriggerButton(
                 modifier = Modifier.fillMaxWidth(),
                 onClick = {
                     if (isInputValid(input = qrCode.value.text)) {
                         keyboardController?.hide()
-//                    onDismiss
                         navController.navigate(route = "${NavigationRoutes.INSERT_NAME_SCREEN}/${qrCode.value.text.trim()}")
                     }
-                }) {
-                CustomText(text = "Ok")
-            }
+                },
+                text = "Ok"
+            )
         }
     )
 }

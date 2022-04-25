@@ -12,7 +12,11 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun CreditsScreen(modifier: Modifier = Modifier) {
-    Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         Text(text = "Credits")
         Text("<a href=\"https://www.vecteezy.com/free-vector/cartoon\">Cartoon Vectors by Vecteezy</a>", modifier = Modifier.padding(16.dp))
     }

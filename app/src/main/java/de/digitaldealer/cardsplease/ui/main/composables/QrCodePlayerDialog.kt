@@ -3,61 +3,67 @@ package de.digitaldealer.cardsplease.ui.main.composables
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.AlertDialog
-import androidx.compose.material.Button
-import androidx.compose.material.Text
+import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
-import de.digitaldealer.cardsplease.ui.main.dealer_device.DealerViewModel
+import androidx.compose.ui.tooling.preview.Preview
+import de.digitaldealer.cardsplease.QR_CODE_SIZE
 import de.digitaldealer.cardsplease.ui.theme.one_GU
 import net.glxn.qrgen.android.QRCode
 
 @Composable
-fun AddPlayerDialog(
+fun QrCodePlayerDialog(
     modifier: Modifier = Modifier,
-    viewModel: DealerViewModel,
+    onDismiss: () -> Unit,
     tableId: String,
     tableName: String
 ) {
     AlertDialog(
-        onDismissRequest = {
-            viewModel.resetPlayerDeckId()
-        },
+        onDismissRequest = onDismiss,
+        backgroundColor = MaterialTheme.colors.secondaryVariant,
         text = {
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(text = "Tisch: $tableName")
+                CustomText(text = "Tisch: $tableName")
                 Spacer(modifier = Modifier.height(one_GU))
-                Text(text = "tableId: $tableId")
+                CustomText(text = "tableId: $tableId")
+                Spacer(modifier = Modifier.height(one_GU))
                 Image(
-                    bitmap = getQrCodeAsBitmap(deckId = tableId),
+                    bitmap = getQrCodeAsBitmap(deckId = tableId, Modifier.fillMaxWidth()),
                     contentDescription = ""
                 )
             }
         },
         buttons = {
             Row(
-                modifier = Modifier.padding(all = one_GU),
+                modifier = Modifier
+                    .padding(all = one_GU)
+                    .fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
             ) {
-                Button(
-                    onClick = { viewModel.resetPlayerDeckId() }
-                ) {
-                    Text("Aha!")
-                }
+                TriggerButton(
+                    onClick = onDismiss,
+                    text = "Aha!"
+                )
             }
         }
     )
 }
 
 @Composable
-private fun getQrCodeAsBitmap(deckId: String): ImageBitmap {
-    val bitmap = QRCode.from(deckId).withSize(400, 400).bitmap().asImageBitmap()
+private fun getQrCodeAsBitmap(deckId: String, fillMaxWidth: Modifier): ImageBitmap {
+    val bitmap = QRCode.from(deckId).withSize(QR_CODE_SIZE, QR_CODE_SIZE).bitmap().asImageBitmap()
     return bitmap
+}
+
+@Preview
+@Composable
+fun Preview_QrCodePlayerDialog(modifier: Modifier = Modifier) {
+    QrCodePlayerDialog(onDismiss = { /*TODO*/ }, tableId = "asiudhiuashd", tableName = "Hector")
 }

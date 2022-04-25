@@ -3,12 +3,8 @@ package de.digitaldealer.cardsplease.ui.extensions
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import androidx.activity.viewModels
 import androidx.annotation.ColorRes
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
 import androidx.lifecycle.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
@@ -58,7 +54,7 @@ fun <T> ViewModel.stateFlow(
 val Context.executor: Executor
     get() = ContextCompat.getMainExecutor(this)
 
-//inline fun <reified T : ViewModel> Fragment.viewModelsFactory(crossinline viewModelInitialization: () -> T): Lazy<T> {
+// inline fun <reified T : ViewModel> Fragment.viewModelsFactory(crossinline viewModelInitialization: () -> T): Lazy<T> {
 //    return viewModels {
 //        object : ViewModelProvider.Factory {
 //            override fun <T : ViewModel?> create(modelClass: Class<T>): T {
@@ -66,9 +62,9 @@ val Context.executor: Executor
 //            }
 //        }
 //    }
-//}
+// }
 //
-//inline fun <reified T : ViewModel> AppCompatActivity.viewModelsFactory(crossinline viewModelInitialization: () -> T): Lazy<T> {
+// inline fun <reified T : ViewModel> AppCompatActivity.viewModelsFactory(crossinline viewModelInitialization: () -> T): Lazy<T> {
 //    return viewModels {
 //        object : ViewModelProvider.Factory {
 //            override fun <T : ViewModel?> create(modelClass: Class<T>): T {
@@ -76,4 +72,4 @@ val Context.executor: Executor
 //            }
 //        }
 //    }
-//}
+// }

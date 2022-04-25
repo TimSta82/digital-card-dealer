@@ -66,12 +66,16 @@ fun CardsPleaseApp() {
                     StartScreen(navController = navController)
                 }
                 composable(DEALER_DEVICE_START_SCREEN) {
-                    LockScreenOrientation(orientation = ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR, navController = navController)
+                    LockScreenOrientation(
+                        orientation = ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR,
+                        navController = navController
+                    )
                 }
                 composable(PLAYER_DEVICE_START_SCREEN) {
                     PlayerStartScreen(navController = navController)
                 }
-                composable(route = "$INSERT_NAME_SCREEN/{$NAV_ARG_TABLE_ID}",
+                composable(
+                    route = "$INSERT_NAME_SCREEN/{$NAV_ARG_TABLE_ID}",
                     arguments = listOf(
                         navArgument(NAV_ARG_TABLE_ID) {
                             type = NavType.StringType

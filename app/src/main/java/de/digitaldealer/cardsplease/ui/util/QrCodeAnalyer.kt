@@ -9,7 +9,7 @@ import java.nio.ByteBuffer
 
 class QrCodeAnalyzer(
     private val onQrCodeScanned: (String) -> Unit
-): ImageAnalysis.Analyzer {
+) : ImageAnalysis.Analyzer {
 
     private val supportedImageFormats = listOf(
         ImageFormat.YUV_420_888,
@@ -18,7 +18,7 @@ class QrCodeAnalyzer(
     )
 
     override fun analyze(image: ImageProxy) {
-        if(image.format in supportedImageFormats) {
+        if (image.format in supportedImageFormats) {
             val bytes = image.planes.first().buffer.toByteArray()
             val source = PlanarYUVLuminanceSource(
                 bytes,
@@ -42,7 +42,7 @@ class QrCodeAnalyzer(
                     )
                 }.decode(binaryBmp)
                 onQrCodeScanned(result.text)
-            } catch(e: Exception) {
+            } catch (e: Exception) {
                 e.printStackTrace()
             } finally {
                 image.close()

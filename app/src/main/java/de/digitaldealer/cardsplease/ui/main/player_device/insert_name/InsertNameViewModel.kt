@@ -11,6 +11,7 @@ import de.digitaldealer.cardsplease.COLLECTION_PLAYERS
 import de.digitaldealer.cardsplease.core.utils.Logger
 import de.digitaldealer.cardsplease.domain.model.Player
 import de.digitaldealer.cardsplease.domain.model.PokerTable
+import de.digitaldealer.cardsplease.domain.usecases.SetPlayerLocallyUseCase
 import de.digitaldealer.cardsplease.ui.NavigationRoutes.NAV_ARG_TABLE_ID
 import de.digitaldealer.cardsplease.ui.extensions.launch
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -18,10 +19,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import java.util.*
 
 class InsertNameViewModel(val savedState: SavedStateHandle) : ViewModel(), KoinComponent {
 
+    private val setPlayerLocallyUseCase by inject<SetPlayerLocallyUseCase>()
     private val db = FirebaseFirestore.getInstance()
     private val gamesCollectionRef = db.collection(COLLECTION_GAMES)
 
@@ -79,11 +82,18 @@ class InsertNameViewModel(val savedState: SavedStateHandle) : ViewModel(), KoinC
                 Logger.debug("Bingo, Spieler wurde dem Game hinzugefügt")
                 _isLoading.value = false
                 _player.value = player
+                savePlayerLocally(player)
             }
             .addOnFailureListener {
                 _isLoading.value = false
                 launch { _onNavigateBack.emit(true) }
                 Logger.debug("Zonk, spieler hinzufügen hat nicht geklappt")
             }
+    }
+
+    private fun savePlayerLocally(player: Player) {
+        launch {
+            setPlayerLocallyUseCase.call(player = player)
+        }
     }
 }

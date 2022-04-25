@@ -10,7 +10,11 @@ import androidx.compose.ui.Modifier
 
 @Composable
 fun DataScreen(modifier: Modifier = Modifier) {
-    Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         Text(text = "Data Privacy")
     }
 }

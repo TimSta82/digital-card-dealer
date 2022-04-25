@@ -10,7 +10,7 @@ import org.koin.core.context.startKoin
 class KoinInitializer : Initializer<KoinApplication> {
 
     companion object {
-        val modules = repositoryModule + useCaseModule + dataModule + networkModule + helperModule
+        val modules = repositoryModule + useCaseModule + dataModule + networkModule + helperModule + controllerModule
     }
 
     override fun create(context: Context): KoinApplication {

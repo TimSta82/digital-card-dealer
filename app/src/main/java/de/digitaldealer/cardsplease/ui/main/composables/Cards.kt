@@ -119,7 +119,6 @@ fun Preview_CardBack(modifier: Modifier = Modifier) {
     CardBack()
 }
 
-
 enum class CardFace(val angle: Float) {
     Front(0f) {
         override val next: CardFace

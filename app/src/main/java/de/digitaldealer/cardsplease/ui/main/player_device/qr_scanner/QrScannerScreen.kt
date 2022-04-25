@@ -115,16 +115,17 @@ fun QrScannerScreen(navController: NavController) {
                     previewView
                 },
             )
-            Divider(modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = four_GU)
-                .background(color = Color.Cyan)
-                .constrainAs(line) {
-                    top.linkTo(parent.top)
-                    start.linkTo(parent.start)
-                    end.linkTo(parent.end)
-                    bottom.linkTo(text.top)
-                }
+            Divider(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = four_GU)
+                    .background(color = Color.Cyan)
+                    .constrainAs(line) {
+                        top.linkTo(parent.top)
+                        start.linkTo(parent.start)
+                        end.linkTo(parent.end)
+                        bottom.linkTo(text.top)
+                    }
             )
             Text(
                 text = code,

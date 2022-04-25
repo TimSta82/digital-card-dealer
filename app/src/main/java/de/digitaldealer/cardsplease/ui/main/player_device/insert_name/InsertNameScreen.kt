@@ -8,7 +8,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.*
+import androidx.compose.material.Card
+import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.Text
+import androidx.compose.material.TextField
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
@@ -30,6 +33,7 @@ import de.digitaldealer.cardsplease.core.utils.Logger
 import de.digitaldealer.cardsplease.ui.NavigationRoutes.PLAYER_HAND_SCREEN
 import de.digitaldealer.cardsplease.ui.NavigationRoutes.START_SCREEN
 import de.digitaldealer.cardsplease.ui.extensions.collectAsStateLifecycleAware
+import de.digitaldealer.cardsplease.ui.main.composables.TriggerButton
 import de.digitaldealer.cardsplease.ui.theme.half_GU
 import de.digitaldealer.cardsplease.ui.theme.one_GU
 import de.digitaldealer.cardsplease.ui.theme.two_GU
@@ -47,7 +51,7 @@ fun InsertNameScreen(modifier: Modifier = Modifier, navController: NavController
     LaunchedEffect(key1 = player != null) {
         player?.let {
             val playerJson = Uri.encode(Gson().toJson(player))
-            navController?.navigate(route = "$PLAYER_HAND_SCREEN/${playerJson}")
+            navController?.navigate(route = "$PLAYER_HAND_SCREEN/$playerJson")
         }
     }
 
@@ -101,9 +105,10 @@ fun InsertNameTextFieldContainer(viewModel: InsertNameViewModel) {
             if (nickName.value.text.isNotBlank()) viewModel.submitToGame(nickName.value.text)
         }),
     )
-    Button(onClick = { if (nickName.value.text.isNotBlank()) viewModel.submitToGame(nickName.value.text) }) {
-        Text(text = "anmelden")
-    }
+    TriggerButton(
+        onClick = { if (nickName.value.text.isNotBlank()) viewModel.submitToGame(nickName.value.text) },
+        text = "anmelden"
+    )
 }
 
 @Preview

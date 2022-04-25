@@ -11,6 +11,7 @@ import de.digitaldealer.cardsplease.COLLECTION_PLAYERS
 import de.digitaldealer.cardsplease.core.utils.Logger
 import de.digitaldealer.cardsplease.domain.model.Hand
 import de.digitaldealer.cardsplease.domain.model.Player
+import de.digitaldealer.cardsplease.domain.usecases.DeletePlayerLocallyUseCase
 import de.digitaldealer.cardsplease.ui.NavigationRoutes.NAV_ARG_PLAYER
 import de.digitaldealer.cardsplease.ui.extensions.launch
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -18,8 +19,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
 class PlayerHandViewModel(val savedState: SavedStateHandle) : ViewModel(), KoinComponent {
+
+    private val deletePlayerLocallyUseCase by inject<DeletePlayerLocallyUseCase>()
 
     private val _player = MutableStateFlow(savedState.get<Player>(NAV_ARG_PLAYER) ?: Player())
     val player = _player.asStateFlow()
@@ -69,6 +73,7 @@ class PlayerHandViewModel(val savedState: SavedStateHandle) : ViewModel(), KoinC
             .addOnSuccessListener {
                 Logger.debug("Tschüss ${_player.value.nickName}")
                 launch {
+                    deletePlayerLocallyUseCase.call()
                     _onLeaveTable.emit(Unit)
                 }
             }

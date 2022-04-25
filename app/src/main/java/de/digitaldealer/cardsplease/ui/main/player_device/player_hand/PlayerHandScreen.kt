@@ -84,7 +84,8 @@ fun PlayerHandScreen(modifier: Modifier = Modifier, navController: NavController
         HandContent(
             player = player,
             hand = hand,
-            onDisconnectPlayer = { showPlayerLeaveDialog.value = true })
+            onDisconnectPlayer = { showPlayerLeaveDialog.value = true }
+        )
     }
 }
 
@@ -127,7 +128,9 @@ fun HandContent(
                             CustomText(text = "Runde: ${hand.round}", textAlign = TextAlign.Start)
                         }
                     }
-                }, onClick = {})
+                },
+                onClick = {}
+            )
             FloatingActionButton(
                 modifier = Modifier.constrainAs(button) {
                     top.linkTo(card.top)
