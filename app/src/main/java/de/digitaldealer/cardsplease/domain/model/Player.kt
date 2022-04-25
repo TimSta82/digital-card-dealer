@@ -16,7 +16,7 @@ data class Player(
     val uuid: String
 ) : Parcelable {
     constructor() : this(
-        tableId = "-1",
+        tableId = "",
         nickName = "",
         tableName = "",
         uuid = ""

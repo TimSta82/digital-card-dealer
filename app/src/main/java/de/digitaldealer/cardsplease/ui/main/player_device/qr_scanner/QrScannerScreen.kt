@@ -23,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -30,6 +31,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
+import de.digitaldealer.cardsplease.R
 import de.digitaldealer.cardsplease.ui.NavigationRoutes
 import de.digitaldealer.cardsplease.ui.main.composables.QrInputDialog
 import de.digitaldealer.cardsplease.ui.theme.four_GU
@@ -69,7 +71,11 @@ fun QrScannerScreen(navController: NavController) {
         launcher.launch(Manifest.permission.CAMERA)
     }
 
-    ConstraintLayout(modifier = Modifier.fillMaxSize()) {
+    ConstraintLayout(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(color = colorResource(id = R.color.player_background)),
+    ) {
         val (scanner, text, button, line) = createRefs()
         if (hasCamPermission) {
             AndroidView(

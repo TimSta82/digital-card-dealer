@@ -14,8 +14,7 @@ fun TriggerButton(
     onClick: () -> Unit
 ) {
     Button(
-//        modifier = modifier
-//            .background(color = MaterialTheme.colors.primaryVariant),
+        modifier = modifier,
         onClick = onClick,
         colors = buttonColors(backgroundColor = MaterialTheme.colors.primaryVariant)
     ) {

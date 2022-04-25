@@ -1,14 +1,15 @@
 package de.digitaldealer.cardsplease.ui.main.composables
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.AlertDialog
+import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import de.digitaldealer.cardsplease.ui.theme.one_GU
+import de.digitaldealer.cardsplease.ui.theme.two_GU
 
 @Composable
 fun TwoButtonDialog(
@@ -21,12 +22,22 @@ fun TwoButtonDialog(
     onDecline: () -> Unit
 ) {
     AlertDialog(
+        modifier = modifier,
         onDismissRequest = onDismiss,
+        backgroundColor = MaterialTheme.colors.secondaryVariant,
         text = {
-            CustomText(text = text)
+            Row(
+                modifier = modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                CustomText(text = text)
+            }
         },
-        buttons = {
+        confirmButton = {
             Column(
+                modifier = modifier
+                    .fillMaxWidth()
+                    .padding(bottom = two_GU),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.SpaceAround
             ) {
@@ -34,7 +45,7 @@ fun TwoButtonDialog(
                     onClick = onConfirm,
                     text = confirmButtonText
                 )
-                Spacer(modifier = Modifier.height(one_GU))
+                Spacer(modifier = modifier.height(one_GU))
                 TriggerButton(
                     onClick = onDecline,
                     text = declineButtonText
@@ -43,3 +54,40 @@ fun TwoButtonDialog(
         }
     )
 }
+
+@Composable
+@Preview
+fun Preview_TwoButtonDialog(modifier: Modifier = Modifier) {
+    TwoButtonDialog(text = "testy mcTestface", confirmButtonText = "Bestätigen", declineButtonText = "Abbrechen", onDismiss = { /*TODO*/ }, onConfirm = { /*TODO*/ }) {
+    }
+}
+
+/**
+ *
+ * AlertDialog(
+modifier = modifier,
+onDismissRequest = onDismiss,
+text = {
+CustomText(text = text)
+},
+confirmButton = {},
+buttons = {
+Column(
+modifier = modifier,
+horizontalAlignment = Alignment.CenterHorizontally,
+verticalArrangement = Arrangement.SpaceAround
+) {
+TriggerButton(
+onClick = onConfirm,
+text = confirmButtonText
+)
+Spacer(modifier = modifier.height(one_GU))
+TriggerButton(
+onClick = onDecline,
+text = declineButtonText
+)
+}
+}
+)
+ *
+ */

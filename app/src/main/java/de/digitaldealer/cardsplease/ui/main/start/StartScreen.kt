@@ -54,7 +54,7 @@ fun StartScreen(modifier: Modifier = Modifier, navController: NavController) {
     val context = LocalContext.current
     val viewModel: StartViewModel = viewModel()
 
-    var showPlayerRejoinTableDialog = remember { mutableStateOf(Player()) }
+    val showPlayerRejoinTableDialog = remember { mutableStateOf(Player()) }
 
     val shouldSwitchColors by viewModel.alternatingColors.collectAsStateLifecycleAware()
 

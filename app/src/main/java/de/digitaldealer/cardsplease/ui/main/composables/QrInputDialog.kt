@@ -1,11 +1,10 @@
 package de.digitaldealer.cardsplease.ui.main.composables
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.AlertDialog
-import androidx.compose.material.Text
-import androidx.compose.material.TextField
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -22,6 +21,8 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import de.digitaldealer.cardsplease.ui.NavigationRoutes
+import de.digitaldealer.cardsplease.ui.theme.one_GU
+import de.digitaldealer.cardsplease.ui.theme.two_GU
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -37,6 +38,7 @@ fun QrInputDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
+        backgroundColor = MaterialTheme.colors.secondaryVariant,
         text = {
             Column(
                 modifier = Modifier
@@ -49,6 +51,15 @@ fun QrInputDialog(
                 TextField(
                     value = qrCode.value,
                     singleLine = true,
+                    shape = RoundedCornerShape(one_GU),
+                    colors = TextFieldDefaults.textFieldColors(
+                        textColor = Color.Gray,
+                        disabledTextColor = Color.Transparent,
+                        backgroundColor = Color.White,
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        disabledIndicatorColor = Color.Transparent
+                    ),
                     onValueChange = {
                         if (it.toString().length <= 12) qrCode.value = it
 //                        if (it.length <= maxChar) text = it
@@ -72,17 +83,23 @@ fun QrInputDialog(
                 }
             }
         },
-        buttons = {
-            TriggerButton(
-                modifier = Modifier.fillMaxWidth(),
-                onClick = {
-                    if (isInputValid(input = qrCode.value.text)) {
-                        keyboardController?.hide()
-                        navController.navigate(route = "${NavigationRoutes.INSERT_NAME_SCREEN}/${qrCode.value.text.trim()}")
-                    }
-                },
-                text = "Ok"
-            )
+        confirmButton = {
+            Row(
+                modifier = modifier
+                    .fillMaxWidth()
+                    .padding(bottom = two_GU),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                TriggerButton(
+                    onClick = {
+                        if (isInputValid(input = qrCode.value.text)) {
+                            keyboardController?.hide()
+                            navController.navigate(route = "${NavigationRoutes.INSERT_NAME_SCREEN}/${qrCode.value.text.trim()}")
+                        }
+                    },
+                    text = "Ok"
+                )
+            }
         }
     )
 }
