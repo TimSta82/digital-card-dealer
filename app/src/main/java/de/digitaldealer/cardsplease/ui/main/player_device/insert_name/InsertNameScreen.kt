@@ -33,6 +33,7 @@ import de.digitaldealer.cardsplease.core.utils.Logger
 import de.digitaldealer.cardsplease.ui.NavigationRoutes.PLAYER_HAND_SCREEN
 import de.digitaldealer.cardsplease.ui.NavigationRoutes.START_SCREEN
 import de.digitaldealer.cardsplease.ui.extensions.collectAsStateLifecycleAware
+import de.digitaldealer.cardsplease.ui.main.composables.SimpleDialog
 import de.digitaldealer.cardsplease.ui.main.composables.TriggerButton
 import de.digitaldealer.cardsplease.ui.theme.half_GU
 import de.digitaldealer.cardsplease.ui.theme.one_GU
@@ -47,11 +48,25 @@ fun InsertNameScreen(modifier: Modifier = Modifier, navController: NavController
     val player by viewModel.player.observeAsState()
     val deckFromFireStore by viewModel.tableFromFireStore.collectAsStateLifecycleAware()
     val isLoading by viewModel.isLoading.collectAsStateLifecycleAware()
+    val showHasInternetErrorDialog = remember { mutableStateOf(false) }
+
+    if (!showHasInternetErrorDialog.value) SimpleDialog(
+        title = "Überprüfe deine Internetverbindung",
+        buttonText = "Ok",
+        onDismiss = { showHasInternetErrorDialog.value = false },
+        onConfirmClicked = { showHasInternetErrorDialog.value = false }
+    )
 
     LaunchedEffect(key1 = player != null) {
         player?.let {
             val playerJson = Uri.encode(Gson().toJson(player))
             navController?.navigate(route = "$PLAYER_HAND_SCREEN/$playerJson")
+        }
+    }
+
+    LaunchedEffect(key1 = showHasInternetErrorDialog) {
+        viewModel.hasInternet.collectLatest { hasInternet ->
+            showHasInternetErrorDialog.value = hasInternet
         }
     }
 

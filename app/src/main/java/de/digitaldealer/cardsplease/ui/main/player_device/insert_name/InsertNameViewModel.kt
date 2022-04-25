@@ -12,8 +12,10 @@ import de.digitaldealer.cardsplease.core.utils.Logger
 import de.digitaldealer.cardsplease.domain.model.Player
 import de.digitaldealer.cardsplease.domain.model.PokerTable
 import de.digitaldealer.cardsplease.domain.usecases.SetPlayerLocallyUseCase
+import de.digitaldealer.cardsplease.domain.usecases.WatchHasInternetAccessUseCase
 import de.digitaldealer.cardsplease.ui.NavigationRoutes.NAV_ARG_TABLE_ID
 import de.digitaldealer.cardsplease.ui.extensions.launch
+import de.digitaldealer.cardsplease.ui.extensions.stateFlow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -25,6 +27,7 @@ import java.util.*
 class InsertNameViewModel(val savedState: SavedStateHandle) : ViewModel(), KoinComponent {
 
     private val setPlayerLocallyUseCase by inject<SetPlayerLocallyUseCase>()
+    private val watchHasInternetAccessUseCase by inject<WatchHasInternetAccessUseCase>()
     private val db = FirebaseFirestore.getInstance()
     private val gamesCollectionRef = db.collection(COLLECTION_GAMES)
 
@@ -39,6 +42,8 @@ class InsertNameViewModel(val savedState: SavedStateHandle) : ViewModel(), KoinC
 
     private val _tableFromFirestore = MutableStateFlow(PokerTable())
     val tableFromFireStore = _tableFromFirestore.asStateFlow()
+
+    val hasInternet = stateFlow(flow = watchHasInternetAccessUseCase.call(), initialValue = true)
 
     init {
         checkIfDeckExists()
