@@ -55,6 +55,7 @@ fun StartScreen(modifier: Modifier = Modifier, navController: NavController) {
     val viewModel: StartViewModel = viewModel()
 
     val showPlayerRejoinTableDialog = remember { mutableStateOf(Player()) }
+    val showTermsOfUsageDialog = remember { mutableStateOf(true) }
 
     val shouldSwitchColors by viewModel.alternatingColors.collectAsStateLifecycleAware()
 
@@ -63,6 +64,21 @@ fun StartScreen(modifier: Modifier = Modifier, navController: NavController) {
             showPlayerRejoinTableDialog.value = it
         }
     }
+
+    LaunchedEffect(key1 = showTermsOfUsageDialog) {
+        viewModel.hasAcceptedTermsOfUsageUseCase.collectLatest { hasAccepted ->
+            showTermsOfUsageDialog.value = hasAccepted.not()
+        }
+    }
+
+    if (showTermsOfUsageDialog.value) TwoButtonDialog(
+        text = "Um die App zu nutzen musst du den AGBs zustimmen",
+        confirmButtonText = "Zustimmen",
+        declineButtonText = "Nicht zustimmen",
+        onDismiss = { showTermsOfUsageDialog.value = false },
+        onConfirm = viewModel::acceptTermsOfUsage,
+        onDecline = { showTermsOfUsageDialog.value = false }
+    )
 
     if (showPlayerRejoinTableDialog.value.tableId != "") TwoButtonDialog(
         text = "Willst du dem Spiel am Tisch ${showPlayerRejoinTableDialog.value.tableName} beitreten?",
@@ -122,10 +138,10 @@ fun StartDrawer(modifier: Modifier = Modifier, navController: NavController, con
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(painter = painterResource(id = R.drawable.ic_clubs), contentDescription = "")
-            Text("Cards Please", modifier = Modifier.padding(16.dp))
+            CustomText(text = "Cards Please", modifier = Modifier.padding(16.dp))
         }
         Divider()
-        DrawerItem(text = "Imprint", icon = Icons.Filled.DeviceUnknown) {
+        DrawerItem(text = "Über die App", icon = Icons.Filled.DeviceUnknown) {
             navController.navigate(route = NavigationRoutes.IMPRINT_SCREEN)
         }
         Spacer(modifier = Modifier.height(one_GU))
@@ -156,7 +172,7 @@ fun DrawerItem(
             .clickable { onNavigate() }
     ) {
         Icon(icon, contentDescription = "")
-        Text(text = text, modifier = Modifier.padding(16.dp))
+        CustomText(text = text, modifier = Modifier.padding(16.dp))
     }
 }
 

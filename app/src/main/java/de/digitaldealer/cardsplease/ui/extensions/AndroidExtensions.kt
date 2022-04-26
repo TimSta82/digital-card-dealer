@@ -1,6 +1,8 @@
 package de.digitaldealer.cardsplease.ui.extensions
 
+import android.app.AlertDialog
 import android.content.Context
+import android.content.DialogInterface
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import androidx.annotation.ColorRes
@@ -54,22 +56,28 @@ fun <T> ViewModel.stateFlow(
 val Context.executor: Executor
     get() = ContextCompat.getMainExecutor(this)
 
-// inline fun <reified T : ViewModel> Fragment.viewModelsFactory(crossinline viewModelInitialization: () -> T): Lazy<T> {
-//    return viewModels {
-//        object : ViewModelProvider.Factory {
-//            override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-//                return viewModelInitialization.invoke() as T
-//            }
-//        }
+//suspend fun AlertDialog.await(
+//    positiveText: String,
+//    negativeText: String
+//) = suspendCancellableCoroutine<Boolean> { cont ->
+//    val listener = DialogInterface.OnClickListener { _, which ->
+//        if (which == AlertDialog.BUTTON_POSITIVE) cont.resume(true)
+//        else if (which == AlertDialog.BUTTON_NEGATIVE) cont.resume(false)
 //    }
-// }
 //
-// inline fun <reified T : ViewModel> AppCompatActivity.viewModelsFactory(crossinline viewModelInitialization: () -> T): Lazy<T> {
-//    return viewModels {
-//        object : ViewModelProvider.Factory {
-//            override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-//                return viewModelInitialization.invoke() as T
-//            }
-//        }
-//    }
-// }
+//    setButton(AlertDialog.BUTTON_POSITIVE, positiveText, listener)
+//    setButton(AlertDialog.BUTTON_NEGATIVE, negativeText, listener)
+//
+//    // we can either decide to cancel the coroutine if the dialog
+//    // itself gets cancelled, or resume the coroutine with the
+//    // value [false]
+//    setOnCancelListener { cont.cancel() }
+//
+//    // if we make this coroutine cancellable, we should also close the
+//    // dialog when the coroutine is cancelled
+//    cont.invokeOnCancellation { dismiss() }
+//
+//    // remember to show the dialog before returning from the block,
+//    // you won't be able to do it after this function is called!
+//    show()
+//}

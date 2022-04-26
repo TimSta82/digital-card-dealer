@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.datastore.preferences.core.*
 import androidx.datastore.preferences.preferencesDataStore
 import de.digitaldealer.cardsplease.data.database.KeyValueStore.Keys.APP_DATA_STORE_NAME
+import de.digitaldealer.cardsplease.data.database.KeyValueStore.Keys.KEY_HAS_ACCEPTED_TERMS_OF_USAGE
 import de.digitaldealer.cardsplease.data.database.KeyValueStore.Keys.KEY_PLAYER_NICK_NAME
 import de.digitaldealer.cardsplease.data.database.KeyValueStore.Keys.KEY_PLAYER_TABLE_ID
 import de.digitaldealer.cardsplease.data.database.KeyValueStore.Keys.KEY_PLAYER_TABLE_NAME
@@ -41,9 +42,22 @@ class KeyValueStore(private val context: Context) {
         val KEY_PLAYER_NICK_NAME = stringPreferencesKey("KEY_PLAYER_NICK_NAME")
         val KEY_PLAYER_TABLE_NAME = stringPreferencesKey("KEY_PLAYER_TABLE_NAME")
         val KEY_PLAYER_TABLE_ID = stringPreferencesKey("KEY_PLAYER_TABLE_ID")
+        val KEY_HAS_ACCEPTED_TERMS_OF_USAGE = booleanPreferencesKey("KEY_HAS_ACCEPTED_TERMS_OF_USAGE")
     }
 
     private val Context.dataStore by preferencesDataStore(name = APP_DATA_STORE_NAME)
+
+    suspend fun setHasTermsOfUsageAccepted() {
+        context.dataStore.edit { preferences ->
+            preferences[KEY_HAS_ACCEPTED_TERMS_OF_USAGE] = true
+        }
+    }
+
+    fun watchHasTermsOfUsageAccepted(): Flow<Boolean> {
+        return context.dataStore.data.map { preferences ->
+            preferences[KEY_HAS_ACCEPTED_TERMS_OF_USAGE] ?: false
+        }
+    }
 
     suspend fun setPlayer(player: Player) {
         context.dataStore.edit { preferences ->
