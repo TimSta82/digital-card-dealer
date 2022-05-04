@@ -40,7 +40,11 @@ fun EntryCard(
 }
 
 @Composable
-fun EntryContent(modifier: Modifier = Modifier, entryType: EntryType, onClick: () -> Unit) {
+fun EntryContent(
+    modifier: Modifier = Modifier,
+    entryType: EntryType,
+    onClick: () -> Unit
+) {
     Column(
         modifier = Modifier
             .padding(vertical = four_GU)

@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import de.digitaldealer.cardsplease.domain.usecases.DeletePlayerLocallyUseCase
 import de.digitaldealer.cardsplease.domain.usecases.SetAcceptTermsOfUsageUseCase
-import de.digitaldealer.cardsplease.domain.usecases.WatchHasAcceptedTermsOfUsageUseCase
 import de.digitaldealer.cardsplease.domain.usecases.WatchPlayerLocallyUseCase
 import de.digitaldealer.cardsplease.ui.extensions.launch
 import kotlinx.coroutines.delay
@@ -20,13 +19,11 @@ class StartViewModel : ViewModel(), KoinComponent {
     private val watchPlayerLocallyUseCase by inject<WatchPlayerLocallyUseCase>()
     private val deletePlayerLocallyUseCase by inject<DeletePlayerLocallyUseCase>()
     private val setAcceptTermsOfUsageUseCase by inject<SetAcceptTermsOfUsageUseCase>()
-    private val watchHasAcceptedTermsOfUsageUseCase by inject<WatchHasAcceptedTermsOfUsageUseCase>()
 
     private val _alternatingColors = MutableStateFlow(true)
     val alternatingColors = _alternatingColors.asStateFlow()
 
     val localPlayer = watchPlayerLocallyUseCase.call().shareIn(viewModelScope, SharingStarted.Lazily)
-    val hasAcceptedTermsOfUsageUseCase = watchHasAcceptedTermsOfUsageUseCase.call().shareIn(viewModelScope, SharingStarted.Lazily)
 
     init {
         animateSymbolColors()
@@ -45,7 +42,7 @@ class StartViewModel : ViewModel(), KoinComponent {
         }
     }
 
-    fun acceptTermsOfUsage() {
-        launch { setAcceptTermsOfUsageUseCase.call() }
+    fun resetTermsOfUsage() {
+        launch { setAcceptTermsOfUsageUseCase.call(hasAccepted = false) }
     }
 }

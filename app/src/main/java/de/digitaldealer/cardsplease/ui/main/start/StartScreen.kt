@@ -9,10 +9,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Book
-import androidx.compose.material.icons.filled.DataExploration
-import androidx.compose.material.icons.filled.DeviceUnknown
-import androidx.compose.material.icons.filled.FrontHand
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -54,39 +51,23 @@ fun StartScreen(modifier: Modifier = Modifier, navController: NavController) {
     val context = LocalContext.current
     val viewModel: StartViewModel = viewModel()
 
-    val showPlayerRejoinTableDialog = remember { mutableStateOf(Player()) }
-    val showTermsOfUsageDialog = remember { mutableStateOf(true) }
+    val shouldShowPlayerRejoinTableDialog = remember { mutableStateOf(Player()) }
 
     val shouldSwitchColors by viewModel.alternatingColors.collectAsStateLifecycleAware()
 
     LaunchedEffect(key1 = Unit) {
         viewModel.localPlayer.collectLatest {
-            showPlayerRejoinTableDialog.value = it
+            shouldShowPlayerRejoinTableDialog.value = it
         }
     }
 
-    LaunchedEffect(key1 = showTermsOfUsageDialog) {
-        viewModel.hasAcceptedTermsOfUsageUseCase.collectLatest { hasAccepted ->
-            showTermsOfUsageDialog.value = hasAccepted.not()
-        }
-    }
-
-    if (showTermsOfUsageDialog.value) TwoButtonDialog(
-        text = "Um die App zu nutzen musst du den AGBs zustimmen",
-        confirmButtonText = "Zustimmen",
-        declineButtonText = "Nicht zustimmen",
-        onDismiss = { showTermsOfUsageDialog.value = false },
-        onConfirm = viewModel::acceptTermsOfUsage,
-        onDecline = { showTermsOfUsageDialog.value = false }
-    )
-
-    if (showPlayerRejoinTableDialog.value.tableId != "") TwoButtonDialog(
-        text = "Willst du dem Spiel am Tisch ${showPlayerRejoinTableDialog.value.tableName} beitreten?",
+    if (shouldShowPlayerRejoinTableDialog.value.tableId != "") TwoButtonDialog(
+        text = "Willst du dem Spiel am Tisch ${shouldShowPlayerRejoinTableDialog.value.tableName} beitreten?",
         onConfirm = {
-            val playerJson = Uri.encode(Gson().toJson(showPlayerRejoinTableDialog.value))
+            val playerJson = Uri.encode(Gson().toJson(shouldShowPlayerRejoinTableDialog.value))
             navController.navigate(route = "${NavigationRoutes.PLAYER_HAND_SCREEN}/$playerJson")
         },
-        onDismiss = { showPlayerRejoinTableDialog.value = Player() },
+        onDismiss = { shouldShowPlayerRejoinTableDialog.value = Player() },
         onDecline = viewModel::onDeclineJoinTable,
         confirmButtonText = "Betreten",
         declineButtonText = "Ablehnen"
@@ -96,7 +77,7 @@ fun StartScreen(modifier: Modifier = Modifier, navController: NavController) {
         scaffoldState = scaffoldState,
         drawerShape = drawerShape(),
         drawerContent = {
-            StartDrawer(navController = navController, context = context)
+            StartDrawer(navController = navController, context = context, resetTermsOfUsage = viewModel::resetTermsOfUsage)
         },
         // Defaults to true
         drawerGesturesEnabled = true,
@@ -126,7 +107,12 @@ fun StartScreen(modifier: Modifier = Modifier, navController: NavController) {
 }
 
 @Composable
-fun StartDrawer(modifier: Modifier = Modifier, navController: NavController, context: Context) {
+fun StartDrawer(
+    modifier: Modifier = Modifier,
+    navController: NavController,
+    context: Context,
+    resetTermsOfUsage: () -> Unit
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -154,6 +140,9 @@ fun StartDrawer(modifier: Modifier = Modifier, navController: NavController, con
         }
         DrawerItem(text = "Lizenzen", icon = Icons.Filled.Book) {
             context.findActivity()?.startActivity(Intent(context, OssLicensesMenuActivity::class.java))
+        }
+        DrawerItem(text = "Reset terms", icon = Icons.Filled.ResetTv) {
+            resetTermsOfUsage()
         }
     }
 }
@@ -233,7 +222,10 @@ fun StartContent(
             EntryCard(
                 entryType = EntryType.DEALER,
                 content = {
-                    EntryContent(entryType = EntryType.DEALER) { onStartAsDealer() }
+                    EntryContent(
+                        entryType = EntryType.DEALER,
+                        onClick = { onStartAsDealer() }
+                    )
                 },
                 onClick = { onStartAsDealer() }
             )
@@ -241,7 +233,10 @@ fun StartContent(
             EntryCard(
                 entryType = EntryType.PLAYER,
                 content = {
-                    EntryContent(entryType = EntryType.PLAYER) { onStartAsPlayer() }
+                    EntryContent(
+                        entryType = EntryType.PLAYER,
+                        onClick = { onStartAsPlayer() }
+                    )
                 },
                 onClick = { onStartAsPlayer() }
             )

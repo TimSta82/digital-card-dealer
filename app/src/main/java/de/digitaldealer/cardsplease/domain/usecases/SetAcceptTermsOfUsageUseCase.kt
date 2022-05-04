@@ -8,7 +8,7 @@ class SetAcceptTermsOfUsageUseCase : BaseUseCase() {
 
     private val keyValueStore by inject<KeyValueStore>()
 
-    suspend fun call() {
-        keyValueStore.setHasTermsOfUsageAccepted()
+    suspend fun call(hasAccepted: Boolean) {
+        keyValueStore.setHasTermsOfUsageAccepted(hasAccepted = hasAccepted)
     }
 }

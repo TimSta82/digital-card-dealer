@@ -2,6 +2,7 @@ package de.digitaldealer.cardsplease.ui
 
 object NavigationRoutes {
 
+    const val TERMS_OF_USAGE_SCREEN = "TERMS_OF_USAGE_SCREEN"
     const val START_SCREEN = "START_SCREEN"
     const val DEALER_DEVICE_START_SCREEN = "DEALER_DEVICE_START_SCREEN"
     const val PLAYER_DEVICE_START_SCREEN = "PLAYER_DEVICE_START_SCREEN"

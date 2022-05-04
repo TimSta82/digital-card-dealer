@@ -47,9 +47,9 @@ class KeyValueStore(private val context: Context) {
 
     private val Context.dataStore by preferencesDataStore(name = APP_DATA_STORE_NAME)
 
-    suspend fun setHasTermsOfUsageAccepted() {
+    suspend fun setHasTermsOfUsageAccepted(hasAccepted: Boolean) {
         context.dataStore.edit { preferences ->
-            preferences[KEY_HAS_ACCEPTED_TERMS_OF_USAGE] = true
+            preferences[KEY_HAS_ACCEPTED_TERMS_OF_USAGE] = hasAccepted
         }
     }
 

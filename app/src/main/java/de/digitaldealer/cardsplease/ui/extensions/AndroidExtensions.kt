@@ -8,6 +8,7 @@ import android.graphics.BitmapFactory
 import androidx.annotation.ColorRes
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.*
+import de.digitaldealer.cardsplease.core.utils.Logger
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import java.io.IOException
@@ -56,28 +57,28 @@ fun <T> ViewModel.stateFlow(
 val Context.executor: Executor
     get() = ContextCompat.getMainExecutor(this)
 
-//suspend fun AlertDialog.await(
-//    positiveText: String,
-//    negativeText: String
-//) = suspendCancellableCoroutine<Boolean> { cont ->
-//    val listener = DialogInterface.OnClickListener { _, which ->
-//        if (which == AlertDialog.BUTTON_POSITIVE) cont.resume(true)
-//        else if (which == AlertDialog.BUTTON_NEGATIVE) cont.resume(false)
-//    }
-//
-//    setButton(AlertDialog.BUTTON_POSITIVE, positiveText, listener)
-//    setButton(AlertDialog.BUTTON_NEGATIVE, negativeText, listener)
-//
-//    // we can either decide to cancel the coroutine if the dialog
-//    // itself gets cancelled, or resume the coroutine with the
-//    // value [false]
-//    setOnCancelListener { cont.cancel() }
-//
-//    // if we make this coroutine cancellable, we should also close the
-//    // dialog when the coroutine is cancelled
-//    cont.invokeOnCancellation { dismiss() }
-//
-//    // remember to show the dialog before returning from the block,
-//    // you won't be able to do it after this function is called!
-//    show()
-//}
+suspend fun AlertDialog.await(
+    positiveText: String,
+    negativeText: String
+) = suspendCancellableCoroutine<Boolean> { cont ->
+    val listener = DialogInterface.OnClickListener { _, which ->
+        if (which == AlertDialog.BUTTON_POSITIVE) cont.resume(value = true, onCancellation = { Logger.debug("onCancellation: $it") })
+        else if (which == AlertDialog.BUTTON_NEGATIVE) cont.resume(value = false, onCancellation = { Logger.debug("onCancellation: $it") })
+    }
+
+    setButton(AlertDialog.BUTTON_POSITIVE, positiveText, listener)
+    setButton(AlertDialog.BUTTON_NEGATIVE, negativeText, listener)
+
+    // we can either decide to cancel the coroutine if the dialog
+    // itself gets cancelled, or resume the coroutine with the
+    // value [false]
+    setOnCancelListener { cont.cancel() }
+
+    // if we make this coroutine cancellable, we should also close the
+    // dialog when the coroutine is cancelled
+    cont.invokeOnCancellation { dismiss() }
+
+    // remember to show the dialog before returning from the block,
+    // you won't be able to do it after this function is called!
+    show()
+}

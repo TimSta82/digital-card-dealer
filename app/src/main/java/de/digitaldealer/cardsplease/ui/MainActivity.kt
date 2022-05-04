@@ -8,6 +8,8 @@ import androidx.activity.compose.setContent
 import androidx.compose.material.Scaffold
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -25,7 +27,9 @@ import de.digitaldealer.cardsplease.ui.NavigationRoutes.NAV_ARG_TABLE_ID
 import de.digitaldealer.cardsplease.ui.NavigationRoutes.PLAYER_DEVICE_START_SCREEN
 import de.digitaldealer.cardsplease.ui.NavigationRoutes.PLAYER_HAND_SCREEN
 import de.digitaldealer.cardsplease.ui.NavigationRoutes.START_SCREEN
+import de.digitaldealer.cardsplease.ui.NavigationRoutes.TERMS_OF_USAGE_SCREEN
 import de.digitaldealer.cardsplease.ui.base.BaseActivity
+import de.digitaldealer.cardsplease.ui.extensions.collectAsStateLifecycleAware
 import de.digitaldealer.cardsplease.ui.main.dealer_device.LockScreenOrientation
 import de.digitaldealer.cardsplease.ui.main.player_device.PlayerStartScreen
 import de.digitaldealer.cardsplease.ui.main.player_device.insert_name.InsertNameScreen
@@ -34,6 +38,8 @@ import de.digitaldealer.cardsplease.ui.main.start.StartScreen
 import de.digitaldealer.cardsplease.ui.main.start.legal.CreditsScreen
 import de.digitaldealer.cardsplease.ui.main.start.legal.DataScreen
 import de.digitaldealer.cardsplease.ui.main.start.legal.ImprintScreen
+import de.digitaldealer.cardsplease.ui.terms_of_usage.TermsOfUsageScreen
+import de.digitaldealer.cardsplease.ui.terms_of_usage.TermsOfUsageViewModel
 import de.digitaldealer.cardsplease.ui.theme.MainTheme
 
 class MainActivity : BaseActivity() {
@@ -56,12 +62,17 @@ class MainActivity : BaseActivity() {
 fun CardsPleaseApp() {
     val scaffoldState = rememberScaffoldState()
     val navController = rememberNavController()
+    val termsOfUsageViewModel: TermsOfUsageViewModel = viewModel()
+    val hasAccepted by termsOfUsageViewModel.hasAcceptedTermsOfUsageUseCase.collectAsStateLifecycleAware()
 
     MainTheme {
         Scaffold(
             scaffoldState = scaffoldState,
         ) {
-            NavHost(navController = navController, startDestination = START_SCREEN) {
+            NavHost(navController = navController, startDestination = if (hasAccepted) START_SCREEN else TERMS_OF_USAGE_SCREEN) {
+                composable(TERMS_OF_USAGE_SCREEN) {
+                    TermsOfUsageScreen(navController = navController)
+                }
                 composable(START_SCREEN) {
                     StartScreen(navController = navController)
                 }
