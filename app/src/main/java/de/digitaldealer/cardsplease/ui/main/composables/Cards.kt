@@ -5,21 +5,23 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Api
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -33,34 +35,36 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import de.digitaldealer.cardsplease.CARD_ASPECT_RATIO
 import de.digitaldealer.cardsplease.R
 import de.digitaldealer.cardsplease.domain.model.Card
+import de.digitaldealer.cardsplease.ui.theme.half_GU
 import de.digitaldealer.cardsplease.ui.theme.one_GU
+import de.digitaldealer.cardsplease.ui.theme.two_GU
 import de.digitaldealer.cardsplease.ui.util.CardUtils
 
 @Composable
 fun CardFace(
     modifier: Modifier = Modifier,
     card: Card,
-    elevation: Dp? = 4.dp,
+    elevation: Dp? = half_GU,
 ) {
     Card(
-        shape = RoundedCornerShape(8.dp),
-        modifier = Modifier.clip(RoundedCornerShape(8.dp)),
+        shape = RoundedCornerShape(one_GU),
+        modifier = modifier.clip(RoundedCornerShape(one_GU)),
         backgroundColor = Color.White,
-        elevation = elevation ?: 8.dp,
+        elevation = elevation ?: one_GU,
     ) {
         Box(
-            modifier = Modifier.aspectRatio(CARD_ASPECT_RATIO),
+            modifier = modifier.aspectRatio(CARD_ASPECT_RATIO),
             contentAlignment = Alignment.Center
         ) {
             Card(
-                modifier = Modifier.padding(one_GU),
+                modifier = modifier.padding(one_GU),
                 backgroundColor = Color.White,
                 border = BorderStroke(2.dp, color = colorResource(id = CardUtils.getSuitColor(card.suit)))
             ) {
                 ConstraintLayout {
                     val (icon, cardValue) = createRefs()
                     Image(
-                        modifier = Modifier.constrainAs(icon) {
+                        modifier = modifier.constrainAs(icon) {
                             top.linkTo(parent.top)
                             end.linkTo(parent.end)
                             start.linkTo(parent.start)
@@ -70,7 +74,7 @@ fun CardFace(
                         contentDescription = ""
                     )
                     Text(
-                        modifier = Modifier.constrainAs(cardValue) {
+                        modifier = modifier.constrainAs(cardValue) {
                             top.linkTo(parent.top)
                             end.linkTo(parent.end)
                             start.linkTo(parent.start)
@@ -90,19 +94,34 @@ fun CardFace(
 @Composable
 fun CardBack(
     modifier: Modifier = Modifier,
-    elevation: Dp? = 4.dp,
+    elevation: Dp? = half_GU,
 ) {
+    val gradient = Brush.horizontalGradient(
+        colors = listOf(
+            colorResource(id = R.color.primaryColor),
+            colorResource(id = R.color.card_red)
+        )
+    )
     Card(
-        shape = RoundedCornerShape(8.dp),
-        modifier = Modifier.clip(RoundedCornerShape(8.dp)),
+        shape = RoundedCornerShape(one_GU),
+        modifier = modifier.clip(RoundedCornerShape(one_GU)),
         backgroundColor = Color.DarkGray,
-        elevation = elevation ?: 8.dp,
+        elevation = elevation ?: one_GU,
     ) {
         Box(
-            modifier = Modifier.aspectRatio(CARD_ASPECT_RATIO),
+            modifier = modifier
+                .aspectRatio(CARD_ASPECT_RATIO)
+                .background(brush = gradient),
             contentAlignment = Alignment.Center
         ) {
-            Image(Icons.Filled.Api, contentDescription = "")
+            Image(
+                modifier = modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = two_GU),
+                painter = painterResource(id = R.drawable.ic_clubs),
+                contentDescription = "",
+                contentScale = ContentScale.Crop
+            )
         }
     }
 }
@@ -145,8 +164,6 @@ fun FlipCard(
     onClick: (CardFace) -> Unit,
     modifier: Modifier = Modifier,
     axis: RotationAxis = RotationAxis.AxisY,
-//    face: @Composable () -> Unit = {},
-//    front: @Composable () -> Unit = {},
 ) {
     val rotation = animateFloatAsState(
         targetValue = cardFace.angle,
@@ -157,7 +174,7 @@ fun FlipCard(
     )
     Card(
         onClick = { onClick(cardFace) },
-        shape = RoundedCornerShape(8.dp),
+        shape = RoundedCornerShape(one_GU),
         modifier = modifier
             .graphicsLayer {
                 if (axis == RotationAxis.AxisX) {
@@ -167,7 +184,7 @@ fun FlipCard(
                 }
                 cameraDistance = 12f * density
             }
-            .clip(RoundedCornerShape(8.dp)),
+            .clip(RoundedCornerShape(one_GU)),
     ) {
         if (rotation.value <= 90f) {
             Box {

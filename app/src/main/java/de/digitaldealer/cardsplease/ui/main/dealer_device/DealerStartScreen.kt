@@ -14,6 +14,7 @@ import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
@@ -47,6 +48,7 @@ fun DealerStartScreen(modifier: Modifier = Modifier, navController: NavControlle
 
     val showDeleteGameDialog = remember { mutableStateOf(false) }
     val onShowAddPlayerDialog = remember { mutableStateOf(false) }
+    val onShowPlayersDialog = remember { mutableStateOf(false) }
     val onShowHasInternetErrorDialog = remember { mutableStateOf(false) }
     val table by viewModel.table.collectAsStateLifecycleAware()
     val gamePhase by viewModel.gamePhase.collectAsStateLifecycleAware()
@@ -60,6 +62,15 @@ fun DealerStartScreen(modifier: Modifier = Modifier, navController: NavControlle
         onDismiss = { showDeleteGameDialog.value = false },
         onConfirmClicked = viewModel::quitTable
     )
+
+    if (onShowPlayersDialog.value) {
+        SimpleDialog(
+            players = joinedPlayers.map { player -> player.nickName },
+            buttonText = "Achso",
+            onDismiss = { onShowPlayersDialog.value = false },
+            onConfirmClicked = { onShowPlayersDialog.value = false }
+        )
+    }
 
     if (onShowAddPlayerDialog.value) QrCodePlayerDialog(onDismiss = { onShowAddPlayerDialog.value = false }, tableId = table.tableId, tableName = table.tableName)
     if (!onShowHasInternetErrorDialog.value) SimpleDialog(
@@ -105,6 +116,14 @@ fun DealerStartScreen(modifier: Modifier = Modifier, navController: NavControlle
     }
 
     LaunchedEffect(key1 = Unit) {
+        viewModel.onPlayerCountError.collectLatest {
+            scaffoldState.snackbarHostState.showSnackbar(
+                message = it.errorMessage,
+            )
+        }
+    }
+
+    LaunchedEffect(key1 = Unit) {
         viewModel.onStart()
     }
 
@@ -117,8 +136,9 @@ fun DealerStartScreen(modifier: Modifier = Modifier, navController: NavControlle
         scaffoldState = scaffoldState // attaching `scaffoldState` to the `Scaffold`
     ) {
         DealerContent(
+            onShowPlayers = { onShowPlayersDialog.value = true },
             onDeal = { viewModel.deal(gamePhase = gamePhase) },
-            onReset = { viewModel.reset() },
+            onReset = viewModel::reset,
             onAddPlayer = { onShowAddPlayerDialog.value = true },
             onDismissQuitDialog = { showDeleteGameDialog.value = true },
             table = table,
@@ -132,6 +152,7 @@ fun DealerStartScreen(modifier: Modifier = Modifier, navController: NavControlle
 
 @Composable
 fun DealerContent(
+    onShowPlayers: () -> Unit,
     onDeal: () -> Unit,
     onReset: () -> Unit,
     onAddPlayer: () -> Unit,
@@ -149,7 +170,7 @@ fun DealerContent(
     ) {
         val (infoButton, tableInfo, quitButton, board, flopRow, turnRow, riverRow, dealerButton, playerInfo, addPlayerButton, resetButton, boardInfo) = createRefs()
         FloatingActionButton(
-            onClick = { /*TODO*/ },
+            onClick = onShowPlayers,
             modifier = Modifier.constrainAs(infoButton) {
                 top.linkTo(parent.top)
                 start.linkTo(parent.start)
@@ -231,18 +252,18 @@ fun DealerContent(
                 bottom.linkTo(addPlayerButton.bottom)
             }
         )
-        if (joinedPlayers.size < 10) {
-            ExtendedFloatingActionButton(
-                onClick = onAddPlayer,
-                modifier = Modifier.constrainAs(addPlayerButton) {
+        ExtendedFloatingActionButton(
+            onClick = onAddPlayer,
+            modifier = Modifier
+                .alpha(if (joinedPlayers.size < 10) 1f else 0f)
+                .constrainAs(addPlayerButton) {
                     end.linkTo(parent.end)
                     bottom.linkTo(parent.bottom)
                 },
-                text = {
-                    Text(text = "Spieler hinzufügen")
-                }
-            )
-        }
+            text = {
+                Text(text = "Spieler hinzufügen")
+            }
+        )
     }
 }
 
@@ -250,6 +271,7 @@ fun DealerContent(
 @Composable
 fun Preview_DealerContent() {
     DealerContent(
+        onShowPlayers = {},
         onDeal = {},
         onReset = {},
         onAddPlayer = {},
@@ -279,6 +301,7 @@ fun getBoardPlayerMessage(players: List<Player>): String {
     }
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun BoardCards(modifier: Modifier = Modifier, cards: List<Card>) {
     if (isValidAction(cards)) {

@@ -75,7 +75,12 @@ fun TermsOfUsageContent(
     onShowCloseDialog: () -> Unit
 ) {
     val annotatedString = buildAnnotatedString {
-        append("By joining, you agree to the ")
+        append("Das Ziel der CardsPlease App ist es, das Mischen und verteilen der Karten für die Pokervariante Texas Hold-em zu übernehmen. Um die App nutzen zu können sind mindestens drei Android" +
+            " Geräte notwendig. Eins als Dealer Gerät und pro Spieler wird ein weiteres benötigt. Es werden keine Personenbezogenen Daten erhoben oder gespeichert. Um Die App ordnungsgemäß im vollen Umfang" +
+            " nutzen zu können, sollten bestimmte Berechtigungen für Smartphone-Funktionen gewährt werden. Diese werden zu gegebener Zeit bei der Nutzung erfragt. Die App ermöglicht es nicht online" +
+            " Glücksspiel zu betreiben. Die App wertet keine Ergebnisse aus. Die Auswertung muss durch die anwesenden Spieler geschehen. Die App ist zur Zeit kostenlos und werbefrei nutzbar. Der " +
+            "Entwickler behält sich jedoch das Recht vor Änderungen vorzunehmen.")
+//        append("By joining, you agree to the ")
 
         pushStringAnnotation(tag = "policy", annotation = "https://google.com/policy")
         withStyle(style = SpanStyle(color = MaterialTheme.colors.primary)) {
@@ -95,7 +100,7 @@ fun TermsOfUsageContent(
     ConstraintLayout(
         modifier = modifier
             .fillMaxSize()
-            .background(color = colorResource(id = R.color.colorPrimary)),
+            .background(color = colorResource(id = R.color.primaryColor)),
     ) {
         val (title, text, confirm, decline) = createRefs()
 

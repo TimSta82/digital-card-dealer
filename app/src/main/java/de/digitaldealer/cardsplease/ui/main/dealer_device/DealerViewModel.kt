@@ -1,6 +1,5 @@
 package de.digitaldealer.cardsplease.ui.main.dealer_device
 
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
@@ -12,7 +11,6 @@ import de.digitaldealer.cardsplease.domain.usecases.WatchHasInternetAccessUseCas
 import de.digitaldealer.cardsplease.extensions.second
 import de.digitaldealer.cardsplease.ui.extensions.launch
 import de.digitaldealer.cardsplease.ui.extensions.stateFlow
-import de.digitaldealer.cardsplease.ui.util.SingleLiveEvent
 import de.digitaldealer.cardsplease.ui.util.TableNames
 import kotlinx.coroutines.flow.*
 import org.koin.core.component.KoinComponent
@@ -39,8 +37,8 @@ class DealerViewModel : ViewModel(), KoinComponent {
     private val _joinedPlayers = MutableStateFlow(listOf(Player()))
     val joinedPlayers = _joinedPlayers.asStateFlow()
 
-    private val _onPlayerCountError = SingleLiveEvent<PlayerCountError>()
-    val onPlayerCountError: LiveData<PlayerCountError> = _onPlayerCountError
+    private val _onPlayerCountError = MutableSharedFlow<PlayerCountError>()
+    val onPlayerCountError = _onPlayerCountError.asSharedFlow()
 
     private val _onDealingCardsToPlayersAccomplished = MutableSharedFlow<Unit>()
     val onDealingCardsToPlayersAccomplished = _onDealingCardsToPlayersAccomplished.asSharedFlow()
@@ -96,11 +94,11 @@ class DealerViewModel : ViewModel(), KoinComponent {
                     in 2..10 -> _joinedPlayers.value = players
                     1 -> {
                         _joinedPlayers.value = players
-                        _onPlayerCountError.value = PlayerCountError.NOT_ENOUGH
+                        launch { _onPlayerCountError.emit(PlayerCountError.NOT_ENOUGH) }
                         Logger.debug("Not enough players yet")
                     }
                     else -> {
-                        _onPlayerCountError.value = PlayerCountError.TOO_MANY
+                        launch { _onPlayerCountError.emit(PlayerCountError.TOO_MANY) }
                         Logger.debug("Too many players")
                     }
                 }
@@ -161,26 +159,30 @@ class DealerViewModel : ViewModel(), KoinComponent {
     }
 
     private fun dealHandCardsToPlayers(gamePhase: GamePhase) {
-        _joinedPlayers.value?.let { players ->
-            val cards = DeckHelper.getRandomCardsByPlayerCount(playerCount = players.count())
-            _round.value++
-            remainingCards = cards.toList()
-            players.forEachIndexed { index, player ->
-                val currentHand = Hand(one = remainingCards.first(), two = remainingCards.second(), round = _round.value)
-                remainingCards = remainingCards.drop(2)
-                checkIfDealingCardsToPlayersHasAccomplished(remainingCards)
-                gamesCollectionRef.document(player.tableId).collection(COLLECTION_PLAYERS).document(player.uuid).collection(COLLECTION_HAND_CARDS).document("currentHand").set(currentHand)
-                    .addOnSuccessListener {
-                        Logger.debug("Spieler ${player.nickName} sollte jetzt ne hand haben")
-                        if (index == players.size - 1) {
-                            updateGamePhase(gamePhase = gamePhase)
-                            launch { _onPlaySound.emit(Unit) }
+        _joinedPlayers.value.let { players ->
+            if (players.none { player -> player.tableId.isBlank() }) {
+                val cards = DeckHelper.getRandomCardsByPlayerCount(playerCount = players.count())
+                _round.value++
+                remainingCards = cards.toList()
+                players.forEachIndexed { index, player ->
+                    val currentHand = Hand(one = remainingCards.first(), two = remainingCards.second(), round = _round.value)
+                    remainingCards = remainingCards.drop(2)
+                    checkIfDealingCardsToPlayersHasAccomplished(remainingCards)
+                    gamesCollectionRef.document(player.tableId).collection(COLLECTION_PLAYERS).document(player.uuid).collection(COLLECTION_HAND_CARDS).document("currentHand").set(currentHand)
+                        .addOnSuccessListener {
+                            Logger.debug("Spieler ${player.nickName} sollte jetzt ne hand haben")
+                            if (index == players.size - 1) {
+                                updateGamePhase(gamePhase = gamePhase)
+                                launch { _onPlaySound.emit(Unit) }
+                            }
                         }
-                    }
-                    .addOnFailureListener {
-                        Logger.debug("Karten konnten nicht an Spieler ${player.nickName} verteilt werden")
-                        return@addOnFailureListener
-                    }
+                        .addOnFailureListener {
+                            Logger.debug("Karten konnten nicht an Spieler ${player.nickName} verteilt werden")
+                            return@addOnFailureListener
+                        }
+                }
+            } else {
+                launch { _onPlayerCountError.emit(PlayerCountError.NOT_ENOUGH) }
             }
         }
     }
@@ -204,7 +206,7 @@ class DealerViewModel : ViewModel(), KoinComponent {
 
     private fun clearCards() {
         _table.value.tableId.let { tableId ->
-            _joinedPlayers.value?.let { players ->
+            _joinedPlayers.value.let { players ->
                 players.forEach { player ->
                     gamesCollectionRef.document(tableId).collection(COLLECTION_PLAYERS).document(player.uuid).collection(COLLECTION_HAND_CARDS).document(DOCUMENT_CURRENT_HAND).delete()
                         .addOnSuccessListener {
@@ -246,6 +248,7 @@ enum class GamePhase(val buttonText: String) {
     DEAL("Dealen"), FLOP("Flop"), TURN("Turn"), RIVER("River"), SHUFFLE("Shuffle")
 }
 
-enum class PlayerCountError(val errorMessageId: Int) {
-    NOT_ENOUGH(R.string.player_count_error_not_enough_message), TOO_MANY(R.string.player_count_error_too_many_message)
+enum class PlayerCountError(val errorMessage: String) {
+    NOT_ENOUGH("Nicht genug Spieler"), TOO_MANY("Zu viele Spieler")
+//    NOT_ENOUGH(R.string.player_count_error_not_enough_message), TOO_MANY(R.string.player_count_error_too_many_message), NONE(R.string.player_count_error_too_none)
 }

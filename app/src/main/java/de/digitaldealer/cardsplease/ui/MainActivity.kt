@@ -45,8 +45,9 @@ import de.digitaldealer.cardsplease.ui.theme.MainTheme
 class MainActivity : BaseActivity() {
 
     companion object {
-        fun startActivity(origin: Activity) {
-            origin.startActivity(Intent(origin, MainActivity::class.java))
+        fun startActivity(originActivity: Activity) {
+            originActivity.startActivity(Intent(originActivity, MainActivity::class.java))
+            originActivity.finish()
         }
     }
 
