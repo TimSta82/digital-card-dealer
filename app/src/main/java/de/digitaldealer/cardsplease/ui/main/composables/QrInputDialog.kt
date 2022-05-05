@@ -32,7 +32,7 @@ fun QrInputDialog(
     onDismiss: () -> Unit
 ) {
     val qrCode = remember { mutableStateOf(TextFieldValue()) }
-    var isError = rememberSaveable { mutableStateOf(false) }
+    val isError = rememberSaveable { mutableStateOf(false) }
     val keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done, capitalization = KeyboardCapitalization.None)
     val keyboardController = LocalSoftwareKeyboardController.current
 

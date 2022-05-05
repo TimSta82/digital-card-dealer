@@ -73,8 +73,8 @@ fun QrScannerScreen(navController: NavController) {
 
     ConstraintLayout(
         modifier = Modifier
-            .fillMaxSize()
-            .background(color = colorResource(id = R.color.player_background)),
+            .fillMaxSize(),
+//            .background(color = colorResource(id = R.color.player_background)),
     ) {
         val (scanner, text, button, line) = createRefs()
         if (hasCamPermission) {
@@ -139,7 +139,7 @@ fun QrScannerScreen(navController: NavController) {
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(32.dp)
+                    .padding(four_GU)
                     .constrainAs(text) {
                         start.linkTo(parent.start)
                         end.linkTo(parent.end)

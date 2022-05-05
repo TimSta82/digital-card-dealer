@@ -1,5 +1,6 @@
 package de.digitaldealer.cardsplease.ui.main.composables
 
+import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.AlertDialog
@@ -62,8 +63,14 @@ private fun getQrCodeAsBitmap(deckId: String, fillMaxWidth: Modifier): ImageBitm
     return bitmap
 }
 
-@Preview
 @Composable
+@Preview(uiMode = UI_MODE_NIGHT_YES)
 fun Preview_QrCodePlayerDialog(modifier: Modifier = Modifier) {
-    QrCodePlayerDialog(onDismiss = { /*TODO*/ }, tableId = "asiudhiuashd", tableName = "Hector")
+    QrCodePlayerDialog(onDismiss = {}, tableId = "asiudhiuashd", tableName = "Hector")
+}
+
+@Composable
+@Preview
+fun Preview_DialogLight(modifier: Modifier = Modifier) {
+    QrCodePlayerDialog(onDismiss = {}, tableId = "asdasda", tableName = "Tablename")
 }

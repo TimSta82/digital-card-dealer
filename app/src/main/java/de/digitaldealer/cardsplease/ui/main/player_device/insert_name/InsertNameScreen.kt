@@ -4,13 +4,11 @@ package de.digitaldealer.cardsplease.ui.main.player_device.insert_name
 
 import android.net.Uri
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.*
@@ -20,27 +18,22 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.google.gson.Gson
-import de.digitaldealer.cardsplease.R
 import de.digitaldealer.cardsplease.core.utils.Logger
 import de.digitaldealer.cardsplease.ui.NavigationRoutes.PLAYER_HAND_SCREEN
 import de.digitaldealer.cardsplease.ui.NavigationRoutes.START_SCREEN
 import de.digitaldealer.cardsplease.ui.extensions.collectAsStateLifecycleAware
+import de.digitaldealer.cardsplease.ui.main.composables.CustomText
 import de.digitaldealer.cardsplease.ui.main.composables.SimpleDialog
 import de.digitaldealer.cardsplease.ui.main.composables.TriggerButton
-import de.digitaldealer.cardsplease.ui.theme.four_GU
-import de.digitaldealer.cardsplease.ui.theme.half_GU
-import de.digitaldealer.cardsplease.ui.theme.one_GU
-import de.digitaldealer.cardsplease.ui.theme.two_GU
+import de.digitaldealer.cardsplease.ui.theme.*
 import kotlinx.coroutines.flow.collectLatest
 
 @Composable
@@ -85,29 +78,27 @@ fun InsertNameScreen(modifier: Modifier = Modifier, navController: NavController
 
     Box(
         modifier = Modifier
-            .fillMaxSize()
-            .background(color = colorResource(id = R.color.player_background)),
+            .fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
         if (isLoading) {
             CircularProgressIndicator(modifier = Modifier.padding(horizontal = two_GU, vertical = two_GU + half_GU))
         } else {
             Column(
-                modifier = Modifier.padding(top = 24.dp),
+                modifier = Modifier.padding(top = three_GU),
                 verticalArrangement = Arrangement.Top,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(text = "Tisch: ${deckFromFireStore.tableName}", textAlign = TextAlign.Center)
+                CustomText(text = "Tisch: ${deckFromFireStore.tableName}", textAlign = TextAlign.Center)
                 Spacer(modifier = Modifier.height(one_GU))
-                Text(text = "SpielId: ${deckFromFireStore.tableId}", textAlign = TextAlign.Center)
-                Spacer(modifier = Modifier.height(32.dp))
-                Text(text = "Gib mal deinen Namen ein")
+                CustomText(text = "SpielId: ${deckFromFireStore.tableId}", textAlign = TextAlign.Center)
+                Spacer(modifier = Modifier.height(four_GU))
+                CustomText(text = "Gib mal deinen Namen ein")
                 Spacer(modifier = Modifier.height(four_GU))
                 TextField(
                     value = nickName.value,
                     shape = RoundedCornerShape(one_GU),
                     colors = TextFieldDefaults.textFieldColors(
-                        textColor = Color.Gray,
                         disabledTextColor = Color.Transparent,
                         backgroundColor = Color.White,
                         focusedIndicatorColor = Color.Transparent,

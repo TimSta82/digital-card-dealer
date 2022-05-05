@@ -2,7 +2,6 @@
 
 package de.digitaldealer.cardsplease.ui.main.player_device.player_hand
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.ZeroCornerSize
@@ -12,14 +11,12 @@ import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import de.digitaldealer.cardsplease.R
 import de.digitaldealer.cardsplease.domain.model.Hand
 import de.digitaldealer.cardsplease.domain.model.Player
 import de.digitaldealer.cardsplease.ui.NavigationRoutes
@@ -97,34 +94,31 @@ fun HandContent(
     onDisconnectPlayer: () -> Unit
 ) {
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(color = colorResource(id = R.color.player_background)),
+        modifier = modifier
+            .fillMaxSize(),
     ) {
         ConstraintLayout(
-            modifier = Modifier
+            modifier = modifier
                 .padding(one_GU)
                 .fillMaxSize()
         ) {
             val (card, button, revealHand, text) = createRefs()
             EntryCard(
-                modifier = Modifier
-                    .padding(horizontal = two_GU)
+                modifier = modifier
+//                    .padding(start = one_GU)
                     .constrainAs(card) {
                         top.linkTo(parent.top)
                         start.linkTo(parent.start)
-                        end.linkTo(button.start)
                     },
-                entryType = EntryType.PLAYER,
                 content = {
                     Column(
-                        modifier = Modifier.padding(one_GU)
+                        modifier = modifier.padding(one_GU)
                     ) {
                         CustomText(text = "Tisch: ${player.tableName}", textAlign = TextAlign.Start)
-                        Spacer(Modifier.height(half_GU))
+                        Spacer(modifier.height(half_GU))
                         CustomText(text = "tableId: ${player.tableId}", textAlign = TextAlign.Start)
                         if (hand.round != 0) {
-                            Spacer(Modifier.height(half_GU))
+                            Spacer(modifier.height(half_GU))
                             CustomText(text = "Runde: ${hand.round}", textAlign = TextAlign.Start)
                         }
                     }
@@ -132,10 +126,9 @@ fun HandContent(
                 onClick = {}
             )
             FloatingActionButton(
-                modifier = Modifier.constrainAs(button) {
-                    top.linkTo(card.top)
+                modifier = modifier.constrainAs(button) {
+                    top.linkTo(parent.top)
                     end.linkTo(parent.end)
-                    bottom.linkTo(card.bottom)
                 },
                 onClick = onDisconnectPlayer
             ) {
@@ -143,7 +136,7 @@ fun HandContent(
             }
             if (hand.isValid()) {
                 Row(
-                    modifier = Modifier
+                    modifier = modifier
                         .fillMaxHeight()
                         .constrainAs(revealHand) {
                             top.linkTo(parent.top)
@@ -158,7 +151,7 @@ fun HandContent(
                         mutableStateOf(CardFace.Front)
                     }
                     FlipCard(
-                        modifier = Modifier.weight(1f),
+                        modifier = modifier.weight(1f),
                         card = hand.one,
                         cardFace = cardOneState,
                         onClick = {
@@ -166,12 +159,12 @@ fun HandContent(
                         },
                         axis = RotationAxis.AxisY,
                     )
-                    Spacer(modifier = Modifier.width(one_GU))
+                    Spacer(modifier = modifier.width(one_GU))
                     var cardTwoState by remember {
                         mutableStateOf(CardFace.Front)
                     }
                     FlipCard(
-                        modifier = Modifier.weight(1f),
+                        modifier = modifier.weight(1f),
                         card = hand.two,
                         cardFace = cardTwoState,
                         onClick = {
@@ -182,7 +175,7 @@ fun HandContent(
                 }
             } else {
                 CustomText(
-                    modifier = Modifier
+                    modifier = modifier
                         .constrainAs(revealHand) {
                             top.linkTo(parent.top)
                             start.linkTo(parent.start)

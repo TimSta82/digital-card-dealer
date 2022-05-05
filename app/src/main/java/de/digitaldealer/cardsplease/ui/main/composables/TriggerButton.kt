@@ -1,5 +1,6 @@
 package de.digitaldealer.cardsplease.ui.main.composables
 
+import android.content.res.Configuration
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults.buttonColors
 import androidx.compose.material.MaterialTheme
@@ -16,17 +17,26 @@ fun TriggerButton(
     Button(
         modifier = modifier,
         onClick = onClick,
-        colors = buttonColors(backgroundColor = MaterialTheme.colors.primaryVariant)
+//        colors = buttonColors(backgroundColor = MaterialTheme.colors.primaryVariant)
     ) {
         CustomText(text = text)
     }
 }
 
 @Composable
-@Preview
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 private fun Preview_TriggerButton() {
     TriggerButton(
-        text = "Test",
+        text = "Dark Mode",
+        onClick = {}
+    )
+}
+
+@Composable
+@Preview
+private fun Preview_TriggerButton2() {
+    TriggerButton(
+        text = "Light Mode",
         onClick = {}
     )
 }

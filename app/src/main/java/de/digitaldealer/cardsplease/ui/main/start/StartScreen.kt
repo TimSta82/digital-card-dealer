@@ -220,7 +220,6 @@ fun StartContent(
             )
             Spacer(modifier = Modifier.height(four_GU))
             EntryCard(
-                entryType = EntryType.DEALER,
                 content = {
                     EntryContent(
                         entryType = EntryType.DEALER,
@@ -231,7 +230,6 @@ fun StartContent(
             )
             Spacer(modifier = Modifier.height(two_GU))
             EntryCard(
-                entryType = EntryType.PLAYER,
                 content = {
                     EntryContent(
                         entryType = EntryType.PLAYER,

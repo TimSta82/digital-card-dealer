@@ -105,7 +105,6 @@ fun CardBack(
     Card(
         shape = RoundedCornerShape(one_GU),
         modifier = modifier.clip(RoundedCornerShape(one_GU)),
-        backgroundColor = Color.DarkGray,
         elevation = elevation ?: one_GU,
     ) {
         Box(
@@ -118,7 +117,7 @@ fun CardBack(
                 modifier = modifier
                     .fillMaxWidth()
                     .padding(horizontal = two_GU),
-                painter = painterResource(id = R.drawable.ic_clubs),
+                painter = painterResource(id = R.drawable.ic_cp),
                 contentDescription = "",
                 contentScale = ContentScale.Crop
             )
